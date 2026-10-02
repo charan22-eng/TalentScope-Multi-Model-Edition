@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "epk"
+version = "0.1.0"
+description = "Employee Performance Classification ML package"
+requires-python = ">=3.11"
+dependencies = [
+    "scikit-learn",
+    "pandas",
+    "numpy",
+    "imbalanced-learn",
+    "joblib",
+    "pytest",
+    "pytest-cov",
+    "black",
+    "ruff",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter",
+    "matplotlib",
+    "seaborn",
+    "streamlit"
+]
+
+[tool.ruff]
+line-length = 88
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+[tool.black]
+line-length = 88

@@ -1,0 +1,10 @@
+[lint]
+ignore = [
+    "E501", # Line too long
+    "B008", # Depends in argument defaults (standard FastAPI pattern)
+    "E722", # Bare except
+    "S110", # try-except-pass
+    "S112", # try-except-continue
+    "PLW1510", # subprocess.run without check
+    "BLE001", # blind exception
+]

@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+alembic
+psycopg[binary]
+pytest
+ruff
+black

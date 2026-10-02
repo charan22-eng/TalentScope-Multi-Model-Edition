@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "phase": "0",
+    "utc": "2026-10-02T11:31:09Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "HEAD",
+    "git_branch": "HEAD",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "make test",
+      "returncode": 0,
+      "seconds": 5.83,
+      "stdout_tail": "make[1]: Entering directory `C:/Users/resma/Documents/WORKSHOP/DM-CBP'\nuv run pytest -q ml/tests backend/tests\n.........                                                                [100%]\n============================== warnings summary ===============================\n.venv\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\resma\\Documents\\WORKSHOP\\DM-CBP\\.venv\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\nbackend\\db\\database.py:13\n  C:\\Users\\resma\\Documents\\WORKSHOP\\DM-CBP\\backend\\db\\database.py:13: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)\n    Base = declarative_base()\n\nbackend\\main.py:50\n  C:\\Users\\resma\\Documents\\WORKSHOP\\DM-CBP\\backend\\main.py:50: DeprecationWarning: \n          on_event is deprecated, use lifespan event handlers instead.\n  \n          Read more about it in the\n          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).\n          \n    @app.on_event(\"startup\")\n\n.venv\\Lib\\site-packages\\fastapi\\applications.py:4681\n  C:\\Users\\resma\\Documents\\WORKSHOP\\DM-CBP\\.venv\\Lib\\site-packages\\fastapi\\applications.py:4681: DeprecationWarning: \n          on_event is deprecated, use lifespan event handlers instead.\n  \n          Read more about it in the\n          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).\n          \n    return self.router.on_event(event_type)  # ty: ignore[deprecated]\n\nbackend/tests/test_api.py::test_predict_success\n  C:\\Users\\resma\\Documents\\WORKSHOP\\DM-CBP\\.venv\\Lib\\site-packages\\sqlalchemy\\sql\\schema.py:4296: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore[call-arg, no-any-return, no-untyped-call]  # noqa: E501\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n9 passed, 5 warnings in 3.59s\ncd frontend && npm run test\n\n> frontend@0.0.0 test\n> vitest run\n\n\n\u001b[1m\u001b[30m\u001b[46m RUN \u001b[49m\u001b[39m\u001b[22m \u001b[36mv5.0.3 \u001b[39m\u001b[90mC:/Users/resma/Documents/WORKSHOP/DM-CBP/frontend\u001b[39m\n\nNo test files found, exiting with code 0\n\nmake[1]: Leaving directory `C:/Users/resma/Documents/WORKSHOP/DM-CBP'\n",
+      "stderr_tail": "\u001b[2minclude: \u001b[22m\u001b[33m**/*.{test,spec}.?(c|m)[jt]s?(x)\u001b[39m\n\u001b[2mexclude:  \u001b[22m\u001b[33mnode_modules\u001b[2m, \u001b[22me2e\u001b[39m\n\n",
+      "label": "tests"
+    },
+    {
+      "cmd": "make lint",
+      "returncode": 0,
+      "seconds": 1.55,
+      "stdout_tail": "make[1]: Entering directory `C:/Users/resma/Documents/WORKSHOP/DM-CBP'\nuv run ruff check .\nAll checks passed!\nuv run black --check .\ncd frontend && npm run lint\n\n> frontend@0.0.0 lint\n> oxlint\n\n\n  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.\n    ,-[src/App.tsx:79:14]\n 78 |       onLogin(res.access_token);\n 79 |     } catch (err: any) {\n    :              ^|^\n    :               `-- 'err' is declared here\n 80 |       setError('Invalid credentials or Network Error (CORS)');\n    `----\n  help: Consider handling this error.\n\nFound 1 warning and 0 errors.\nFinished in 23ms on 7 files with 116 rules using 12 threads.\nmake[1]: Leaving directory `C:/Users/resma/Documents/WORKSHOP/DM-CBP'\n",
+      "stderr_tail": "All done! \\u2728 \\U0001f370 \\u2728\n22 files would be left unchanged.\n",
+      "label": "lint"
+    }
+  ],
+  "hashes": {},
+  "missing_files": []
+}
