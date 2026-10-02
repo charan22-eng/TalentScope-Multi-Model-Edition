@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "phase": "6",
+    "utc": "2026-10-02T17:16:54Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "94a7e4bc2a2ff85225bba737af5eac460564783c",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "cd backend && uv run pytest tests -q",
+      "returncode": 0,
+      "seconds": 17.98,
+      "stdout_tail": "...s......                                                               [100%]\n============================== warnings summary ===============================\n.venv\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\resma\\Documents\\WORKSHOP\\DM-CBP\\backend\\.venv\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n9 passed, 1 skipped, 1 warning in 15.88s\n",
+      "stderr_tail": "",
+      "label": "tests"
+    }
+  ],
+  "hashes": {
+    "openapi.json": "ed2cd8ced90526466d2f3a7aca78c49de3b58f7d7de7ec37f1f483eb2b8e8cf2",
+    "artifacts/v1/metadata.json": "fa31d86c5abe86415ee26dd09e270dc3de2b9e998928b5c0cb19147c880dd076"
+  },
+  "missing_files": []
+}

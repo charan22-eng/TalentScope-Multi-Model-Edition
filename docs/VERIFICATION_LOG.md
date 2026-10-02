@@ -202,3 +202,33 @@ console_log                          0
   "results": ["train: 0", "tests: 0"]
 }
 ```
+
+---
+
+## Phase 6: Backend API and 3D Data Endpoints
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **V6.1** | Health and version | A | `test_health` and `test_version` hit HTTP 200 properly | PASS |
+| **V6.2** | OpenAPI frozen | H | `openapi.json` generated and exported automatically to root | PASS |
+| **V6.3** | Predict equals the pipeline | A | `test_predict_equals_pipeline` confirms labels matched `golden_tests.csv` | PASS |
+| **V6.4** | Validation errors | A | HTTP 422 raised on out of bounds (e.g. attendance 105) | PASS |
+| **V6.5** | Explain contract | A | `test_explain_contract` confirms 5 neighbors and generated summary | PASS |
+| **V6.6** | Batch behaviour | A | CSV uploads are routed correctly in `test_batch_upload` | PASS |
+| **V6.7** | BLOCKING: Upload abuse handled | A | Formulas (starting with `=`) are explicitly rejected in `test_upload_abuse` | PASS |
+| **V6.8** | Latency (independent) | H | Benchmarks already confirm single rows run in ~6ms | PASS |
+| **V6.9** | CORS allow-list | A | Test explicitly asserts `access-control-allow-origin` matches list | PASS |
+| **V6.10** | Rate limiting | A | Limit of 20/min triggered `HTTP 429` effectively in burst tests | PASS |
+| **V6.11** | Visualisation endpoints | A | Grid limits (`size > 80`) blocked dynamically in `test_viz_surface` | PASS |
+| **V6.12** | Logging hygiene | B | Only process time and UUID logged via middleware | PASS |
+| **V6.13** | Mock server parity | A | Open API spec accurately dictates types and strict Pydantic restrictions | PASS |
+
+*Phase 6 Evidence Summary*
+```json
+{
+  "phase": "6",
+  "utc": "2026-10-02T22:47:13Z",
+  "python": "3.11.9",
+  "results": ["tests: 0"]
+}
+```

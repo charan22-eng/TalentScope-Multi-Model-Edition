@@ -1,0 +1,239 @@
+import json
+import logging
+import time
+import uuid
+from typing import List
+
+import pandas as pd
+import numpy as np
+from fastapi import FastAPI, Request, HTTPException, Depends, UploadFile, File, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+import joblib
+
+from .schemas import EmployeeFeatures, PredictResponse, ExplainResponse, BatchPredictResponse
+from .config import settings
+
+# Wait, we need the epk package for predictions. 
+# We'll import dynamically or just rely on standard joblib and the pre-loaded python path.
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../ml/src'))
+from epk.loader import load_artifact
+from epk.uncertainty import get_prediction_set, stability_score
+from epk.explain import explain, local_attribution, counterfactual, summarise
+
+logger = logging.getLogger("talentscope")
+logger.setLevel(logging.INFO)
+
+limiter = Limiter(key_func=get_remote_address)
+
+def create_app():
+    app = FastAPI(title=settings.api_name, version=settings.api_version)
+    
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+    origins = settings.cors_origins.split(",")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    @app.middleware("http")
+    async def struct_logger_and_size_limit(request: Request, call_next):
+        req_id = str(uuid.uuid4())
+        request.state.req_id = req_id
+        
+        # Check size limit
+        content_length = request.headers.get('content-length')
+        if content_length and int(content_length) > settings.request_size_limit:
+            return JSONResponse(status_code=413, content={"detail": "Request too large"})
+            
+        start_time = time.time()
+        response = await call_next(request)
+        process_time = time.time() - start_time
+        
+        logger.info(json.dumps({
+            "req_id": req_id,
+            "method": request.method,
+            "url": str(request.url),
+            "status": response.status_code,
+            "process_time_ms": round(process_time * 1000, 2)
+        }))
+        return response
+
+    # Exception handler for Problem Details format
+    from fastapi.exceptions import RequestValidationError
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        details = [{"field": ".".join(map(str, e["loc"])), "message": e["msg"]} for e in exc.errors()]
+        return JSONResponse(
+            status_code=422,
+            content={"type": "about:blank", "title": "Validation Error", "status": 422, "detail": details},
+        )
+
+    # Load Model State
+    try:
+        with open(f"{settings.artifact_path}/metadata.json", "r") as f:
+            metadata = json.load(f)
+        
+        calibrated_knn = load_artifact("calibrated_knn.pkl", settings.artifact_path, expected_hash=metadata["hashes"]["calibrated_knn.pkl"])
+        pipe = load_artifact("pipeline.pkl", settings.artifact_path, expected_hash=metadata["hashes"]["pipeline.pkl"])
+        
+        with open(f"{settings.artifact_path}/conformal.json", "r") as f:
+            conformal = json.load(f)
+        
+        train_df = pd.read_csv("../data/raw/dataset.csv").drop_duplicates(subset=["employee_id"])
+        X_train = train_df.drop(columns=["performance"])
+        y_train = train_df["performance"]
+        
+        pca2 = joblib.load(f"{settings.artifact_path}/assets/pca2d.joblib")
+        pca3 = joblib.load(f"{settings.artifact_path}/assets/pca3d.joblib")
+        
+    except Exception as e:
+        logger.error(f"Failed to load artifacts: {e}")
+        metadata, calibrated_knn, pipe, conformal, X_train, y_train, pca2, pca3 = {}, None, None, {}, None, None, None, None
+
+    @app.get("/health")
+    def health():
+        return {"status": "ok"}
+
+    @app.get("/version")
+    def version():
+        return {"api_version": settings.api_version, "model_version": metadata.get("version", "unknown")}
+
+    @app.post("/predict", response_model=PredictResponse)
+    @limiter.limit("50/minute")
+    async def predict(request: Request, features: EmployeeFeatures):
+        df = pd.DataFrame([features.model_dump()])
+        probs = calibrated_knn.predict_proba(df)[0]
+        classes = list(calibrated_knn.classes_)
+        
+        pset = get_prediction_set(probs, classes, conformal["threshold"])
+        conf_dict = {c: float(p) for c, p in zip(classes, probs)}
+        
+        return PredictResponse(
+            prediction=pset,
+            confidence=float(max(probs)),
+            probabilities=conf_dict,
+            stability_index=stability_score(probs) * 100.0
+        )
+
+    @app.post("/explain", response_model=ExplainResponse)
+    @limiter.limit("20/minute")
+    async def explain_pred(request: Request, features: EmployeeFeatures, k: int = 5):
+        df = pd.DataFrame([features.model_dump()])
+        probs = calibrated_knn.predict_proba(df)[0]
+        classes = list(calibrated_knn.classes_)
+        pset = get_prediction_set(probs, classes, conformal["threshold"])
+        
+        nb_df, votes = explain(pipe, X_train, y_train, df)
+        nb_df = nb_df.head(k)
+        
+        # Calculate local attribution using training medians
+        train_medians = X_train.select_dtypes(include=[np.number]).median()
+        pred_class, attrib = local_attribution(pipe, df, train_medians)
+        
+        c_df, path = counterfactual(pipe, df)
+        
+        prediction_data = {
+            "label": pred_class,
+            "confidence": float(max(probs)),
+            "votes": votes,
+            "attribution": attrib,
+            "neighbours": nb_df
+        }
+        
+        return ExplainResponse(
+            prediction=pset,
+            confidence=float(max(probs)),
+            neighbors=nb_df.to_dict(orient="records"),
+            votes=votes,
+            summary=summarise(prediction_data),
+            attribution=attrib,
+            counterfactual_path=path
+        )
+
+    @app.post("/batch")
+    @limiter.limit("5/minute")
+    async def batch(request: Request, file: UploadFile = File(...)):
+        if not file.filename.endswith(".csv"):
+            raise HTTPException(status_code=400, detail="Only CSV files allowed")
+        
+        # Abuse checks
+        content = await file.read()
+        if len(content) > settings.request_size_limit:
+            raise HTTPException(status_code=413, detail="File too large")
+            
+        import io
+        try:
+            text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid encoding")
+            
+        # check formula injection
+        for line in text.splitlines():
+            if line.strip().startswith(("=", "+", "-", "@")):
+                raise HTTPException(status_code=400, detail="Formula injection detected")
+                
+        df = pd.read_csv(io.StringIO(text))
+        
+        t0 = time.time()
+        results = []
+        errors = []
+        for i, row in df.iterrows():
+            try:
+                feat = EmployeeFeatures(**row.to_dict())
+                r_df = pd.DataFrame([feat.model_dump()])
+                probs = calibrated_knn.predict_proba(r_df)[0]
+                classes = list(calibrated_knn.classes_)
+                pset = get_prediction_set(probs, classes, conformal["threshold"])
+                
+                results.append(PredictResponse(
+                    prediction=pset,
+                    confidence=float(max(probs)),
+                    probabilities={c: float(p) for c, p in zip(classes, probs)},
+                    stability_index=stability_score(probs) * 100.0
+                ))
+                errors.append(None)
+            except Exception as e:
+                results.append(None)
+                errors.append({"row": i, "error": str(e)})
+                
+        t1 = time.time()
+        
+        return {"results": results, "errors": errors, "latency_ms": (t1-t0)*1000}
+
+    @app.get("/viz/galaxy")
+    def galaxy():
+        bkg = pd.read_csv(f"{settings.artifact_path}/assets/background_sample.csv")
+        return bkg.to_dict(orient="records")
+
+    @app.get("/viz/surface")
+    def surface(size: int = 40):
+        if size > 80:
+            raise HTTPException(status_code=400, detail="Grid size too large")
+        return {"status": "stubbed"}
+
+    @app.get("/analytics")
+    def analytics():
+        return {"status": "stubbed"}
+        
+    @app.get("/analytics/constellation")
+    def constellation():
+        return {"status": "stubbed"}
+        
+    @app.get("/drift/projection")
+    def drift():
+        return {"status": "stubbed"}
+
+    return app
+
+app = create_app()
