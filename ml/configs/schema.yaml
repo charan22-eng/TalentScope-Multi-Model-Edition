@@ -1,0 +1,42 @@
+features:
+  - name: attendance
+    type: float
+    range: [0.0, 100.0]
+    missing_policy: median_impute_plus_flag
+  - name: experience_years
+    type: float
+    range: [0.0, 50.0]
+    missing_policy: median
+  - name: training_hours
+    type: float
+    range: [0.0, 300.0]
+    missing_policy: median
+  - name: projects_completed
+    type: int
+    range: [0, 100]
+    missing_policy: median
+  - name: weekly_hours
+    type: float
+    range: [0.0, 100.0]
+    missing_policy: median
+  - name: prev_score
+    type: float
+    range: [1.0, 5.0]
+    missing_policy: median
+  - name: department
+    type: categorical
+    values: ["Sales", "Engineering", "HR", "Marketing"]
+    missing_policy: Unknown
+  - name: job_level
+    type: ordinal
+    values: ["Junior", "Mid", "Senior", "Lead"]
+    missing_policy: Unknown
+
+label:
+  name: performance
+  type: ordinal
+  values: ["Low", "Medium", "High"]
+
+audit:
+  - name: gender
+  - name: age_band

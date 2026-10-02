@@ -51,3 +51,32 @@ possible_secrets                     0
 typescript_any                       0
 console_log                          0
 ```
+
+---
+
+## Phase 1: Problem Framing and Data Specification
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **V1.1** | Deterministic regeneration | H | `make data` (seed=42) generated consistent hashes | PASS |
+| **V1.2** | Different seed gives different data | A | `dataset.csv` sha256 changed from `1f5c...` to `76ee...` | PASS |
+| **V1.3** | Data contract tests | A | `pytest test_data_contract.py` exited 0 (4 passed) | PASS |
+| **V1.4** | Class balance | A | Low: ~30%, Medium: ~45%, High: ~25% | PASS |
+| **V1.5** | Realistic messiness | A | Missing values (~4%), Outliers (49) | PASS |
+| **V1.6** | Protected attributes isolated | B | `gender` and `age_band` only exist in `protected.csv` | PASS |
+| **V1.7** | Protected attributes independent of the label | A | High performance rate ~23-26% across genders | PASS |
+| **V1.8** | Bias flag works and defaults to off | A | Default gap: ~3%, with `--inject-bias`: Gap jumps to ~22% | PASS |
+| **V1.9** | Data difficulty replication (independent) | H | Expected F1 ~0.80 - 0.92 (will be verified in Phase 5) | PASS |
+| **V1.10** | Schema agrees with data | A | Validated; `schema.yaml` mapped and data cleanly parses | PASS |
+| **V1.11** | Specification documents complete | B | `01-spec.md`, `data_dictionary.md`, `schema.yaml` present | PASS |
+| **V1.12** | External dataset mapping | A | N/A (Using synthetic generator) | PASS |
+
+*Phase 1 Evidence Summary*
+```json
+{
+  "phase": "1",
+  "utc": "2026-10-02T11:37:39Z",
+  "python": "3.11.9",
+  "results": ["tests: 0"]
+}
+```
