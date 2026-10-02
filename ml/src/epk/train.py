@@ -140,5 +140,43 @@ def main():
         f.write(f"- **Single Row:** {single_latency:.1f} ms\n")
         f.write(f"- **Batch ({batch_size}):** {batch_latency:.1f} ms\n")
 
+    # Phase 5: Artifact Bundle and Metadata
+    import datetime
+    from epk.loader import save_artifact
+    Path("artifacts/v1").mkdir(parents=True, exist_ok=True)
+    
+    # Save Pipeline and Calibrated KNN
+    pipe_hash = save_artifact(knn_scaled, "pipeline.pkl", "artifacts/v1")
+    calib_hash = save_artifact(calibrated_knn, "calibrated_knn.pkl", "artifacts/v1")
+    
+    # Metadata
+    metadata = {
+        "version": "v1.0",
+        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "hashes": {
+            "pipeline.pkl": pipe_hash,
+            "calibrated_knn.pkl": calib_hash,
+        },
+        "metrics": {
+            "cv_macro_f1": float(cv_mean),
+            "test_macro_f1": float(test_f1),
+            "exact_pct": float(exact),
+            "extreme_pct": float(extreme),
+            "brier": float(brier_calib),
+        },
+        "parameters": {
+            "k": 5,
+            "scaler": "MinMaxScaler",
+            "calibration": "sigmoid"
+        }
+    }
+    with open("artifacts/v1/metadata.json", "w") as f:
+        json.dump(metadata, f, indent=2)
+
+    # Golden Test Cases for Regression
+    golden = X_test.head(5).copy()
+    golden["expected_label"] = calibrated_knn.predict(golden)
+    golden.to_csv("artifacts/v1/golden_tests.csv", index=False)
+
 if __name__ == "__main__":
     main()

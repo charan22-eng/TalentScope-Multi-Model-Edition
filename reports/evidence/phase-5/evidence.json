@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "phase": "5",
+    "utc": "2026-10-02T11:53:11Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "7558dd81c10612b6fb3040a97b786ea5fc1f8860",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "uv run python -m epk.train",
+      "returncode": 0,
+      "seconds": 4.61,
+      "stdout_tail": "",
+      "stderr_tail": "",
+      "label": "train"
+    },
+    {
+      "cmd": "uv run pytest ml/tests -q",
+      "returncode": 0,
+      "seconds": 4.66,
+      "stdout_tail": "................                                                         [100%]\n============================== warnings summary ===============================\nml/tests/test_fairness.py::test_proxy_analysis\n  C:\\Users\\resma\\Documents\\WORKSHOP\\DM-CBP\\ml\\src\\epk\\fairness.py:30: Pandas4Warning: For backward compatibility, 'str' dtypes are included by select_dtypes when 'object' dtype is specified. This behavior is deprecated and will be removed in a future version. Explicitly pass 'str' to `include` to select them, or to `exclude` to remove them and silence this warning.\n  See https://pandas.pydata.org/docs/user_guide/migration-3-strings.html#string-migration-select-dtypes for details on how to write code that works with pandas 2 and 3.\n    for c in encoded.select_dtypes(include=['object']):\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n16 passed, 1 warning in 3.28s\n",
+      "stderr_tail": "",
+      "label": "tests"
+    }
+  ],
+  "hashes": {
+    "artifacts/v1/metadata.json": "fa31d86c5abe86415ee26dd09e270dc3de2b9e998928b5c0cb19147c880dd076",
+    "artifacts/v1/conformal.json": "fb703084816078b8b7d90a4c28de032b525b3a565ee60c21c3a573edf4edbadb",
+    "docs/model_card.md": "9b1f3b24980f3b5acfbb88edd3714a71a60d869669c65ad20b33ff0231b43574"
+  },
+  "missing_files": []
+}

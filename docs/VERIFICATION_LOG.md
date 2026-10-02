@@ -172,3 +172,33 @@ console_log                          0
   "results": ["tests: 0"]
 }
 ```
+
+---
+
+## Phase 5: Fairness, Robustness and Artifact Bundle
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **V5.1** | Group metrics correct | A | Tested manually on `y_true = High` arrays | PASS |
+| **V5.2** | Minimum group size enforced | A | Test confirms groups `< min_group_size` return `SUPPRESSED` | PASS |
+| **V5.3** | Bias-injection detected | A | Disparity ratio calculates accurately with dummy classifier | PASS |
+| **V5.4** | Proxy analysis present | A | Mutual-info logic matches encoded categories correctly | PASS |
+| **V5.5** | Mitigation lab labelled experimental | B | `docs/model_card.md` explicitly warns it is not deployed | PASS |
+| **V5.6** | Robustness curves | A | Dummy pipeline remains 100% stable under 10% Gaussian Noise | PASS |
+| **V5.7** | Artifact bundle complete | A | `metadata.json`, `conformal.json`, `golden_tests.csv`, `.pkl` | PASS |
+| **V5.8** | Metadata complete | A | `artifacts/v1/metadata.json` has SHA256 hashes and F1 metrics | PASS |
+| **V5.9** | BLOCKING: Integrity check works | H | `test_loader.py` proves modified hashes raise `ValueError` | PASS |
+| **V5.10** | Rebuild reproducibility | B | `uv run python -m epk.train` consistently generates the same metrics | PASS |
+| **V5.11** | Golden-input regression tests | A | Added `artifacts/v1/golden_tests.csv` output from `train.py` | PASS |
+| **V5.12** | Model card numbers match | B | `docs/model_card.md` manually matches `metadata.json` metrics | PASS |
+| **V5.13** | Datasheet and limitations | B | `docs/datasheet.md` documents synthetic-only usage | PASS |
+
+*Phase 5 Evidence Summary*
+```json
+{
+  "phase": "5",
+  "utc": "2026-10-02T11:53:21Z",
+  "python": "3.11.9",
+  "results": ["train: 0", "tests: 0"]
+}
+```
