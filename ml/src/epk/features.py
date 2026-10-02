@@ -37,6 +37,7 @@ class Winsorizer(BaseEstimator, TransformerMixin):
 
 class EngineeredFeatures(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
+        self.is_fitted_ = True
         return self
 
     def transform(self, X):

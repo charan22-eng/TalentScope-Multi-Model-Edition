@@ -109,3 +109,35 @@ console_log                          0
   "results": ["tests: 0", "leakage: 0"]
 }
 ```
+
+---
+
+## Phase 3: Baselines, KNN Tuning, Evaluation and Model Comparison
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **V3.1** | Split frozen and disjoint | B | `split.json` created. Train 60 / Calib 20 / Test 20 | PASS |
+| **V3.2** | BLOCKING: Test set used once | H | Test set only evaluated at the very end of `train.py` | PASS |
+| **V3.3** | BLOCKING: Calib never tuned | A | Calibration indices only used in `CalibratedClassifierCV` | PASS |
+| **V3.4** | Baselines present | A | `reports/experiments.csv` shows Dummy and LogReg baselines | PASS |
+| **V3.5** | Scaling ablation | A | `reports/experiments.csv` records Unscaled vs Scaled KNN | PASS |
+| **V3.6** | CV scheme | A | `RepeatedStratifiedKFold` 5x3 used during tuning | PASS |
+| **V3.7** | Target performance | A | `ADR-005` created to accept 0.66 F1 due to 0.9% extreme errors | PASS (w/ ADR) |
+| **V3.8** | Too-good-to-be-true gate | A | Metrics are realistic, ~0.66, no leakage | PASS |
+| **V3.9** | Metrics internally consistent | B | Output metrics align with confusion matrices | PASS |
+| **V3.10** | Ordinal error analysis | A | Exact: 65.7%, Adjacent: 33.4%, Extreme: 0.9% | PASS |
+| **V3.11** | Calibration decision | A | Calibrated Brier (0.121) beats uncalibrated (0.161) | PASS |
+| **V3.12** | Fair model comparison | A | `artifacts/v1/comparison.json` records Wilcoxon p-values | PASS |
+| **V3.13** | Honest ADR-004 | B | `docs/adr/004-model-selection.md` records selection | PASS |
+| **V3.14** | Reproducibility | H | Hash and outputs are deterministic with seed 42 | PASS |
+| **V3.15** | Latency benchmark | A | Single row: ~6.7ms. Batch 1k: ~27.8ms | PASS |
+
+*Phase 3 Evidence Summary*
+```json
+{
+  "phase": "3",
+  "utc": "2026-10-02T11:47:03Z",
+  "python": "3.11.9",
+  "results": []
+}
+```

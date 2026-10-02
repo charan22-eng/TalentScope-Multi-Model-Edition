@@ -53,6 +53,7 @@ def main():
     cv = RepeatedStratifiedKFold(n_splits=3, n_repeats=2, random_state=42)
 
     results = []
+    cv_scores = {}
 
     for name, clf in models.items():
         pipe = Pipeline([("prep", build_preprocessor()), ("clf", clf)])
@@ -67,6 +68,7 @@ def main():
             return_train_score=False,
         )
 
+        cv_scores[name] = scores["test_score"]
         mean_f1 = np.mean(scores["test_score"])
         std_f1 = np.std(scores["test_score"])
 
@@ -77,6 +79,17 @@ def main():
                 "macro_f1_std": float(std_f1),
             }
         )
+
+    # Perform Wilcoxon signed-rank test against KNN
+    from scipy.stats import wilcoxon
+    knn_scores = cv_scores["KNN (Tuned)"]
+    for r in results:
+        name = r["model"]
+        if name == "KNN (Tuned)":
+            r["p_value_vs_knn"] = 1.0
+        else:
+            stat, p = wilcoxon(knn_scores, cv_scores[name])
+            r["p_value_vs_knn"] = float(p)
 
     # Export for UI
     Path("artifacts/v1").mkdir(parents=True, exist_ok=True)

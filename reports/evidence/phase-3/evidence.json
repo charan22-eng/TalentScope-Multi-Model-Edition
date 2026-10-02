@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "phase": "3",
+    "utc": "2026-10-02T11:47:03Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "8dec375d227f0f670c62ef46408894ce80df5ee5",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [],
+  "hashes": {
+    "data/processed/split.json": "e54c25fbe335c69739e617b3c5fa1a0771f6a244723257aedd7904a374e5857c",
+    "reports/v0.3_final.md": "99784c476f87e76835a6353b63640c8f209e1181cb11a146fe33cb8e4323158f",
+    "reports/experiments.csv": "a42a8d56dec428e5e345cdd5e96557e47b38ee0b349f0cc647f039e321179248",
+    "artifacts/v1/comparison.json": "4a44e6ab1d7504eb79f4101cfdae87e9e3b02c0e865976994d92a68fe5ce77c8",
+    "docs/adr/004-model-selection.md": "37f2612ae0d8e41d36dad426a73b3b4043a734d8c77acd31bc6260dc30070b47",
+    "docs/adr/005-low-f1.md": "11220a35241cbb70cf90ad1c1dce486e8c0b463368d67e34d715ae2068899567"
+  },
+  "missing_files": []
+}
