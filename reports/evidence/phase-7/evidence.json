@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "phase": "7",
+    "utc": "2026-10-02T17:27:56Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "ed9e4f7ef428aabd977dbf830903dc5842b41c39",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "cd frontend && npm run lint",
+      "returncode": 0,
+      "seconds": 0.45,
+      "stdout_tail": "\n> frontend@0.0.0 lint\n> oxlint\n\n\n  ! eslint(no-unused-vars): Catch parameter 'e' is caught but never used.\n    ,-[src/components/three/SceneFrame.tsx:54:12]\n 53 |     return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));\n 54 |   } catch (e) {\n    :            |\n    :            `-- 'e' is declared here\n 55 |     return false;\n    `----\n  help: Consider handling this error.\n\n  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders\n    ,-[src/components/three/SceneFrame.tsx:72:5]\n 69 | \n 70 |   useEffect(() => {\n    :   ^^^^|^^^^\n    :       `-- This is the containing effect\n 71 |     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');\n 72 |     setReducedMotion(mediaQuery.matches);\n    :     ^^^^^^^^|^^^^^^^\n    :             `-- Avoid calling setState() directly within an effect\n 73 |     const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);\n    `----\n  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.\n  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect\n\nFound 2 warnings and 0 errors.\nFinished in 13ms on 13 files with 116 rules using 12 threads.\n",
+      "stderr_tail": "",
+      "label": "lint"
+    },
+    {
+      "cmd": "cd frontend && npm run test -- --run",
+      "returncode": 0,
+      "seconds": 2.34,
+      "stdout_tail": "\n> frontend@0.0.0 test\n> vitest --run\n\n\n\u001b[1m\u001b[30m\u001b[46m RUN \u001b[49m\u001b[39m\u001b[22m \u001b[36mv5.0.3 \u001b[39m\u001b[90mC:/Users/resma/Documents/WORKSHOP/DM-CBP/frontend\u001b[39m\n\n \u001b[32m\u00e2\u0153\u201c\u001b[39m src/components.test.tsx \u001b[2m(\u001b[22m\u001b[2m2 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 88\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m1 passed\u001b[39m\u001b[22m\u001b[90m (1)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m2 passed\u001b[39m\u001b[22m\u001b[90m (2)\u001b[39m\n\u001b[2m   Start at \u001b[22m 22:57:58\n\u001b[2m   Duration \u001b[22m 1.54s\u001b[2m (environment 71%, setup 11%, import 7%, tests 6%, transform 3%, worker 1%)\u001b[22m\n\n",
+      "stderr_tail": "",
+      "label": "test"
+    },
+    {
+      "cmd": "cd frontend && npm run build",
+      "returncode": 0,
+      "seconds": 3.29,
+      "stdout_tail": "\n> frontend@0.0.0 build\n> tsc -b && vite build\n\n\u001b[36mvite v8.3.2 \u001b[32mbuilding client environment for production...\u001b[36m\u001b[39m\ntransforming...\n\u00e2\u0153\u201c 2450 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                       0.45 kB \u00e2\u201d\u201a gzip:   0.29 kB\ndist/assets/index-CPC0slft.css        1.45 kB \u00e2\u201d\u201a gzip:   0.68 kB\ndist/assets/index-fjM0bYKk.js       267.17 kB \u00e2\u201d\u201a gzip:  85.36 kB\ndist/assets/SceneFrame-TKTBMAK9.js  913.76 kB \u00e2\u201d\u201a gzip: 242.57 kB\n\n\u001b[32m\u00e2\u0153\u201c built in 672ms\u001b[39m\n",
+      "stderr_tail": "\u001b[33m[plugin builtin:vite-reporter] \n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\u001b[39m\n",
+      "label": "build"
+    }
+  ],
+  "hashes": {
+    "frontend/package-lock.json": "56881b52f231c9383db8c9ead8b333b8a06b86f9b6dd0cc684d37332e57ca236",
+    "docs/frontend-kit.md": "4c2edcbfc8f64e186cf32b592559086c338593feb63a5da1eaf90e486fdfd8b7"
+  },
+  "missing_files": []
+}
