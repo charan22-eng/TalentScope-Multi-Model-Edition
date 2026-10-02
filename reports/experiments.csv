@@ -1,5 +1,4 @@
-run_id,phase,model,cv_macro_f1,test_macro_f1,notes
-baseline_1,5.2,Dummy Prior,N/A,0.207,Majority class
-baseline_2,5.2,LogReg,N/A,0.761,Balanced weights
-knn_v1,5.3,KNN(k=5 scaled),N/A,0.656,First vertical slice
-knn_tuned,6.7,Tuned KNN,0.690,0.701,"Params: {'knn__n_neighbors': 17, 'knn__p': 1, 'knn__weights': 'distance'}"
+scaler,engineered_feature,cv_mean,cv_std,seed,data_checksum
+MinMaxScaler,projects_per_year,0.852,0.015,42,1f5c44d75db3f47fb1ddedd65712cb2450fa10b9dd2952f969ab894b39c6cecd
+StandardScaler,projects_per_year,0.841,0.018,42,1f5c44d75db3f47fb1ddedd65712cb2450fa10b9dd2952f969ab894b39c6cecd
+MinMaxScaler,none,0.835,0.019,42,1f5c44d75db3f47fb1ddedd65712cb2450fa10b9dd2952f969ab894b39c6cecd

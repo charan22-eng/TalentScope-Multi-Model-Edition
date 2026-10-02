@@ -80,3 +80,32 @@ console_log                          0
   "results": ["tests: 0"]
 }
 ```
+
+---
+
+## Phase 2: Exploratory Analysis and Preprocessing Pipeline
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **V2.1** | EDA notebook runs top to bottom | A | `jupyter nbconvert` ran cleanly and exited 0 | PASS |
+| **V2.2** | EDA decisions are evidence-linked | B | `docs/03-eda-findings.md` cites data shapes and outliers | PASS |
+| **V2.3** | Single preprocessing source | A | Only `features.py` imports Scalers/Imputers | PASS |
+| **V2.4** | BLOCKING: Leakage test passes | A | `pytest -k leakage` passed 2 tests | PASS |
+| **V2.5** | BLOCKING: Leakage test has teeth | H | Strict assertion checks mutated train/test boundaries | PASS |
+| **V2.6** | Shape, NaN and idempotence tests | A | Added engineered features and tested dimensions | PASS |
+| **V2.7** | Unseen categories handled | A | OneHot handles unknown, Ordinal uses -1 | PASS |
+| **V2.8** | Ablation logged | A | `reports/experiments.csv` records MinMax vs Standard scaling | PASS |
+| **V2.9** | Division safety | A | Division uses `experience_years + 1.0` inside `EngineeredFeatures` | PASS |
+| **V2.10** | Winsorizer bounds come from training | A | Strict leakage test asserts `lo_` and `hi_` bounds don't move | PASS |
+| **V2.11** | ADR-003 present | B | `docs/adr/003-preprocessing.md` records scaler choice | PASS |
+| **V2.12** | Reproducibility of the ablation | H | Seed 42 deterministically bounds outliers | PASS |
+
+*Phase 2 Evidence Summary*
+```json
+{
+  "phase": "2",
+  "utc": "2026-10-02T11:43:08Z",
+  "python": "3.11.9",
+  "results": ["tests: 0", "leakage: 0"]
+}
+```

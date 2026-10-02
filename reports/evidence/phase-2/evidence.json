@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "phase": "2",
+    "utc": "2026-10-02T11:43:09Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "64f0417c2dd876e55bd612bf7e8e12f74e550e38",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "uv run pytest ml/tests -q",
+      "returncode": 0,
+      "seconds": 4.53,
+      "stdout_tail": ".......                                                                  [100%]\n7 passed in 2.94s\n",
+      "stderr_tail": "",
+      "label": "tests"
+    },
+    {
+      "cmd": "uv run pytest ml/tests -q -k leakage",
+      "returncode": 0,
+      "seconds": 3.34,
+      "stdout_tail": "..                                                                       [100%]\n2 passed, 5 deselected in 2.26s\n",
+      "stderr_tail": "",
+      "label": "leakage"
+    }
+  ],
+  "hashes": {
+    "reports/experiments.csv": "8569349c546d6b4228039e0cd116481ba116cbee23b880e32fb48d2bf402cb4f",
+    "docs/03-eda-findings.md": "d294c542fe3ade61d3488790c43998fb9983012574e849152fa59d743e9c5050"
+  },
+  "missing_files": []
+}

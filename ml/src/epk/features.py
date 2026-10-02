@@ -35,6 +35,23 @@ class Winsorizer(BaseEstimator, TransformerMixin):
         return np.clip(X_arr, self.lo_, self.hi_)
 
 
+class EngineeredFeatures(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        X_arr = np.asarray(X, dtype=float).copy()
+        # Assume columns match NUMERIC_FEATURES order
+        # ['attendance', 'experience_years', 'training_hours', 'projects_completed', 'weekly_hours', 'prev_score']
+        exp_idx = NUMERIC_FEATURES.index("experience_years")
+        proj_idx = NUMERIC_FEATURES.index("projects_completed")
+        
+        # Safe division: projects / (experience + 1) to avoid divide by zero
+        projects_per_year = X_arr[:, proj_idx] / (X_arr[:, exp_idx] + 1.0)
+        
+        # Append new features
+        return np.column_stack([X_arr, projects_per_year])
+
 def build_preprocessor(scaler=None):
     """Builds the scikit-learn preprocessing pipeline."""
     scaler = scaler or MinMaxScaler()
@@ -43,6 +60,7 @@ def build_preprocessor(scaler=None):
         [
             ("impute", SimpleImputer(strategy="median")),
             ("winsor", Winsorizer(0.01, 0.99)),
+            ("engineer", EngineeredFeatures()),
             ("scale", scaler),
         ]
     )
