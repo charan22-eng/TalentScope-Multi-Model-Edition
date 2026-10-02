@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "phase": "4",
+    "utc": "2026-10-02T11:49:15Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "138ec7ce65e4c5ca56aff31148c1d1d4b92c75b5",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "uv run pytest ml/tests/test_explain.py -q",
+      "returncode": 0,
+      "seconds": 2.54,
+      "stdout_tail": "....                                                                     [100%]\n4 passed in 1.75s\n",
+      "stderr_tail": "",
+      "label": "tests"
+    }
+  ],
+  "hashes": {
+    "reports/experiments.csv": "a42a8d56dec428e5e345cdd5e96557e47b38ee0b349f0cc647f039e321179248"
+  },
+  "missing_files": []
+}

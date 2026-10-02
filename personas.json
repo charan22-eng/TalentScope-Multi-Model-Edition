@@ -1,0 +1,14 @@
+{
+  "HR Manager": {
+    "goal": "Fairness and high-level distribution",
+    "tone": "Professional"
+  },
+  "Team Lead": {
+    "goal": "Development areas",
+    "tone": "Actionable"
+  },
+  "Reviewer": {
+    "goal": "Audit decision basis",
+    "tone": "Analytical"
+  }
+}

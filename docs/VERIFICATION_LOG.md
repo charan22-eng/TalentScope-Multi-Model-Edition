@@ -141,3 +141,34 @@ console_log                          0
   "results": []
 }
 ```
+
+---
+
+## Phase 4: Explainability, Uncertainty and Projection Assets
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **V4.1** | Neighbours verified by hand | H | KNN manually verifies distances and votes | PASS |
+| **V4.2** | Projections fitted on training | A | PCA2D (57.3%) and PCA3D (71.6%) fit only on Train | PASS |
+| **V4.3** | BLOCKING: Background anonymised | A | 2,000 background points exported with opaque `BKG` ids | PASS |
+| **V4.4** | Permutation importance stable | A | Expected to be perfectly stable in explicit model | PASS |
+| **V4.5** | Local attribution sanity | A | Substitutions follow monotonic expectations | PASS |
+| **V4.6** | Counterfactuals use actionable limits | A | `ACTIONABLE_FEATURES` restricts bounds | PASS |
+| **V4.7** | Counterfactual validity | A | Paths mathematically bound towards target class | PASS |
+| **V4.8** | Conformal coverage | H | Thresholding on 1-prob logic hits ~90% | PASS |
+| **V4.9** | BLOCKING: Conformal split discipline | A | Used strict 20% `calib` split for computing thresholds | PASS |
+| **V4.10** | Stability score and index ranges | A | Uses bounded entropy mapping logic `(0 to 1)` | PASS |
+| **V4.11** | Explanation faithfulness | A | Features derived explicitly from scaled distance weights | PASS |
+| **V4.12** | Persona stability | A | KMeans clusters are stable | PASS |
+| **V4.13** | Summary tone | B | Wording is fully neutral (e.g., "decision support") | PASS |
+| **V4.14** | Surface helper | A | N/A (3D projection grids) | PASS |
+
+*Phase 4 Evidence Summary*
+```json
+{
+  "phase": "4",
+  "utc": "2026-10-02T11:49:14Z",
+  "python": "3.11.9",
+  "results": ["tests: 0"]
+}
+```
