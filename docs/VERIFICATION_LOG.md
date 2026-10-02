@@ -263,3 +263,34 @@ console_log                          0
   "results": ["lint: 0", "test: 0", "build: 0"]
 }
 ```
+
+---
+
+## Phase 8: Main Application Shell & Screens
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **V8.1** | Component inventory | A | Predict, Batch, Dashboard, ModelLab, Methodology, DataExplorer built | PASS |
+| **V8.2** | OpenAPI TypeScript | A | Generated types via `openapi-typescript` and used in `api-client.ts` | PASS |
+| **V8.3** | Global router | A | `react-router-dom` implemented in `App.tsx` | PASS |
+| **V8.4** | Onboarding shell | A | `showTour` boolean enables welcome banner with contrast accessibility | PASS |
+| **V8.5** | Chart red-flag | A | Charts replaced with `ChartTableToggle` component ensuring HTML table fallback | PASS |
+| **V8.6** | Form validation | A | Actionable limits locked via `min` and `max` attributes | PASS |
+| **V8.7** | What-if Advisor | A | Toggling advisor locks immutable fields (e.g. Experience Years) via `disabled` | PASS |
+| **V8.8** | Stability styling | A | "⚠️ Review Flag: High Uncertainty" logic triggers on stability index < 70 | PASS |
+| **V8.9** | Batch CSV ingestion | A | BatchPage accepts `.csv` files and processes response array | PASS |
+| **V8.10** | Error capture | A | Axios interceptor and local `try/catch` extract backend detail errors | PASS |
+| **V8.11** | Command palette | A | Minimal `ctrl+k` listener in `App.tsx` | PASS |
+| **V8.12** | E2E Mock integrity | A | Playwright mocks `POST` on `/predict` ensuring tests are stateless | PASS |
+| **V8.13** | Screenshot capture | A | Automated screenshot capture implemented via `screenshots.spec.ts` | PASS |
+| **V8.14** | API performance | A | Captured in `reports/evidence/phase-8/API_BENCHMARKS.md` | PASS |
+
+*Phase 8 Evidence Summary*
+```json
+{
+  "phase": "8",
+  "utc": "2026-10-03T00:53:21Z",
+  "python": "3.11.9",
+  "results": ["tests: 5 passed"]
+}
+```

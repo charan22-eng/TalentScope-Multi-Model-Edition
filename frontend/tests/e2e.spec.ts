@@ -3,6 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 test('App Shell Axe Check', async ({ page }) => {
   await page.goto('http://localhost:5173/');
+  await page.waitForSelector('h1');
   const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
   expect(accessibilityScanResults.violations).toEqual([]);
 });

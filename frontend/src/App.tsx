@@ -1,5 +1,11 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import PredictPage from './pages/Predict';
+import BatchPage from './pages/Batch';
+import DashboardPage from './pages/Dashboard';
+import ModelLabPage from './pages/ModelLab';
+import MethodologyPage from './pages/Methodology';
+import DataExplorerPage from './pages/DataExplorer';
 import { Moon, Sun } from 'lucide-react';
 import { ClassChip } from './components/ui/ClassChip';
 import './index.css';
@@ -11,6 +17,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
   });
+  const [showTour, setShowTour] = useState(true);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -19,13 +26,35 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
 
+  // Command palette listener stub
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        alert('Command Palette opened!');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div className="min-h-screen">
+      {showTour && (
+        <aside aria-label="Onboarding Tour" style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', padding: '1rem', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>
+          Welcome to the Onboarding Tour! <button onClick={() => setShowTour(false)} style={{ marginLeft: '1rem', padding: '0.25rem 0.5rem', background: 'var(--primary-color)', color: '#0f172a', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>Skip Tour</button>
+        </aside>
+      )}
       <header style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <nav style={{ display: 'flex', gap: '1rem' }}>
+        <nav style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <Link to="/" style={{ fontWeight: 'bold', color: 'var(--text-primary)', textDecoration: 'none' }}>TalentScope</Link>
+          <Link to="/predict" style={{ color: 'var(--text-primary)' }}>Predict</Link>
+          <Link to="/batch" style={{ color: 'var(--text-primary)' }}>Batch</Link>
+          <Link to="/dashboard" style={{ color: 'var(--text-primary)' }}>Dashboard</Link>
+          <Link to="/model-lab" style={{ color: 'var(--text-primary)' }}>Model Lab</Link>
+          <Link to="/data-explorer" style={{ color: 'var(--text-primary)' }}>Data Explorer</Link>
+          <Link to="/methodology" style={{ color: 'var(--text-primary)' }}>Methodology</Link>
           <Link to="/3d" style={{ color: 'var(--text-primary)' }}>3D Viewer</Link>
-          <Link to="/components" style={{ color: 'var(--text-primary)' }}>Components</Link>
         </nav>
         <button onClick={toggleTheme} aria-label="Toggle theme" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}>
           {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -107,6 +136,12 @@ export default function App() {
       <AppShell>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/predict" element={<PredictPage />} />
+          <Route path="/batch" element={<BatchPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/model-lab" element={<ModelLabPage />} />
+          <Route path="/data-explorer" element={<DataExplorerPage />} />
+          <Route path="/methodology" element={<MethodologyPage />} />
           <Route path="/3d" element={<ThreeViewerPage />} />
           <Route path="/components" element={<ComponentsPage />} />
         </Routes>
