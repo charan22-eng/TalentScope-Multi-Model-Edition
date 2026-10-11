@@ -46,5 +46,6 @@ artifacts/
 data/raw/
 data/processed/
 project/qa-evidence/
+*.db
 *~
 *.swp

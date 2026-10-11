@@ -16,6 +16,19 @@ import joblib
 
 from .schemas import EmployeeFeatures, PredictResponse, ExplainResponse, BatchPredictResponse
 from .config import settings
+from backend.db.database import get_db, engine, Base
+from backend.db.models import User, PredictionHistory
+from backend.core.security import authenticate_user, create_access_token, get_current_user_email, get_password_hash
+from backend.services.drift import get_current_drift
+from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import Response
+import json
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+
+Base.metadata.create_all(bind=engine)
 
 # Wait, we need the epk package for predictions. 
 # We'll import dynamically or just rely on standard joblib and the pre-loaded python path.
@@ -90,7 +103,7 @@ def create_app():
         with open(f"{settings.artifact_path}/conformal.json", "r") as f:
             conformal = json.load(f)
         
-        train_df = pd.read_csv("../data/raw/dataset.csv").drop_duplicates(subset=["employee_id"])
+        train_df = pd.read_csv("data/raw/dataset.csv").drop_duplicates(subset=["employee_id"])
         X_train = train_df.drop(columns=["performance"])
         y_train = train_df["performance"]
         
@@ -109,9 +122,17 @@ def create_app():
     def version():
         return {"api_version": settings.api_version, "model_version": metadata.get("version", "unknown")}
 
+    @app.post("/login")
+    def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+        user = authenticate_user(db, form_data.username, form_data.password)
+        if not user:
+            raise HTTPException(status_code=400, detail="Incorrect email or password")
+        access_token = create_access_token(data={"sub": user.email})
+        return {"access_token": access_token, "token_type": "bearer"}
+
     @app.post("/predict", response_model=PredictResponse)
     @limiter.limit("50/minute")
-    async def predict(request: Request, features: EmployeeFeatures):
+    async def predict(request: Request, features: EmployeeFeatures, db: Session = Depends(get_db), current_user: str = Depends(get_current_user_email)):
         df = pd.DataFrame([features.model_dump()])
         probs = calibrated_knn.predict_proba(df)[0]
         classes = list(calibrated_knn.classes_)
@@ -119,12 +140,30 @@ def create_app():
         pset = get_prediction_set(probs, classes, conformal["threshold"])
         conf_dict = {c: float(p) for c, p in zip(classes, probs)}
         
+        
+        # Save to history
+        hist = PredictionHistory(
+            user_email=current_user,
+            input_data=features.model_dump_json(),
+            prediction=pset[0] if pset else "Unknown",
+            confidence=float(max(probs)),
+            needs_review=1 if (stability_score(probs) * 100.0 < 70) else 0
+        )
+        db.add(hist)
+        db.commit()
+
         return PredictResponse(
             prediction=pset,
             confidence=float(max(probs)),
             probabilities=conf_dict,
             stability_index=stability_score(probs) * 100.0
         )
+
+    @app.get("/analytics/drift")
+    def drift_report(db: Session = Depends(get_db)):
+        history = db.query(PredictionHistory).order_by(PredictionHistory.timestamp.desc()).limit(1000).all()
+        drift_result = get_current_drift(history, {})
+        return drift_result
 
     @app.post("/explain", response_model=ExplainResponse)
     @limiter.limit("20/minute")
@@ -210,6 +249,28 @@ def create_app():
         t1 = time.time()
         
         return {"results": results, "errors": errors, "latency_ms": (t1-t0)*1000}
+
+    @app.get("/batch/report/pdf")
+    def export_pdf_report(db: Session = Depends(get_db)):
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        c.drawString(100, 750, "TalentScope Batch Prediction Report")
+        c.drawString(100, 730, "=================================")
+        
+        history = db.query(PredictionHistory).order_by(PredictionHistory.timestamp.desc()).limit(10).all()
+        y = 700
+        for h in history:
+            c.drawString(100, y, f"[{h.timestamp.strftime('%Y-%m-%d %H:%M')}] {h.user_email}: {h.prediction} ({h.confidence:.2f})")
+            y -= 20
+            if y < 100:
+                c.showPage()
+                y = 750
+        
+        c.save()
+        pdf = buffer.getvalue()
+        buffer.close()
+        
+        return Response(content=pdf, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=report.pdf"})
 
     @app.get("/viz/galaxy")
     def galaxy():

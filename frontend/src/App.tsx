@@ -6,7 +6,8 @@ import DashboardPage from './pages/Dashboard';
 import ModelLabPage from './pages/ModelLab';
 import MethodologyPage from './pages/Methodology';
 import DataExplorerPage from './pages/DataExplorer';
-import { Moon, Sun } from 'lucide-react';
+import { Login } from './pages/Login';
+import { Moon, Sun, LogOut } from 'lucide-react';
 import { ClassChip } from './components/ui/ClassChip';
 import './index.css';
 
@@ -56,9 +57,16 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <Link to="/methodology" style={{ color: 'var(--text-primary)' }}>Methodology</Link>
           <Link to="/3d" style={{ color: 'var(--text-primary)' }}>3D Viewer</Link>
         </nav>
-        <button onClick={toggleTheme} aria-label="Toggle theme" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}>
-          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button onClick={toggleTheme} aria-label="Toggle theme" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}>
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          {localStorage.getItem('token') && (
+            <button onClick={() => { localStorage.removeItem('token'); window.location.href='/login'; }} title="Logout" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}>
+              <LogOut size={20} />
+            </button>
+          )}
+        </div>
       </header>
       <main className="container">
         {children}
@@ -130,20 +138,29 @@ function ComponentsPage() {
   );
 }
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <div className="p-8 text-center"><h2 className="text-xl mb-4">Unauthorized Access</h2><Link to="/login" className="text-primary-color underline">Go to Login</Link></div>;
+  }
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AppShell>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/predict" element={<PredictPage />} />
-          <Route path="/batch" element={<BatchPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/model-lab" element={<ModelLabPage />} />
-          <Route path="/data-explorer" element={<DataExplorerPage />} />
-          <Route path="/methodology" element={<MethodologyPage />} />
-          <Route path="/3d" element={<ThreeViewerPage />} />
-          <Route path="/components" element={<ComponentsPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/predict" element={<ProtectedRoute><PredictPage /></ProtectedRoute>} />
+          <Route path="/batch" element={<ProtectedRoute><BatchPage /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/model-lab" element={<ProtectedRoute><ModelLabPage /></ProtectedRoute>} />
+          <Route path="/data-explorer" element={<ProtectedRoute><DataExplorerPage /></ProtectedRoute>} />
+          <Route path="/methodology" element={<ProtectedRoute><MethodologyPage /></ProtectedRoute>} />
+          <Route path="/3d" element={<ProtectedRoute><ThreeViewerPage /></ProtectedRoute>} />
+          <Route path="/components" element={<ProtectedRoute><ComponentsPage /></ProtectedRoute>} />
         </Routes>
       </AppShell>
     </BrowserRouter>
