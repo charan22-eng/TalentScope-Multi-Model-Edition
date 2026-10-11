@@ -15,7 +15,7 @@ test:
 	cd frontend && npm run test
 
 data:
-	uv run python -m epk.data --out data/raw --seed 42
+	uv run python -m epk.data --out data --seed 42
 
 train:
 	uv run python -m epk.train --config ml/configs/train.yaml

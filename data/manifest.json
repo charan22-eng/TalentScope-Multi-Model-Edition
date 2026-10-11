@@ -1,0 +1,37 @@
+{
+  "seed": 42,
+  "size": 12000,
+  "injected_bias": false,
+  "variants": {
+    "linear": {
+      "dataset.csv": {
+        "sha256": "2465354e7c1fa41452cbaa3933273b3aa2fc506eb9bb279139a97241868dc286",
+        "rows": 11820
+      },
+      "protected.csv": {
+        "sha256": "81fe398568125f8fc23b5dac2478956f565c1e2014a9f00360ccc67c2b704d78",
+        "rows": 11820
+      }
+    },
+    "nonlinear": {
+      "dataset.csv": {
+        "sha256": "bb667b2978a3fbceada3efd637a66dd11be707523735cd01e4a771f89bb07ca0",
+        "rows": 11820
+      },
+      "protected.csv": {
+        "sha256": "81fe398568125f8fc23b5dac2478956f565c1e2014a9f00360ccc67c2b704d78",
+        "rows": 11820
+      }
+    },
+    "noisy_overlap": {
+      "dataset.csv": {
+        "sha256": "889cfffb97df663bcf273c6fc7b3dc759aced38e407c9dfdfd3b025848dff517",
+        "rows": 11820
+      },
+      "protected.csv": {
+        "sha256": "9d3eea36f19f9dbf51c6844479ce332e722bd28d2ab7c2a00e6fb33387eb2a0d",
+        "rows": 11820
+      }
+    }
+  }
+}

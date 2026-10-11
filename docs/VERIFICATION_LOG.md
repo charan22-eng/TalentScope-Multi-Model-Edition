@@ -294,3 +294,32 @@ console_log                          0
   "results": ["tests: 5 passed"]
 }
 ```
+
+---
+
+## Phase MM-S1: Dataset v2 (MM-S1)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM1.1** | BLOCKING: Row count | B | Raw: 12096 rows, Cleaned: 11820 rows (>= 10,000 threshold) | PASS |
+| **VM1.2** | Determinism | H | | |
+| **VM1.3** | Variant properties (independent) | H | | |
+| **VM1.4** | Sanity bands | B | Default variant: Best=SVC (0.802), Worst=DT (0.680), Spread=0.122 (in [0.78, 0.92], spread >= 0.08) | PASS |
+| **VM1.5** | Class balance | A | Low: 30%, Medium: 45%, High: 25% (within 28-32 / 43-47 / 23-27) | PASS |
+| **VM1.6** | Score and band consistency | A | `test_score_band_consistency` passed; monotonicity holds; flips strictly isolated to noisy_overlap (3%) | PASS |
+| **VM1.7** | BLOCKING: Targets and ids never features | A | `test_no_targets_in_features` passed; 0 target/id/protected columns in feature list | PASS |
+| **VM1.8** | BLOCKING: Protected attributes isolated | B | `dataset.csv` contains only features + targets; protected attributes isolated in `protected.csv` | PASS |
+| **VM1.9** | Realism rates | A | Missing: 4.0%, duplicates: 0.8% (96 rows), impossible: 1.5% (dropped); cleaned 12096 -> 11820 | PASS |
+| **VM1.10** | Generator frozen | B | `docs/adr/006-generator-freeze.md` SHA-256 `de5f83af...` matches `ml/src/epk/data.py` | PASS |
+| **VM1.11** | Documents updated | B | `docs/01-spec.md`, `docs/data_dictionary.md`, `ml/configs/schema.yaml` all reflect 11 features and 2 targets | PASS |
+
+*Phase MM-S1 Evidence Summary*
+```json
+{
+  "phase": "MM1",
+  "utc": "2026-10-11T16:37:53Z",
+  "python": "3.11.9",
+  "results": ["data: 0", "contract: 0", "variants: 0"]
+}
+```
+

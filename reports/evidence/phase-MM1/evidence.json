@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "phase": "MM1",
+    "utc": "2026-10-11T16:37:53Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "7a045c15706f666fa10e80a5a2e7e64e86b38127",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "make data",
+      "returncode": 0,
+      "seconds": 1.13,
+      "stdout_tail": "uv run python -m epk.data --out data --seed 42\n",
+      "stderr_tail": "INFO:__main__:Variant: linear | Raw rows: 12096 | Cleaned rows: 11820\nINFO:__main__:Variant: nonlinear | Raw rows: 12096 | Cleaned rows: 11820\nINFO:__main__:Variant: noisy_overlap | Raw rows: 12096 | Cleaned rows: 11820\nINFO:__main__:Data generated at data\n",
+      "label": "data"
+    },
+    {
+      "cmd": "uv run pytest ml/tests/test_data_contract.py -q",
+      "returncode": 0,
+      "seconds": 1.4,
+      "stdout_tail": ".......                                                                  [100%]\n7 passed in 0.67s\n",
+      "stderr_tail": "",
+      "label": "contract"
+    },
+    {
+      "cmd": "uv run python ml/scripts/variant_check.py",
+      "returncode": 0,
+      "seconds": 20.4,
+      "stdout_tail": "Running quick variant checks...\n\nVariant: linear (Rows: 11820)\nClass balance:\n{'Medium': 0.45, 'Low': 0.3, 'High': 0.25}\nMacro-F1 Results:\n{'LogReg': 0.763, 'LinReg': 0.756, 'SVC': 0.746, 'RF': 0.733, 'HistGB': 0.729, 'KNN': 0.689, 'DT': 0.657}\n\nVariant: nonlinear (Rows: 11820)\nClass balance:\n{'Medium': 0.45, 'Low': 0.3, 'High': 0.25}\nMacro-F1 Results:\n{'SVC': 0.802, 'HistGB': 0.792, 'RF': 0.775, 'KNN': 0.711, 'LogReg': 0.708, 'LinReg': 0.686, 'DT': 0.68}\n\nVariant: noisy_overlap (Rows: 11820)\nClass balance:\n{'Medium': 0.44, 'Low': 0.3, 'High': 0.25}\nMacro-F1 Results:\n{'SVC': 0.632, 'RF': 0.631, 'HistGB': 0.628, 'LogReg': 0.611, 'KNN': 0.578, 'LinReg': 0.576, 'DT': 0.559}\n",
+      "stderr_tail": "INFO:epk.data:Variant: linear | Raw rows: 12096 | Cleaned rows: 11820\nINFO:epk.data:Variant: nonlinear | Raw rows: 12096 | Cleaned rows: 11820\nINFO:epk.data:Variant: noisy_overlap | Raw rows: 12096 | Cleaned rows: 11820\n",
+      "label": "variants"
+    }
+  ],
+  "hashes": {
+    "data/manifest.json": "739264fb79c641982fad034089e7e0890da99d83d709dc692047578ceb5e7baf",
+    "ml/configs/schema.yaml": "4c8c0a6bf710b09bf37a1abac41dfdd702f3f360ef6cedb845b3d793fde892fa",
+    "docs/adr/006-generator-freeze.md": "e664c7a56996f3c39302793b3fb9eb547e0c6d83ad0d2efe774996bccc897761",
+    "ml/src/epk/data.py": "de5f83af47d92ad4de5c9019ce07bef5a7fab3a9eb30549397b46c7d5b62134f"
+  },
+  "missing_files": []
+}

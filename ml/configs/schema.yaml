@@ -23,6 +23,18 @@ features:
     type: float
     range: [1.0, 5.0]
     missing_policy: median
+  - name: peer_feedback
+    type: float
+    range: [1.0, 5.0]
+    missing_policy: median
+  - name: tasks_on_time_pct
+    type: float
+    range: [0.0, 100.0]
+    missing_policy: median
+  - name: certifications
+    type: int
+    range: [0, 20]
+    missing_policy: median
   - name: department
     type: categorical
     values: ["Sales", "Engineering", "HR", "Marketing"]
@@ -32,10 +44,13 @@ features:
     values: ["Junior", "Mid", "Senior", "Lead"]
     missing_policy: Unknown
 
-label:
-  name: performance
-  type: ordinal
-  values: ["Low", "Medium", "High"]
+targets:
+  - name: performance
+    type: ordinal
+    values: ["Low", "Medium", "High"]
+  - name: performance_score
+    type: float
+    range: [0.0, 100.0]
 
 audit:
   - name: gender
