@@ -27,8 +27,9 @@ describe('ClassChip', () => {
   });
 
   it('renders Unknown fallback', () => {
-    // @ts-ignore
-    render(<ClassChip status="FooBar" />);
+    // Testing component fallback behavior when receiving invalid/unexpected status value at runtime
+    const invalidStatus = 'FooBar' as unknown as 'Low';
+    render(<ClassChip status={invalidStatus} />);
     const el = screen.getByRole('status');
     expect(el).toHaveClass('chip-unknown');
     expect(el).toHaveTextContent('Unknown');
