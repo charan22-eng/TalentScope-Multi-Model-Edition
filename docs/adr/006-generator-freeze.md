@@ -12,7 +12,12 @@ We freeze the synthetic dataset generator (`ml/src/epk/data.py`) before any mode
 **Final Parameters & Freeze Checksum:**
 - Base rows: 12,000 (>= 10,000 post-cleaning)
 - Noise: 0.45 for `linear`, 0.35 for `nonlinear`, 0.8 for `noisy_overlap`.
-- SHA-256 Hash of `ml/src/epk/data.py`: `DE5F83AF47D92AD4DE5C9019CE07BEF5A7FAB3A9EB30549397B46C7D5B62134F`
+- Original SHA-256 Hash of `ml/src/epk/data.py`: `DE5F83AF47D92AD4DE5C9019CE07BEF5A7FAB3A9EB30549397B46C7D5B62134F`
+- Amended SHA-256 Hash of `ml/src/epk/data.py`: `72248D00A23714FAC157E7E5438F4CA75FEA24D041425FE8CC0EE59FDC468305`
+
+### Amendment Note (2026-10-11)
+- **Reason**: The realism layer in `ml/src/epk/data.py` previously injected 1.5% impossible values (exceeding the contract limit of <= 1%). It was amended to inject exactly 0.8% impossible values (96 rows) across `training_hours`, `weekly_hours`, and `attendance`. No changes were made to the data-generating process, latent factors, noise, or structure parameters.
+- **Model Status**: No final model has been trained or evaluated against this amended dataset.
 
 ## Consequences
 - No further tuning or adjustment of the synthetic generator is permitted, regardless of the subsequent model leaderboard outcomes.

@@ -94,10 +94,12 @@ def make_employee_data(n=12000, seed=42, variant="nonlinear", inject_bias=False)
         mask = rng.random(n) < 0.04
         df.loc[mask, col] = np.nan
         
-    # Outliers (impossible values) <= 1%
-    df.loc[rng.choice(df.index, int(n * 0.005), replace=False), "training_hours"] = 500
-    df.loc[rng.choice(df.index, int(n * 0.005), replace=False), "weekly_hours"] = 150
-    df.loc[rng.choice(df.index, int(n * 0.005), replace=False), "attendance"] = -10
+    # Outliers (impossible values) = 0.8% (limit <= 1%)
+    impossible_idx = rng.choice(df.index, int(n * 0.008), replace=False)
+    k1, k2 = len(impossible_idx) // 3, 2 * (len(impossible_idx) // 3)
+    df.loc[impossible_idx[:k1], "training_hours"] = 500
+    df.loc[impossible_idx[k1:k2], "weekly_hours"] = 150
+    df.loc[impossible_idx[k2:], "attendance"] = -10
     
     # Duplicates <= 1%
     dupes = df.sample(int(n * 0.008), random_state=seed)
