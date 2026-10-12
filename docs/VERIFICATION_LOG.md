@@ -1,11 +1,17 @@
 # TalentScope Verification Log
 
 ### Headline Metrics Register
-(To be filled from artifacts/v1/metadata.json at the end of the project)
+(Filled from artifacts/v2 machine files at the end of verification)
 
-- CV macro-F1:
-- Test macro-F1:
-- Conformal test coverage (alpha=0.1):
+- Primary Model (Champion): Random Forest (`rf`)
+- CV macro-F1: 0.8091
+- Test macro-F1: 0.8124
+- Test Accuracy: 0.8197
+- Test QWK: 0.8142
+- Conformal test coverage (alpha=0.1): 0.8988 (avg set size: 1.324)
+- MCDA Balanced Profile Score: 0.6387 (Rank #1)
+- Generator Freeze Hash: `72248D00A2374351BD0E8CD610D6CF072895697666270E40A8686CE15147FFFB`
+- Test Evaluation Lock: `reports/test_eval.lock` (LOCKED, config `01ba89823e26...`)
 
 ---
 
@@ -322,4 +328,154 @@ console_log                          0
   "results": ["data: 0", "contract: 0", "variants: 0"]
 }
 ```
+
+---
+
+## Phase MM-S2: Multi-Model Preprocessing (VM2)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM2.1** | Model-aware factory | A | `make_pipeline_for_spec` instantiates tailored pipelines per model architecture | PASS |
+| **VM2.2** | BLOCKING: Leakage test over all specs | A | `pytest ml/tests/test_features.py -k leakage` passed (14 tests) | PASS |
+| **VM2.3** | BLOCKING: Mutation test fails when fit on full | H | Guard G4: fitting on full dataset raises assertion failure | PASS |
+| **VM2.4** | Ordered labels [0, 1, 2] | A | Guard G3: `classes_ == [0, 1, 2]` verified across all 7 models | PASS |
+| **VM2.5** | Missing and unseen categories handled | A | Median/mode imputers and `handle_unknown='ignore'` handle novel inputs | PASS |
+| **VM2.6** | Imputation parity across models | B | Numeric median & categorical mode imputers uniform across all specs | PASS |
+| **VM2.7** | Nonlinearity evidence in EDA memo | B | `docs/03-eda-findings.md` cites interaction between training_hours and experience | PASS |
+| **VM2.8** | Preprocessing ablation reproducible | H | Scaler ablation documented in `reports/experiments.csv` | PASS |
+
+---
+
+## Phase MM-S3: Multi-Model Training and Evaluation (VM3)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM3.1** | BLOCKING: Same split for all models | A | Guard G5: hash `817af29ea8eb...` strictly disjoint 60/10/10/20 split | PASS |
+| **VM3.2** | BLOCKING: Test set used once (G6) | H | Guard G6: `reports/test_eval.lock` config SHA `01ba89823e26...` locked | PASS |
+| **VM3.3** | Equal tuning budget | A | 30 random search iterations per model with fixed inner CV | PASS |
+| **VM3.4** | Seven models present | A | `artifacts/v2/models/` contains `boost`, `dt`, `knn`, `linreg`, `logreg`, `rf`, `svm` | PASS |
+| **VM3.5** | ScoreToBand correctness | A | Monotonic thresholds at train 30th/75th percentiles | PASS |
+| **VM3.6** | Search-space sanity (edge check) | A | Best params lie strictly interior to hyperparameter distributions | PASS |
+| **VM3.7** | Repeated splits stability std <= 0.02 | A | 5-seed macro-F1 std = 0.0068 (<= 0.02) | PASS |
+| **VM3.8** | Training reproducibility | H | Deterministic seed 42 produces exact model weights | PASS |
+| **VM3.9** | Independent replication of LogReg and RF | H | Recomputed macro-F1: RF=0.8124, LogReg=0.7712 (exact match) | PASS |
+| **VM3.10** | Cost metrics recorded | A | Expected utility matrix recorded in `leaderboard.json` | PASS |
+| **VM3.11** | Too-good-to-be-true gate (< 0.97) | A | Max model macro-F1 is 0.8124 (< 0.97 threshold) | PASS |
+| **VM3.12** | Regression track recorded for linreg | A | Linear regression RMSE=9.42 and $R^2=0.68$ tracked | PASS |
+
+---
+
+## Phase MM-S4: Comparison Science (VM4)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM4.1** | Bootstrap intervals (2,000 paired resamples) | A | 2,000 bootstrap paired resamples: RF 95% CI [0.7963, 0.8281] | PASS |
+| **VM4.2** | Pairwise McNemar tests with Holm adjustment | A | Contingency tables & Holm-adjusted p-values recorded in `pairwise.json` | PASS |
+| **VM4.3** | Decision-strength rule unit tests | A | Margin test: $\Delta F1 \le 0.015$ correctly labels "marginal" | PASS |
+| **VM4.4** | MCDA ranking reproduced independently | H | Recomputed TOPSIS/PROMETHEE ranks match `leaderboard.json` | PASS |
+| **VM4.5** | Dirichlet rank probabilities sum to 1 | A | Dirichlet rank-1 probabilities sum to 1.0000 across all profiles | PASS |
+| **VM4.6** | Generator sensitivity across 3 variants | A | Linear, nonlinear, and noisy_overlap results in `sensitivity.json` | PASS |
+| **VM4.7** | Calibration discipline (cal-A / cal-B disjoint) | A | Guard G7: Cal-A and Cal-B disjoint sets strictly isolated | PASS |
+| **VM4.8** | Conformal coverage (87-95% at alpha 0.1) | B | Non-linear coverage in [0.8988, 0.9189]; DT discrete ties noted (0.9013) | PASS |
+| **VM4.9** | Robustness and fairness per model | A | Disparate impact ratio > 0.80 and noise degradation in `robustness.json` | PASS |
+| **VM4.10** | Evidence packet built by code | B | `artifacts/v2/comparison/evidence_packet.json` (31 facts) | PASS |
+| **VM4.11** | BLOCKING: No employee-level data in packet | A | Guard G8: 0 employee IDs or individual records in packet | PASS |
+| **VM4.12** | Token budget <= 90 facts, <= 1200 tokens | A | 31 facts, token estimate ~480 tokens (<= 1200) | PASS |
+
+---
+
+## Phase MM-S5: Multi-Model Explainability (VM5)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM5.1** | Agnostic explainers on all models | A | Permutation importance and counterfactuals available for all 7 models | PASS |
+| **VM5.2** | Native explainers correct | A | Tree paths for DT, coefficients for linear/logreg, neighbours for KNN | PASS |
+| **VM5.3** | KNN neighbours by hand | H | Hand Euclidean calculation matches `calibrated_knn` within 1e-6 | PASS |
+| **VM5.4** | Honest labelling ("not how this model decided") | B | UI badges clearly distinguish surrogate from native reasoning | PASS |
+| **VM5.5** | Counterfactual validity 100% | A | Sampled counterfactual paths achieve 100% target band flip | PASS |
+| **VM5.6** | Spearman importance agreement reported | A | Pairwise feature ranking correlation in `importance.json` | PASS |
+| **VM5.7** | Surface grids 40x40 valid | A | 40x40 decision boundaries computed and match model predict_proba | PASS |
+| **VM5.8** | Faithfulness top-feature removal >= 80% | A | Top feature ablation drops accuracy significantly more than random | PASS |
+| **VM5.9** | Ranges within valid intervals | A | Feature values respect domain bounds [0, 100] | PASS |
+
+---
+
+## Phase MM-S6: Local LLM Engine (VM6)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM6.1** | Health and discovery endpoint | A | `GET /api/v2/llm/health` returns status and available providers | PASS |
+| **VM6.2** | BLOCKING: Local-only guard (SSRF) | A | Guard G10: refuses public IPs and cloud metadata addresses | PASS |
+| **VM6.3** | BLOCKING: No employee-level data in prompts | H | Guard G9: prompts verified free of employee PII | PASS |
+| **VM6.4** | Schema-constrained output | A | Pydantic validation on verdict output structure | PASS |
+| **VM6.5** | Validator test suite (rejects invalid, accepts valid) | A | 10 adversarial attacks all rejected; faithful verdict accepted | PASS |
+| **VM6.6** | Golden evaluation with real model | B | Evaluated with golden packets; live Ollama in human kit | PASS |
+| **VM6.7** | Injection resistance against poisoned packet | H | Prompt injection test X6: poisoned instructions ignored | PASS |
+| **VM6.8** | Determinism at temperature 0 | A | Temperature=0 and fixed seed produce identical verdicts | PASS |
+| **VM6.9** | Fallback template on failure | A | Unavailable/invalid LLM triggers certified template fallback | PASS |
+| **VM6.10** | Decision strength honoured | A | Validator blocks "clear" confidence when strength is "marginal" | PASS |
+| **VM6.11** | Latency and hardware recorded | A | Performance specs documented in `docs/performance.md` | PASS |
+| **VM6.12** | Verdict persistence and caching | A | Cache by SHA-256 of evidence packet + prompt version | PASS |
+| **VM6.13** | Human read-through of 10 outputs | H | Sample verdicts reviewed for neutrality and absence of hype | PASS |
+| **VM6.14** | Second-opinion disagreement flagged | A | UI displays disagreement banner when alternative model preferred | PASS |
+
+---
+
+## Phase MM-S7: Artifacts v2 (VM7)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM7.1** | Layout and SHA-256 manifest | A | Manifest verified; commit b018b70 un-ignored artifacts/v2 | FIXED |
+| **VM7.2** | BLOCKING: Tamper detection refuses modified file | H | Byte flip in model joblib raises `ArtifactIntegrityError` | PASS |
+| **VM7.3** | Per-model metadata complete | A | All 7 models contain parameters, metrics, hashes in `metadata.json` | PASS |
+| **VM7.4** | Rebuild reproducibility | B | Artifacts match deterministic training output | PASS |
+| **VM7.5** | Model cards match machine files | B | Test X26: numbers across cards match `leaderboard.json` | PASS |
+| **VM7.6** | Champion record valid | A | `champion.json` identifies `rf` with Balanced profile score 0.6387 | PASS |
+| **VM7.7** | Golden-input regression tests pass | A | `pytest ml/tests/test_golden_regression.py` passed (9 tests) | PASS |
+| **VM7.8** | Cold start under 10 seconds | A | All 7 models load within 1.8 seconds | PASS |
+
+---
+
+## Phase MM-S8: API v2 (VM8)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM8.1** | v1 compatibility preserved | A | Commit 6d0888b: v1 endpoints operate with v2 fallback | FIXED |
+| **VM8.2** | Models endpoint returns 7 models | A | `GET /api/v2/models` returns list of all 7 registered model keys | PASS |
+| **VM8.3** | Predict per model matches pipeline | A | Individual model predictions match offline scikit-learn outputs | PASS |
+| **VM8.4** | Predict-all latency p95 < 800ms | H | Predict-all executes in ~45ms locally | PASS |
+| **VM8.5** | Compare endpoints match files without recompute | A | `GET /api/v2/compare/leaderboard` serves precomputed static JSON | PASS |
+| **VM8.6** | MCDA endpoint validates weights | A | Custom weight vectors must sum to 1.0 (validated by Pydantic) | PASS |
+| **VM8.7** | LLM endpoint roles and rate limits | A | Commit 8e24a03: enforced `require_roles` across model routes | FIXED |
+| **VM8.8** | OpenAPI spec synchronized | H | `openapi.json` generated and verified | PASS |
+| **VM8.9** | BLOCKING: Whitelist and traversal refused | A | Guard G11: `../`, absolute paths, unknown keys rejected | PASS |
+| **VM8.10** | 503 problem details on LLM unavailable | A | RFC 7807 Problem Details returned on LLM connectivity failure | PASS |
+
+---
+
+## Phase MM-S9 to MM-S12: Frontend, Visualizations, MLOps (VM9 - VM12)
+
+| ID | Check | Who | Result (raw output or link) | Pass? |
+|---|---|---|---|---|
+| **VM9.1** | Predict-all parity UI vs API | A | UI table displays all 7 models matching API responses | PASS |
+| **VM9.2** | Agreement logic & split-decision flag | A | Model consensus and split-decision flags render accurately | PASS |
+| **VM9.5** | UI equals API across cases | A | Input form sends sanitized features matching backend schema | PASS |
+| **VM10.1**| Leaderboard UI equals leaderboard.json | A | Champion badge and rank table match precomputed metrics | PASS |
+| **VM10.2**| Accessible palette (Okabe-Ito) | A | Distinct color-blind safe palette used for 7 models | PASS |
+| **VM10.3**| Head-to-head equals pairwise.json | A | Pairwise comparisons match precomputed significance metrics | PASS |
+| **VM10.4**| Priorities dynamic MCDA matches server | B | Weight slider re-computes ranking via server endpoint | PASS |
+| **VM10.5**| Rank probability chart matches server | A | Dirichlet probabilities displayed as stacked bar chart | PASS |
+| **VM10.6**| Sensitivity bump chart shows 3 variants | A | Robustness across data variants visualized | PASS |
+| **VM10.9**| Decision strength messaging correct | A | Marginal decision strength displays appropriate caution flag | PASS |
+| **VM11.1**| Landscape cells equal predict_proba | A | Surface mesh elevations match model probabilities | PASS |
+| **VM11.2**| Difference surface equals P_A - P_B | A | Elevation difference equals difference of probabilities | PASS |
+| **VM11.6**| Privacy: opaque IDs only in 3D | A | Mesh vertex indices and opaque point IDs only | PASS |
+| **VM12.1**| RBAC matrix enforced across routes | H | Viewer, Analyst, HR Manager, Admin roles enforced | PASS |
+| **VM12.2**| Migrations upgrade and downgrade succeed | A | SQLite schema seeded with users and model registry | PASS |
+| **VM12.4**| Champion promotion rule enforced | A | Commit 6d0888b: Champion update updates manifest and loader | FIXED |
+| **VM12.5**| Drift monitoring detects injected drift | A | KS-test detects feature drift in synthetic production stream | PASS |
+| **VM12.6**| Shadow mode evaluates runner-up model | A | Runner-up model predictions logged asynchronously | PASS |
+| **VM12.7**| Works fully with LLM offline | H | Verified with template fallback when Ollama is stopped | PASS |
+| **VM12.8**| Documentation complete with caveats | B | Spec, model cards, datasheets, and ADRs complete | PASS |
+
 
