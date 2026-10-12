@@ -1156,7 +1156,7 @@ def update_champion_file(champion_data: dict) -> None:
                 manifest["files"]["champion.json"]["size_bytes"] = size
                 with open(manifest_file, "w", encoding="utf-8") as f:
                     json.dump(manifest, f, indent=2)
-            default_loader.manifest = manifest
+            default_loader._manifest = manifest
         except Exception as e:
             logger.warning(f"Could not update MANIFEST.json: {e}")
 

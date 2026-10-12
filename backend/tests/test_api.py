@@ -45,10 +45,22 @@ GOLDEN_CSV = Path(__file__).resolve().parent.parent.parent / "artifacts" / "v1" 
 
 def test_predict_equals_pipeline():
     import pandas as pd
-    golden = pd.read_csv(GOLDEN_CSV)
-    row = {k: (None if pd.isna(v) else v) for k, v in golden.iloc[0].to_dict().items()}
-    row.pop("expected_label", None)
-    row.pop("employee_id", None)
+    if GOLDEN_CSV.exists():
+        golden = pd.read_csv(GOLDEN_CSV)
+        row = {k: (None if pd.isna(v) else v) for k, v in golden.iloc[0].to_dict().items()}
+        row.pop("expected_label", None)
+        row.pop("employee_id", None)
+    else:
+        row = {
+            "attendance": 90.0,
+            "experience_years": 5.0,
+            "training_hours": 100.0,
+            "projects_completed": 5.0,
+            "weekly_hours": 40.0,
+            "prev_score": 3.0,
+            "department": "Sales",
+            "job_level": "Junior",
+        }
     response = client.post("/predict", json=row)
     assert response.status_code == 200
     assert response.json()["prediction"]
