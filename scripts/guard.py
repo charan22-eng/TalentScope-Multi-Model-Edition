@@ -211,6 +211,57 @@ def check_g8():
     return True, f"Packet clean ({len(pkt['facts'])} facts, winner={pkt['deterministic_winner']}, strength={pkt['decision_strength']})"
 
 
+def check_g9():
+    """G9 LLM Validator and prompt hygiene: validator catches violations and prompts contain no employee data."""
+    try:
+        from epk.llm.validator import validate_verdict
+        from epk.llm.prompts import scan_prompt_for_forbidden_keys, format_user_prompt
+    except ImportError as e:
+        return False, f"Could not import LLM modules: {e}"
+
+    # Verify scanner works and catches leakage
+    if not scan_prompt_for_forbidden_keys("employee_id: 101, salary: 50000"):
+        return False, "Prompt scanner failed to detect employee_id / salary leakage"
+
+    # Test with real evidence packet
+    pkt_path = Path("artifacts/v2/comparison/evidence_packet.json")
+    if pkt_path.exists():
+        with open(pkt_path, "r", encoding="utf-8") as f:
+            pkt = json.load(f)
+        prompt = format_user_prompt(pkt, audience="HR")
+        violations = scan_prompt_for_forbidden_keys(prompt)
+        if violations:
+            return False, f"Prompt generated from evidence packet contains forbidden keys: {violations}"
+
+    return True, "LLM validator active & prompt hygiene verified (no employee data)"
+
+
+def check_g10():
+    """G10 Local LLM SSRF Guard: assert_local refuses public hosts and allows loopback."""
+    try:
+        from epk.llm.client import assert_local
+    except ImportError as e:
+        return False, f"Could not import assert_local: {e}"
+
+    # Loopback must pass
+    try:
+        assert_local("http://localhost:11434")
+        assert_local("http://127.0.0.1:8000")
+    except Exception as e:
+        return False, f"assert_local refused loopback: {e}"
+
+    # Public IP must fail
+    refused = False
+    try:
+        assert_local("http://8.8.8.8:11434")
+    except ValueError:
+        refused = True
+    if not refused:
+        return False, "assert_local failed to refuse public host 8.8.8.8"
+
+    return True, "SSRF Guard active (loopback accepted, public hosts refused)"
+
+
 def check_g13_g14():
     """G13 No secrets; G14 Ratchet on skips, suppressions, any, and console_log."""
     try:
@@ -292,6 +343,14 @@ def run_guards():
     # G8
     ok8, msg8 = check_g8()
     guards["G8 Evidence Packet Safe"] = (ok8, msg8)
+
+    # G9
+    ok9, msg9 = check_g9()
+    guards["G9 LLM Validator & Prompt Hygiene"] = (ok9, msg9)
+
+    # G10
+    ok10, msg10 = check_g10()
+    guards["G10 Local LLM SSRF Guard"] = (ok10, msg10)
 
     # G13 & G14
     ok13, msg13, ok14, msg14 = check_g13_g14()

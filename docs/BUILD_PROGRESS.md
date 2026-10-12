@@ -57,13 +57,13 @@ Recorded at start of Stage A:
 - [x] **E5**: 2D surface grids (40x40 default), Spearman importance agreement matrix, neutral summaries.
 
 ### Stage F: Local LLM verdict engine (tag: `stage-f-built`)
-- [ ] **F1**: LLM client (`ml/src/epk/llm/`) with `assert_local` guard (G10) for Ollama and OpenAI-compat.
-- [ ] **F2**: SYSTEM_PROMPT, user template, inline VERDICT_SCHEMA, prompt versioning.
-- [ ] **F3**: Verdict validator (schema, fact IDs, numbers, rules, banned words, G9) & retry/template fallback orchestrator.
-- [ ] **F4**: Cache and verdict persistence.
-- [ ] **F5**: Golden evaluation harness (`ml/scripts/llm_eval.py`) with 6 golden packets.
-- [ ] **F6**: Documentation `docs/LLM_SETUP.md`.
-- [ ] **F7**: Forbidden employee-level key prompt scanner.
+- [x] **F1**: LLM client (`ml/src/epk/llm/`) with `assert_local` guard (G10) for Ollama and OpenAI-compat.
+- [x] **F2**: SYSTEM_PROMPT, user template, inline VERDICT_SCHEMA, prompt versioning.
+- [x] **F3**: Verdict validator (schema, fact IDs, numbers, rules, banned words, G9) & retry/template fallback orchestrator.
+- [x] **F4**: Cache and verdict persistence.
+- [x] **F5**: Golden evaluation harness (`ml/scripts/llm_eval.py`) with 6 golden packets.
+- [x] **F6**: Documentation `docs/LLM_SETUP.md`.
+- [x] **F7**: Forbidden employee-level key prompt scanner.
 
 ### Stage G: Artifacts v2 and model cards (tag: `stage-g-built`)
 - [ ] **G1**: `artifacts/v2` layout with `MANIFEST.json` SHA-256 hashes and `champion.json`.

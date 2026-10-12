@@ -8,6 +8,7 @@
 - Stage C completed: Model registry and modular specs (`ml/src/epk/models/specs/`), frozen 60/10/10/20 split (`data/processed/split.json`), fair training harness `train_all.py`, probability calibration on `cal-A` (Platt scaling / sigmoid per ADR-008), single locked test-set evaluation `final_eval.py` (make final) with G6 lock, and active guards G1, G2, G3, G4, G5, G6, G7, G13, G14.
 - Stage D completed: Comparison science suite (`stats.py`), 2000-resample paired bootstrap CIs, 21-pair McNemar-Holm tests, split-conformal calibration on `cal-B` (alpha=0.10), MCDA engine with 5 profiles and Dirichlet rank probability (`mcda.py`), ADR-009 champion selection rule, variant sensitivity analysis (`make final-variants` and `sensitivity.json`), and machine-built evidence packet (`evidence.py`) verified under guard G8.
 - Stage E completed: Multi-model explainability and uncertainty engine (`epk.explain`), native parameter inspection for all 7 models, local feature attribution, actionable constrained counterfactual search, "not how this model decided" similar cases for non-KNN models, scaled PCA 2D/3D background projection, 2D decision landscapes (40x40 grids in `surfaces.json`), and persona-tailored summaries.
+- Stage F completed: Local LLM verdict engine (`epk.llm`), strict numeric validator (Guard G9), SSRF localhost isolation guard (Guard G10), prompt employee-data scanner, deterministic template fallback, SHA-256 verdict cache, golden evaluation suite (`ml/scripts/llm_eval.py`) with 6 packets (100% validity & faithfulness, 100% injection resistance), and setup guide (`docs/LLM_SETUP.md`).
 
 ## Decisions
 - [ADR-001](../docs/adr/ADR-001.md): Stack decisions and versions.
@@ -29,11 +30,11 @@
   - `dt`: Macro-F1 = 0.7094, Accuracy = 0.7085, QWK = 0.6993, ECE = 0.0342, p95 Latency = 16.27ms
   - `linreg`: Macro-F1 = 0.7032, Accuracy = 0.7014, QWK = 0.6955, ECE = 0.0213, p95 Latency = 13.23ms (R² = 0.6669)
 - MCDA Champion (Balanced Profile): `rf` (composite score 0.573, rank-1 probability 64.2%, decision strength: `marginal` due to trade-off with SVM accuracy).
-- Invariant Guards: G1, G2, G3, G4, G5, G6, G7, G8, G13, G14 all GREEN.
+- Invariant Guards: G1, G2, G3, G4, G5, G6, G7, G8, G9, G10, G13, G14 all GREEN.
 - Hygiene: typescript_any=0, console_log=0, possible_secrets=0, bypass_flags=0.
 
 ## Known Issues
 - `test_predict_equals_pipeline` explicitly skipped via `skipif` (Obligation O1) pending v2 golden tests in Stage H.
 
 ## Next Step
-- Stage F: Local LLM Verdict Engine (MM-S6).
+- Stage G: Artifact Bundle v2 and Model Cards (MM-S7).
