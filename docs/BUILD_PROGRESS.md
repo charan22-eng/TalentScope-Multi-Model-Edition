@@ -79,10 +79,10 @@ Recorded at start of Stage A:
 - [x] **H5**: Guards G11 (whitelist/path traversal) and G12 (RBAC matrix) active; predict/all p95 < 800ms.
 
 ### Stage I: Frontend core pages (tag: `stage-i-built`)
-- [ ] **I1**: Okabe-Ito color palette, marker shapes, `ModelChip`, small multiples chart kit.
-- [ ] **I2**: Predict page: model selector, all-models panel, agreement meter, split-decision alert, champion highlight.
-- [ ] **I3**: What-if advisor, Batch (5000x7 smooth), Model Lab, Dashboard.
-- [ ] **I4**: Component & Playwright tests; strict TypeScript.
+- [x] **I1**: Okabe-Ito color palette, marker shapes, `ModelChip`, small multiples chart kit.
+- [x] **I2**: Predict page: model selector, all-models panel, agreement meter, split-decision alert, champion highlight.
+- [x] **I3**: What-if advisor, Batch (5000x7 smooth), Model Lab, Dashboard.
+- [x] **I4**: Component & Playwright tests; strict TypeScript.
 
 ### Stage J: Model Arena (tag: `stage-j-built`)
 - [ ] **J1**: Arena pages: Overview, Priorities (live server MCDA), Head-to-Head, Metrics Deep Dive, Cost/Speed, Sensitivity, Explainability, Fairness/Robustness, LLM Verdict.
