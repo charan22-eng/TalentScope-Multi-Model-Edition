@@ -38,7 +38,8 @@ def check_g1():
     if not data_py.exists():
         return False, "ml/src/epk/data.py not found"
     
-    sha = hashlib.sha256(data_py.read_bytes()).hexdigest().upper()
+    content = data_py.read_bytes().replace(b"\r\n", b"\n")
+    sha = hashlib.sha256(content).hexdigest().upper()
     if sha != FROZEN_GENERATOR_SHA:
         return False, f"SHA mismatch: got {sha}, expected {FROZEN_GENERATOR_SHA}"
     return True, f"Hash verified: {sha[:12]}..."
