@@ -24,8 +24,9 @@ export function Login() {
       });
       localStorage.setItem('token', response.data.access_token);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please try again.');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      setError(axiosErr.response?.data?.detail || 'Login failed. Please try again.');
     }
   };
 

@@ -16,18 +16,20 @@ class ErrorBoundary extends Component<{ children: ReactNode, fallback: ReactNode
   }
 }
 
+import { Object3D, Mesh, Material } from 'three';
+
 // Memory Disposal hook to clean up renderer counts
 const DisposeMemory = () => {
   const { gl, scene } = useThree();
   useEffect(() => {
     return () => {
-      scene.traverse((object: any) => {
-        if (!object.isMesh) return;
+      scene.traverse((object: Object3D) => {
+        if (!(object instanceof Mesh)) return;
         object.geometry.dispose();
-        if (object.material.isMaterial) {
+        if (Array.isArray(object.material)) {
+          for (const m of object.material) cleanMaterial(m);
+        } else if (object.material) {
           cleanMaterial(object.material);
-        } else {
-          for (const material of object.material) cleanMaterial(material);
         }
       });
       gl.dispose();
@@ -36,12 +38,16 @@ const DisposeMemory = () => {
   return null;
 };
 
-const cleanMaterial = (material: any) => {
+const cleanMaterial = (material: Material) => {
   material.dispose();
-  for (const key of Object.keys(material)) {
-    const value = material[key];
+  const matRecord = material as unknown as Record<string, unknown>;
+  for (const key of Object.keys(matRecord)) {
+    const value = matRecord[key];
     if (value && typeof value === 'object' && 'minFilter' in value) {
-      value.dispose();
+      const disposable = value as unknown as { dispose?: () => void };
+      if (typeof disposable.dispose === 'function') {
+        disposable.dispose();
+      }
     }
   }
 };

@@ -7,8 +7,6 @@ test.describe('Predict Flow', () => {
     // If not, we will just intercept it for safety.
     
     // Intercept to avoid actually requiring the backend if it's not running
-    page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
-    page.on('pageerror', err => console.log('BROWSER ERROR:', err.message));
     
     await page.route('http://localhost:8000/predict', async route => {
       if (route.request().method() === 'POST') {
@@ -29,12 +27,7 @@ test.describe('Predict Flow', () => {
 
     await page.goto('http://localhost:5173/predict');
     
-    try {
-      await expect(page.getByRole('heading', { name: 'Predict Performance' })).toBeVisible({ timeout: 5000 });
-    } catch (e) {
-      console.log('DOM CONTENT ON FAILURE:', await page.content());
-      throw e;
-    }
+    await expect(page.getByRole('heading', { name: 'Predict Performance' })).toBeVisible({ timeout: 5000 });
     
     // Default mode, Experience is enabled
     const expInput = page.getByLabel('Experience Years');

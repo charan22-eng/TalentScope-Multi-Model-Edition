@@ -17,8 +17,9 @@ export default function BatchPage() {
     try {
       const res = await batchPredict(file);
       setResults(res);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } }; message?: string };
+      setError(axiosErr.response?.data?.detail || (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
     }
@@ -30,8 +31,8 @@ export default function BatchPage() {
     setError(null);
   };
 
-  const successCount = results?.results.filter((r: any) => r !== null).length || 0;
-  const errorCount = results?.errors.filter((e: any) => e !== null).length || 0;
+  const successCount = results?.results.filter((r): r is NonNullable<typeof r> => r !== null).length || 0;
+  const errorCount = results?.errors.filter((e): e is NonNullable<typeof e> => e !== null).length || 0;
   const total = successCount + errorCount;
   
   // Naive column mapping UI (skipped full implementation for stub, we just pass the file)
@@ -123,7 +124,7 @@ export default function BatchPage() {
                       <td style={{ padding: '0.75rem' }}>
                         {success && (
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            {success.prediction.map((p: string) => <ClassChip key={p} status={p as any} />)}
+                            {success.prediction.map((p: string) => <ClassChip key={p} status={p as 'High' | 'Medium' | 'Low' | 'Unknown'} />)}
                             <span style={{ color: 'var(--text-secondary)' }}>({(success.confidence * 100).toFixed(1)}%)</span>
                           </div>
                         )}

@@ -48,17 +48,8 @@ bundle = DummyModelBundle()
 
 
 @app.on_event("startup")
-def create_default_user():
-    db = next(get_db())
-    admin = db.query(models.User).filter(models.User.email == "admin@hr.local").first()
-    if not admin:
-        new_user = models.User(
-            email="admin@hr.local",
-            hashed_password=get_password_hash("admin123"),
-            role="admin",
-        )
-        db.add(new_user)
-        db.commit()
+def startup_checks():
+    pass
 
 
 @app.get("/health")

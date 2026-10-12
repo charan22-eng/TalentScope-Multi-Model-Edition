@@ -1,4 +1,7 @@
-.PHONY: setup lint test data train api web
+.PHONY: setup lint test data train api web guard
+
+guard:
+	uv run python scripts/guard.py
 
 setup:
 	uv venv .venv

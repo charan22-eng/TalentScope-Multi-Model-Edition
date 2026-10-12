@@ -29,8 +29,9 @@ export default function PredictPage() {
     try {
       const res = await predict(form);
       setResult(res);
-    } catch (err: any) {
-      setError(err.response?.data?.detail?.[0]?.message || err.message);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: Array<{ message?: string }> } }; message?: string };
+      setError(axiosErr.response?.data?.detail?.[0]?.message || (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }
@@ -101,7 +102,7 @@ export default function PredictPage() {
             <div>
               <p>Prediction Set:</p>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                {result.prediction.map((p: string) => <ClassChip key={p} status={p as any} />)}
+                {result.prediction.map((p: string) => <ClassChip key={p} status={p as 'High' | 'Medium' | 'Low' | 'Unknown'} />)}
               </div>
               
               <p>Confidence: {(result.confidence * 100).toFixed(1)}%</p>

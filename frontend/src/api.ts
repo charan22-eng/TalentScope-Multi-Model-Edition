@@ -19,7 +19,7 @@ export interface PredictionResponse {
   summary: string;
   votes: Record<string, number>;
   attribution: Record<string, number>;
-  neighbours: any[];
+  neighbours: Record<string, unknown>[];
   counterfactual_path: string[];
   is_flagged: boolean;
 }
