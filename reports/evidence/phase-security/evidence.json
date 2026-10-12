@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "phase": "security",
+    "utc": "2026-10-12T18:16:41Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "6d0888b7adf92a3472f43d91ee27c0c36f35588d",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "python verification/run_adversarial_tests.py",
+      "returncode": 0,
+      "seconds": 1.32,
+      "stdout_tail": "========================================\nRUNNING ADVERSARIAL AND SECURITY TESTS\n========================================\n[X2 Generator Freeze] Original: 72248D00A237..., Corrupted: F284E1FA7B9E... -> Differs: True\n[X4 Tamper Detection] Correctly refused corrupted file: Tampered or corrupted artifact: 'models/rf/model.joblib' expected SHA-256 db84ba34b3c985bebe638875575773c75471b3229ae771561394c342a67bf1e7, got 2d5c25e93bee169c23084b139da4cc3f9d67551dd11804e5aa81c88b35a31269\n  [PASS] Rejected attack 'Wrong model key': recommendation: unknown model_key 'xgboost'\n  [PASS] Rejected attack 'Clear confidence under marginal strength': confidence 'clear' not allowed when decision_strength is 'marginal'\n  [PASS] Rejected attack 'Winner mismatch without disagree': recommendation differs from deterministic winner 'rf' without agreement='disagree'\n  [PASS] Rejected attack 'Uncited fact ID': claims: array length must be between 2 and 6 (got 1)\n  [PASS] Rejected attack 'Too few claims (<2)': claims: array length must be between 2 and 6 (got 1)\n  [PASS] Rejected attack 'Empty caveats': caveats: array length must be between 1 and 4 (got 0)\n  [PASS] Rejected attack 'Banned words in claim': claims[1]: unsupported absolute wording\n  [PASS] Rejected attack 'Missing required field 'headline'': missing required field 'headline'\n  [PASS] Rejected attack 'Uncited fabricated numbers': claims[1]: number 99.9% not supported by cited facts\n  [PASS] Rejected attack 'Missing fact_ids in tradeoff': tradeoffs[0]: no fact_ids provided\n[X5 Validator Attacks] Rejected 10/10 attacks. Valid verdict accepted: True\n  [PASS] Blocked traversal: ../models\n  [PASS] Blocked traversal: ../../etc/passwd\n  [PASS] Blocked traversal: rf/../../secret\n  [PASS] Blocked traversal: unknown_model\n  [PASS] Blocked traversal: \n  [PASS] SSRF Guard blocked: http://169.254.169.254/latest/meta-data -> LLM host '169.254.169.254' resolves to link-local/metadata address 169.254.169.254; refusing under G10 guard\n  [PASS] SSRF Guard blocked: https://api.openai.com/v1 -> LLM host 'api.openai.com' resolves to a public/non-local address 172.66.0.243; refusing under G10 guard\n  [PASS] SSRF Guard blocked: http://8.8.8.8:11434 -> LLM host '8.8.8.8' resolves to a public/non-local address 8.8.8.8; refusing under G10 guard\n\nOVERALL RESULT: ALL PASSED\n",
+      "stderr_tail": "",
+      "label": "adversarial_tests"
+    },
+    {
+      "cmd": "python scripts/redflags.py",
+      "returncode": 0,
+      "seconds": 0.36,
+      "stdout_tail": "pattern                          count\ntest_skips_or_xfail                  0\nlint_or_type_suppressions            0\nbypass_flags                         0\ntodo_or_placeholders                 0\nhardcoded_metric_assignments         0\npossible_secrets                     0\ntypescript_any                       0\nconsole_log                          0\n",
+      "stderr_tail": "",
+      "label": "redflags"
+    }
+  ],
+  "hashes": {
+    "docker-compose.yml": "189d65a5b7d6ceac1529c1b8974eb084a6a96391c40e84d08c960bec754e585f",
+    "backend/requirements.txt": "96bceecd0435d7c34490085e39d56f436f6ac4401addec8d27a1029c19d75ac6"
+  },
+  "missing_files": []
+}

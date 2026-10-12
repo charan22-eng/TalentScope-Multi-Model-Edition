@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "phase": "data",
+    "utc": "2026-10-12T18:14:58Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "6d0888b7adf92a3472f43d91ee27c0c36f35588d",
+    "git_branch": "master",
+    "git_working_tree_clean": true,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "python scripts/guard.py",
+      "returncode": 0,
+      "seconds": 7.71,
+      "stdout_tail": "============================================================\nTALENTSCOPE INVARIANT GUARD SUITE (make guard)\n============================================================\n[PASS] G1 Generator Frozen                 : Hash verified: 72248D00A237...\n[PASS] G2 Target & Protected Isolation     : Features clean (11 valid features)\n[PASS] G3 Ordered Labels [0, 1, 2]         : All 7 models enforce classes_ == [0, 1, 2]\n[PASS] G4 Leakage Safe Across Specs        : Leakage tests passed for all specs & mutation verified\n[PASS] G5 Split Frozen & Disjoint          : Split verified (hash=817af29ea8eb..., 60/10/10/20 disjoint)\n[PASS] G6 Test Set Locked Once             : Test lock valid (config=01ba89823e26...) and test indices isolated\n[PASS] G7 Calibration Set Isolated         : Calibration sets (cal-A, cal-B) strictly isolated from model tuning\n[PASS] G8 Evidence Packet Safe             : Packet clean (31 facts, winner=rf, strength=marginal)\n[PASS] G9 LLM Validator & Prompt Hygiene   : LLM validator active & prompt hygiene verified (no employee data)\n[PASS] G10 Local LLM SSRF Guard            : SSRF Guard active (loopback accepted, public hosts refused)\n[PASS] G11 Whitelist & Traversal Refused   : Model whitelist & path traversal refusal active (7 valid keys, traversal refused)\n[PASS] G12 RBAC Matrix Enforced            : RBAC matrix enforced across routes with negative access tests\n[PASS] G13 No Secrets / Bypass Flags       : Zero secrets and bypass flags\n[PASS] G14 Ratchet Enforcement             : All metrics within ratchet baseline\n============================================================\nALL ACTIVE GUARDS PASSED\n",
+      "stderr_tail": "",
+      "label": "guard"
+    },
+    {
+      "cmd": "python -m pytest ml/tests/test_data_contract.py ml/tests/test_fairness.py -q",
+      "returncode": 0,
+      "seconds": 2.58,
+      "stdout_tail": "...........                                                              [100%]\n============================== warnings summary ===============================\nml/tests/test_fairness.py::test_proxy_analysis\n  C:\\Users\\resma\\Documents\\WORKSHOP\\DM-CBP\\ml\\src\\epk\\fairness.py:30: Pandas4Warning: For backward compatibility, 'str' dtypes are included by select_dtypes when 'object' dtype is specified. This behavior is deprecated and will be removed in a future version. Explicitly pass 'str' to `include` to select them, or to `exclude` to remove them and silence this warning.\n  See https://pandas.pydata.org/docs/user_guide/migration-3-strings.html#string-migration-select-dtypes for details on how to write code that works with pandas 2 and 3.\n    for c in encoded.select_dtypes(include=['object']):\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n11 passed, 1 warning in 1.25s\n",
+      "stderr_tail": "",
+      "label": "data_test"
+    }
+  ],
+  "hashes": {
+    "artifacts/v2/split.json": "45a90aaf72c97cca88719f05862d44517a45a145a80257457e4d56941fb5d7de",
+    "artifacts/v2/dataset_meta.json": "6db7397fd87f866e380f4445731861e8ed505cc5f93a940d6791cd15f90c852c"
+  },
+  "missing_files": []
+}

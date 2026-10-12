@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "phase": "train",
+    "utc": "2026-10-12T18:15:15Z",
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
+    "git_sha": "6d0888b7adf92a3472f43d91ee27c0c36f35588d",
+    "git_branch": "master",
+    "git_working_tree_clean": false,
+    "git_remote": "",
+    "note": ""
+  },
+  "results": [
+    {
+      "cmd": "python verification/x16_independent_metrics.py",
+      "returncode": 0,
+      "seconds": 8.53,
+      "stdout_tail": "[PASS] Model boost  : calc_f1=0.8038, rep_f1=0.8038, delta=0.00004\n[PASS] Model dt     : calc_f1=0.7094, rep_f1=0.7094, delta=0.00002\n[PASS] Model knn    : calc_f1=0.7543, rep_f1=0.7543, delta=0.00001\n[PASS] Model linreg : calc_f1=0.7032, rep_f1=0.7032, delta=0.00004\n[PASS] Model logreg : calc_f1=0.7189, rep_f1=0.7189, delta=0.00000\n[PASS] Model rf     : calc_f1=0.7804, rep_f1=0.7804, delta=0.00004\n[PASS] Model svm    : calc_f1=0.8164, rep_f1=0.8164, delta=0.00002\n\n--- Paired Bootstrap 95% CIs (2,000 resamples) ---\nModel boost   CI: [0.7879, 0.8197] (Reported: [None, None])\nModel rf      CI: [0.7639, 0.7968] (Reported: [None, None])\nModel svm     CI: [0.8015, 0.8319] (Reported: [None, None])\n\n--- McNemar Test rf vs boost ---\nDiscordant pairs: rf correct only = 110, boost correct only = 168\nMcNemar p-value = 0.0006 (>= 0.05 indicates no statistically significant difference)\n\nSummary: ALL PASSED\n",
+      "stderr_tail": "",
+      "label": "x16_metrics"
+    },
+    {
+      "cmd": "python -m pytest ml/tests/test_models.py ml/tests/test_features.py -q",
+      "returncode": 0,
+      "seconds": 3.05,
+      "stdout_tail": ".......................                                                  [100%]\n============================== warnings summary ===============================\nml/tests/test_features.py: 432 warnings\n  C:\\Users\\resma\\AppData\\Roaming\\Python\\Python311\\site-packages\\pandas\\core\\algorithms.py:1715: Pandas4Warning: is_sparse is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.SparseDtype)` instead.\n    return lib.map_infer(values, mapper)\n\nml/tests/test_features.py: 528 warnings\n  C:\\Users\\resma\\AppData\\Roaming\\Python\\Python311\\site-packages\\sklearn\\utils\\validation.py:605: Pandas4Warning: is_sparse is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.SparseDtype)` instead.\n    if is_sparse(pd_dtype):\n\nml/tests/test_features.py: 528 warnings\n  C:\\Users\\resma\\AppData\\Roaming\\Python\\Python311\\site-packages\\sklearn\\utils\\validation.py:614: Pandas4Warning: is_sparse is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.SparseDtype)` instead.\n    if is_sparse(pd_dtype) or not is_extension_array_dtype(pd_dtype):\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n23 passed, 1488 warnings in 1.65s\n",
+      "stderr_tail": "",
+      "label": "models_test"
+    }
+  ],
+  "hashes": {
+    "reports/test_eval.lock": "5231137015a62434dc739cd3b0a992d6f967d7bc82fe7de7a8022e5b6b8a4069",
+    "artifacts/v2/champion.json": "155772097612720e191b272b7966782c7fe49f8cc9bffe9fa9442af8467ff085",
+    "artifacts/v2/comparison/leaderboard.json": "9e1277f407346c9c2a1ff90a37dd97889a67515fd31e79a446771a5ad598ee85"
+  },
+  "missing_files": []
+}
