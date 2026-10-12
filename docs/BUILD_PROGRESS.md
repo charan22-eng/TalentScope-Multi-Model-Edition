@@ -24,12 +24,12 @@ Recorded at start of Stage A:
 - [x] **A5**: Create `docs/BUILD_PROGRESS.md`, `docs/DECISIONS_LOG.md`, write `docs/adr/010-legacy-reconciliation.md`.
 
 ### Stage B: Preprocessing for seven models (tag: `stage-b-built`)
-- [ ] **B1**: EDA memo `docs/03-eda-findings.md` with evidence on nonlinearity, saturation, interaction, threshold.
-- [ ] **B2**: `ModelSpec` dataclass and 7 spec stubs (`linreg`, `logreg`, `knn`, `svm`, `dt`, `rf`, `boost`).
-- [ ] **B3**: `build_preprocessor(spec)` factory (model-aware scaling, imputation, ordinal, one-hot, train-only winsorizing).
-- [ ] **B4**: Ordered integer label encoding in one place (`classes_ == [0, 1, 2]`).
-- [ ] **B5**: Preprocessing unit tests & parametrized leakage test (G4) & mutation script.
-- [ ] **B6**: Ablation on representative scaled and tree models; log CV; author `docs/adr/007-preprocessing-policy.md`.
+- [x] **B1**: EDA memo `docs/03-eda-findings.md` with evidence on nonlinearity, saturation, interaction, threshold.
+- [x] **B2**: `ModelSpec` dataclass and 7 spec stubs (`linreg`, `logreg`, `knn`, `svm`, `dt`, `rf`, `boost`).
+- [x] **B3**: `build_preprocessor(spec)` factory (model-aware scaling, imputation, ordinal, one-hot, train-only winsorizing).
+- [x] **B4**: Ordered integer label encoding in one place (`classes_ == [0, 1, 2]`).
+- [x] **B5**: Preprocessing unit tests & parametrized leakage test (G4) & mutation script.
+- [x] **B6**: Ablation on representative scaled and tree models; log CV; author `docs/adr/007-preprocessing-policy.md`.
 
 ### Stage C: Registry, training, final evaluation (tag: `stage-c-built`)
 - [ ] **C1**: `ml/src/epk/models/registry.py` and `ScoreToBand` regressor wrapper; 7 full model specs.

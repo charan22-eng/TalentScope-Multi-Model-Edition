@@ -1,5 +1,9 @@
 run_id,phase,model,cv_macro_f1,test_macro_f1,notes
-baseline_majority,3.2,Dummy Prior,N/A,0.207,Majority class
-baseline_lr,3.2,LogReg,N/A,0.742,Balanced weights
-knn_unscaled,3.5,KNN(k=5 unscaled),0.574,N/A,Ablation
+baseline_majority,3.2,Dummy Prior,,0.207,Majority class
+baseline_lr,3.2,LogReg,,0.742,Balanced weights
+knn_unscaled,3.5,KNN(k=5 unscaled),0.574,,Ablation
 knn_scaled,3.5,KNN(k=5 scaled),0.655,0.662,Primary model
+ablation_logreg_winsor_on,MM-S2,LogisticRegression,0.7076 +- 0.0056,N/A (CV only),"Ablation winsorizing=on, scaling=StandardScaler"
+ablation_logreg_winsor_off,MM-S2,LogisticRegression,0.7093 +- 0.0060,N/A (CV only),"Ablation winsorizing=off, scaling=StandardScaler"
+ablation_rf_winsor_on,MM-S2,RandomForest,0.7723 +- 0.0077,N/A (CV only),"Ablation winsorizing=on, scaling=None"
+ablation_rf_winsor_off,MM-S2,RandomForest,0.7733 +- 0.0061,N/A (CV only),"Ablation winsorizing=off, scaling=None"

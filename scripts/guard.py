@@ -53,6 +53,23 @@ def check_g2():
     return True, f"Features clean ({len(features)} valid features)"
 
 
+def check_g4():
+    """G4 Leakage test parametrised over every registry spec, plus mutation script."""
+    import os
+    env = os.environ.copy()
+    src_dir = str(Path("ml/src").resolve())
+    env["PYTHONPATH"] = src_dir + os.pathsep + env.get("PYTHONPATH", "")
+
+    mutation_res = subprocess.run([sys.executable, "ml/scripts/test_leakage_mutation.py"], capture_output=True, text=True, env=env)
+    if mutation_res.returncode != 0:
+        return False, f"Mutation script failed: {mutation_res.stderr or mutation_res.stdout}"
+    
+    pytest_res = subprocess.run([sys.executable, "-m", "pytest", "-q", "ml/tests/test_features.py", "-k", "test_leakage"], capture_output=True, text=True, env=env)
+    if pytest_res.returncode != 0:
+        return False, f"Leakage tests failed: {pytest_res.stderr or pytest_res.stdout}"
+    return True, "Leakage tests passed for all specs & mutation verified"
+
+
 def check_g13_g14():
     """G13 No secrets; G14 Ratchet on skips, suppressions, any, and console_log."""
     try:
@@ -110,6 +127,10 @@ def run_guards():
     # G2
     ok2, msg2 = check_g2()
     guards["G2 Target & Protected Isolation"] = (ok2, msg2)
+    
+    # G4
+    ok4, msg4 = check_g4()
+    guards["G4 Leakage Safe Across Specs"] = (ok4, msg4)
     
     # G13 & G14
     ok13, msg13, ok14, msg14 = check_g13_g14()
