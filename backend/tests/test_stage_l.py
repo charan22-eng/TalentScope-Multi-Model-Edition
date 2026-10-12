@@ -17,9 +17,15 @@ from sqlalchemy import inspect
 from backend.app.main import app
 from backend.core.security import get_current_user, get_current_user_email
 from backend.db.database import SessionLocal, engine
+from backend.db.migrate import run_migrations
 from backend.db.models import AuditLog, Employee, ModelVersion, Prediction, ReviewItem, User
 
 client = TestClient(app)
+
+@pytest.fixture(autouse=True, scope="session")
+def setup_database_session():
+    """Ensure database schema and standard roles are seeded."""
+    run_migrations()
 
 ADMIN_USER = User(id=1, email="admin@test.com", role="admin")
 HR_USER = User(id=2, email="hrmanager@test.com", role="hr_manager")
