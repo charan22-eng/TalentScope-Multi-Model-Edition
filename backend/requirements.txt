@@ -6,3 +6,4 @@ psycopg[binary]
 pytest
 ruff
 black
+reportlab

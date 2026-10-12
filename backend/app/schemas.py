@@ -106,3 +106,39 @@ class ProblemDetails(BaseModel):
     detail: Any
     instance: Optional[str] = None
 
+
+class V2ReviewDecisionRequest(BaseModel):
+    decision_band: int = Field(..., ge=0, le=2)
+    override_reason: Optional[str] = None
+    comments: Optional[str] = None
+
+
+class V2AppealRequest(BaseModel):
+    employee_id: str
+    reason: str
+    supporting_info: Optional[str] = None
+
+
+class V2ConsentRequest(BaseModel):
+    employee_id: str
+    consent_type: str = "automated_decision_support"
+    granted: bool = True
+
+
+class V2DeleteRequest(BaseModel):
+    employee_id: str
+    reason: Optional[str] = None
+
+
+class V2RetrainRequest(BaseModel):
+    profile: Optional[str] = "fast"
+
+
+class V2ApproveChampionRequest(BaseModel):
+    champion_key: str
+    version: Optional[str] = "v2.0"
+
+
+class V2FeatureFlagsUpdateRequest(BaseModel):
+    flags: Dict[str, bool]
+

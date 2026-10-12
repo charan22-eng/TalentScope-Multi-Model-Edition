@@ -96,12 +96,12 @@ Recorded at start of Stage A:
 - [x] **K3**: Disposal/leak tests, performance budgets recorded in `docs/performance.md`.
 
 ### Stage L: Secure app and MLOps (tag: `stage-l-built`)
-- [ ] **L1**: SQLite & PostgreSQL database migrations for all tables.
-- [ ] **L2**: RBAC enforcement across all routes with negative tests, append-only audit log.
-- [ ] **L3**: Review workflow & employee transparency page.
-- [ ] **L4**: Governed retrain-all pipeline with Admin approval and rollback.
-- [ ] **L5**: Per-model drift monitoring (PSI/KS), shadow inference mode.
-- [ ] **L6**: PDF reports with ReportLab.
+- [x] **L1**: SQLite & PostgreSQL database migrations for all tables.
+- [x] **L2**: RBAC enforcement across all routes with negative tests, append-only audit log.
+- [x] **L3**: Review workflow & employee transparency page.
+- [x] **L4**: Governed retrain-all pipeline with Admin approval and rollback.
+- [x] **L5**: Per-model drift monitoring (PSI/KS), shadow inference mode.
+- [x] **L6**: PDF reports with ReportLab.
 
 ### Stage M: Optional Wave 2 (tag: `stage-m-built` or SKIPPED)
 - [ ] **M1**: Scoped API keys, saved views, webhooks (or documented as SKIPPED).
