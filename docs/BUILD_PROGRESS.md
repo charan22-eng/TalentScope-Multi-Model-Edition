@@ -66,10 +66,10 @@ Recorded at start of Stage A:
 - [x] **F7**: Forbidden employee-level key prompt scanner.
 
 ### Stage G: Artifacts v2 and model cards (tag: `stage-g-built`)
-- [ ] **G1**: `artifacts/v2` layout with `MANIFEST.json` SHA-256 hashes and `champion.json`.
-- [ ] **G2**: Lazy loader with model key whitelist and checksum validation.
-- [ ] **G3**: Golden-input regression tests across 7 models.
-- [ ] **G4**: Machine-generated model cards, comparison card `docs/model_card.md`, and `docs/datasheet.md`.
+- [x] **G1**: `artifacts/v2` layout with `MANIFEST.json` SHA-256 hashes and `champion.json`.
+- [x] **G2**: Lazy loader with model key whitelist and checksum validation.
+- [x] **G3**: Golden-input regression tests across 7 models.
+- [x] **G4**: Machine-generated model cards, comparison card `docs/model_card.md`, and `docs/datasheet.md`.
 
 ### Stage H: Backend API v2 (tag: `stage-h-built`)
 - [ ] **H1**: Preserve `/api/v1` (default KNN); implement `/api/v2/*` endpoints.

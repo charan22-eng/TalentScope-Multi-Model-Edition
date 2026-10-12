@@ -59,9 +59,11 @@ def get_llm_config() -> LLMConfig:
     allow_remote_str = os.getenv("LLM_ALLOW_REMOTE", "false").lower()
     allow_remote = allow_remote_str in ("true", "1", "yes")
 
+    prov: Literal["ollama", "openai_compat"] = "openai_compat" if provider == "openai_compat" else "ollama"
+
     return LLMConfig(
         enabled=enabled,
-        provider=provider,  # type: ignore
+        provider=prov,
         base_url=base_url,
         model=model,
         temperature=temperature,
