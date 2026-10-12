@@ -32,6 +32,8 @@ def assert_local(base_url: str, allow_remote: bool = False) -> None:
 
     for _fam, _t, _p, _c, sockaddr in infos:
         ip = ipaddress.ip_address(sockaddr[0])
+        if ip.is_link_local:
+            raise ValueError(f"LLM host {host!r} resolves to link-local/metadata address {ip}; refusing under G10 guard")
         if not (ip.is_loopback or ip.is_private):
             raise ValueError(f"LLM host {host!r} resolves to a public/non-local address {ip}; refusing under G10 guard")
 

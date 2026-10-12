@@ -441,13 +441,24 @@ def generate_persona_summaries(
     }
 
 
-def explain(pipe: Any, X_train: pd.DataFrame, y_train: pd.Series, x_row: pd.DataFrame, k: int = 2) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
+def explain(pipe: Any, X_train: pd.DataFrame, y_train: pd.Series, x_row: pd.DataFrame, k: int = 2) -> Tuple[pd.DataFrame, Dict[str, float]]:
     """Legacy v1 helper for nearest neighbor explanation."""
     res = find_similar_cases(X_train, y_train, x_row, model_key="knn", k=k)
-    return res["neighbors"], res["neighborhood_distribution"]
+    nb_df = pd.DataFrame(res["neighbors"])
+    total = sum(res["neighborhood_distribution"].values()) or 1
+    votes = {k_v: float(v / total) for k_v, v in res["neighborhood_distribution"].items()}
+    return nb_df, votes
 
 
 def counterfactual(*args: Any, **kwargs: Any) -> Any:
     """Legacy v1 alias for find_counterfactuals."""
     return find_counterfactuals(*args, **kwargs)
+
+
+def summarise(pred_data: Dict[str, Any]) -> str:
+    """Legacy v1 helper generating a natural language summary."""
+    lbl = pred_data.get("label", "Medium")
+    conf = pred_data.get("confidence", 0.8)
+    return f"Prediction is {lbl} with confidence {conf:.2f}."
+
 

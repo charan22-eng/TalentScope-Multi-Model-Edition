@@ -54,6 +54,16 @@ class Winsorizer(BaseEstimator, TransformerMixin):
         return np.clip(X_arr, self.lo_, self.hi_)
 
 
+class EngineeredFeatures(BaseEstimator, TransformerMixin):
+    """Legacy v1 transformer for backward compatibility when unpickling v1 models."""
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return X
+
+
 def build_preprocessor(
     spec: Any = None,
     scale_override: bool | None = None,

@@ -23,10 +23,13 @@ from backend.services.drift import get_current_drift
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import Response
-import json
 import io
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+try:
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import letter
+    HAS_REPORTLAB = True
+except ImportError:
+    HAS_REPORTLAB = False
 
 Base.metadata.create_all(bind=engine)
 
@@ -38,6 +41,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../ml/src'))
 from epk.loader import load_artifact
 from epk.uncertainty import get_prediction_set, stability_score
 from epk.explain import explain, local_attribution, counterfactual, summarise
+from epk.labels import INT_TO_BAND
+
+def to_band_str(c):
+    return INT_TO_BAND.get(c, str(c)) if isinstance(c, (int, np.integer)) else str(c)
 
 logger = logging.getLogger("talentscope")
 logger.setLevel(logging.INFO)
@@ -111,8 +118,22 @@ def create_app():
         pca3 = joblib.load(f"{settings.artifact_path}/assets/pca3d.joblib")
         
     except Exception as e:
-        logger.error(f"Failed to load artifacts: {e}")
-        metadata, calibrated_knn, pipe, conformal, X_train, y_train, pca2, pca3 = {}, None, None, {}, None, None, None, None
+        logger.warning(f"v1 artifacts loading error ({e}), falling back to v2 KNN model")
+        try:
+            from epk.artifacts import default_loader
+            calibrated_knn = default_loader.load_model("knn")
+            pipe = calibrated_knn
+            conformal = {"threshold": 0.85}
+            train_df = pd.read_csv("data/raw/dataset.csv")
+            if "employee_id" in train_df.columns:
+                train_df = train_df.drop_duplicates(subset=["employee_id"])
+            X_train = train_df.drop(columns=["performance", "performance_score"], errors="ignore")
+            y_train = train_df["performance"] if "performance" in train_df.columns else pd.Series(["Medium"] * len(train_df))
+            metadata = {"version": "v2.0 (KNN Fallback)"}
+            pca2, pca3 = None, None
+        except Exception as e2:
+            logger.error(f"Failed to load fallback v2 model: {e2}")
+            metadata, calibrated_knn, pipe, conformal, X_train, y_train, pca2, pca3 = {}, None, None, {}, None, None, None, None
 
     @app.get("/health")
     def health():
@@ -136,9 +157,11 @@ def create_app():
         df = pd.DataFrame([features.model_dump()])
         probs = calibrated_knn.predict_proba(df)[0]
         classes = list(calibrated_knn.classes_)
+        classes_str = [to_band_str(c) for c in classes]
         
-        pset = get_prediction_set(probs, classes, conformal["threshold"])
-        conf_dict = {c: float(p) for c, p in zip(classes, probs)}
+        raw_pset = get_prediction_set(probs, classes, conformal.get("threshold", 0.8))
+        pset = [to_band_str(c) for c in raw_pset]
+        conf_dict = {c: float(p) for c, p in zip(classes_str, probs)}
         
         
         # Save to history
@@ -171,16 +194,20 @@ def create_app():
         df = pd.DataFrame([features.model_dump()])
         probs = calibrated_knn.predict_proba(df)[0]
         classes = list(calibrated_knn.classes_)
-        pset = get_prediction_set(probs, classes, conformal["threshold"])
+        classes_str = [to_band_str(c) for c in classes]
+        raw_pset = get_prediction_set(probs, classes, conformal.get("threshold", 0.8))
+        pset = [to_band_str(c) for c in raw_pset]
         
         nb_df, votes = explain(pipe, X_train, y_train, df)
         nb_df = nb_df.head(k)
         
         # Calculate local attribution using training medians
         train_medians = X_train.select_dtypes(include=[np.number]).median()
-        pred_class, attrib = local_attribution(pipe, df, train_medians)
+        attrib = local_attribution(pipe, df, train_medians)
+        pred_class = classes_str[int(np.argmax(probs))]
         
-        c_df, path = counterfactual(pipe, df)
+        cfs = counterfactual(pipe, df)
+        path = [str(opt.get("description", "Intervention")) for opt in cfs] if isinstance(cfs, list) else []
         
         prediction_data = {
             "label": pred_class,
@@ -233,12 +260,15 @@ def create_app():
                 r_df = pd.DataFrame([feat.model_dump()])
                 probs = calibrated_knn.predict_proba(r_df)[0]
                 classes = list(calibrated_knn.classes_)
-                pset = get_prediction_set(probs, classes, conformal["threshold"])
+                classes_str = [to_band_str(c) for c in classes]
+                raw_pset = get_prediction_set(probs, classes, conformal.get("threshold", 0.8))
+                pset = [to_band_str(c) for c in raw_pset]
+                conf_dict = {c: float(p) for c, p in zip(classes_str, probs)}
                 
                 results.append(PredictResponse(
                     prediction=pset,
                     confidence=float(max(probs)),
-                    probabilities={c: float(p) for c, p in zip(classes, probs)},
+                    probabilities=conf_dict,
                     stability_index=stability_score(probs) * 100.0
                 ))
                 errors.append(None)
@@ -252,6 +282,8 @@ def create_app():
 
     @app.get("/batch/report/pdf")
     def export_pdf_report(db: Session = Depends(get_db)):
+        if not HAS_REPORTLAB:
+            return Response(content="ReportLab not installed", media_type="text/plain")
         buffer = io.BytesIO()
         c = canvas.Canvas(buffer, pagesize=letter)
         c.drawString(100, 750, "TalentScope Batch Prediction Report")
@@ -294,6 +326,9 @@ def create_app():
     @app.get("/drift/projection")
     def drift():
         return {"status": "stubbed"}
+
+    from backend.app.api_v2 import router as v2_router
+    app.include_router(v2_router)
 
     return app
 

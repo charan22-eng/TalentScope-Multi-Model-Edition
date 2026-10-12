@@ -43,10 +43,6 @@ from pathlib import Path
 
 GOLDEN_CSV = Path(__file__).resolve().parent.parent.parent / "artifacts" / "v1" / "golden_tests.csv"
 
-@pytest.mark.skipif(
-    True,
-    reason="Phase 6 golden_tests.csv contains unrounded floats/NaNs incompatible with strict EmployeeFeatures schema; v2 golden test parity scheduled for MM-S8"
-)
 def test_predict_equals_pipeline():
     import pandas as pd
     golden = pd.read_csv(GOLDEN_CSV)

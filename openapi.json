@@ -37,6 +37,42 @@
         }
       }
     },
+    "/login": {
+      "post": {
+        "summary": "Login",
+        "operationId": "login_login_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_login_login_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/predict": {
       "post": {
         "summary": "Predict",
@@ -69,6 +105,27 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/analytics/drift": {
+      "get": {
+        "summary": "Drift Report",
+        "operationId": "drift_report_analytics_drift_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -155,6 +212,22 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/batch/report/pdf": {
+      "get": {
+        "summary": "Export Pdf Report",
+        "operationId": "export_pdf_report_batch_report_pdf_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -262,6 +335,541 @@
           }
         }
       }
+    },
+    "/api/v2/models": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "List Models",
+        "description": "List all seven models with their specs, metadata, and test metrics (all roles).",
+        "operationId": "list_models_api_v2_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/predict": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Predict Single",
+        "description": "Predict performance band using a specific whitelisted model (all roles).",
+        "operationId": "predict_single_api_v2_predict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2PredictRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V2PredictResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/predict/all": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Predict All",
+        "description": "Run inference across all seven models, returning consensus and split-decision flags.\n\nPerformance requirement: p95 latency under 800ms.",
+        "operationId": "predict_all_api_v2_predict_all_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmployeeFeatures"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V2PredictAllResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explain": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Explain Model",
+        "description": "Provide model-specific native and agnostic explanations (all roles).",
+        "operationId": "explain_model_api_v2_explain_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2ExplainRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V2ExplainResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/compare/{topic}": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Comparison Data",
+        "description": "Retrieve precomputed model comparison science JSON (all roles).",
+        "operationId": "get_comparison_data_api_v2_compare__topic__get",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Topic"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/compare/mcda": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Recalculate Mcda",
+        "description": "Dynamically recompute MCDA rankings with validated user weights (all roles).",
+        "operationId": "recalculate_mcda_api_v2_compare_mcda_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2MCDARequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/viz/surface": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Surface Landscape",
+        "description": "Retrieve decision surface grid for 2D/3D visualization (all roles).",
+        "operationId": "get_surface_landscape_api_v2_viz_surface_post",
+        "parameters": [
+          {
+            "name": "model_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "rf",
+              "title": "Model Key"
+            }
+          },
+          {
+            "name": "grid_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 40,
+              "title": "Grid Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Surface Landscape",
+        "description": "Retrieve decision surface grid for 2D/3D visualization (all roles).",
+        "operationId": "get_surface_landscape_api_v2_viz_surface_get",
+        "parameters": [
+          {
+            "name": "model_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "rf",
+              "title": "Model Key"
+            }
+          },
+          {
+            "name": "grid_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 40,
+              "title": "Grid Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/viz/pca": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Pca Projection",
+        "description": "Retrieve PCA 2D/3D projection coordinates and background sample (all roles).",
+        "operationId": "get_pca_projection_api_v2_viz_pca_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/llm/health": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Llm Health",
+        "description": "Check local LLM runtime health (Admin, Analyst).",
+        "operationId": "llm_health_api_v2_llm_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/llm/models": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "List Llm Models",
+        "description": "List local models available in Ollama/vLLM (Admin, Analyst).",
+        "operationId": "list_llm_models_api_v2_llm_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/llm/config": {
+      "put": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Update Llm Config",
+        "description": "Update runtime provider, URL, and model with SSRF verification (Admin only).",
+        "operationId": "update_llm_config_api_v2_llm_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2LLMConfigUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/llm/verdict": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Generate Verdict",
+        "description": "Generate or retrieve a cached/fallback LLM verdict.\n\nRoles: Admin, HR, Analyst.\nChecks:\n- Zero employee data in input (G9 prompt hygiene)\n- Strict numeric validation against evidence packet (G9 validator)\n- Fallback on connection error or validator failure",
+        "operationId": "generate_verdict_api_v2_llm_verdict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2LLMVerdictRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/llm/verdicts/{verdict_id}": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Stored Verdict",
+        "description": "Retrieve stored verdict by ID (owner or Admin).",
+        "operationId": "get_stored_verdict_api_v2_llm_verdicts__verdict_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "verdict_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Verdict Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -280,10 +888,69 @@
         ],
         "title": "Body_batch_batch_post"
       },
+      "Body_login_login_post": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^password$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grant Type"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "title": "Password"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": ""
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "format": "password",
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "Body_login_login_post"
+      },
       "EmployeeFeatures": {
         "properties": {
           "attendance": {
-            "type": "integer",
+            "type": "number",
             "maximum": 100.0,
             "minimum": 0.0,
             "title": "Attendance"
@@ -295,27 +962,34 @@
             "title": "Experience Years"
           },
           "training_hours": {
-            "type": "integer",
+            "type": "number",
             "maximum": 1000.0,
             "minimum": 0.0,
             "title": "Training Hours"
           },
           "projects_completed": {
-            "type": "integer",
+            "type": "number",
             "maximum": 100.0,
             "minimum": 0.0,
             "title": "Projects Completed"
           },
           "weekly_hours": {
-            "type": "integer",
+            "type": "number",
             "maximum": 168.0,
             "minimum": 0.0,
             "title": "Weekly Hours"
           },
           "prev_score": {
-            "type": "integer",
-            "maximum": 5.0,
-            "minimum": 1.0,
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Prev Score"
           },
           "department": {
@@ -325,6 +999,48 @@
           "job_level": {
             "type": "string",
             "title": "Job Level"
+          },
+          "peer_feedback": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Peer Feedback",
+            "default": 3.5
+          },
+          "tasks_on_time_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks On Time Pct",
+            "default": 80.0
+          },
+          "certifications": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 20.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Certifications",
+            "default": 1.0
           }
         },
         "additionalProperties": false,
@@ -335,7 +1051,6 @@
           "training_hours",
           "projects_completed",
           "weekly_hours",
-          "prev_score",
           "department",
           "job_level"
         ],
@@ -447,6 +1162,337 @@
         ],
         "title": "PredictResponse"
       },
+      "V2ExplainRequest": {
+        "properties": {
+          "model_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Key",
+            "default": "rf"
+          },
+          "features": {
+            "$ref": "#/components/schemas/EmployeeFeatures"
+          },
+          "k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K",
+            "default": 5
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "V2ExplainRequest"
+      },
+      "V2ExplainResponse": {
+        "properties": {
+          "model_key": {
+            "type": "string",
+            "title": "Model Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "explanation_type": {
+            "type": "string",
+            "title": "Explanation Type"
+          },
+          "predicted_band": {
+            "type": "string",
+            "title": "Predicted Band"
+          },
+          "native_explanation": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Native Explanation"
+          },
+          "local_attribution": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Local Attribution"
+          },
+          "counterfactuals": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Counterfactuals"
+          },
+          "similar_cases": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Similar Cases"
+          },
+          "persona_summaries": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Persona Summaries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model_key",
+          "label",
+          "explanation_type",
+          "predicted_band",
+          "native_explanation",
+          "local_attribution",
+          "counterfactuals",
+          "similar_cases",
+          "persona_summaries"
+        ],
+        "title": "V2ExplainResponse"
+      },
+      "V2LLMConfigUpdateRequest": {
+        "properties": {
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider",
+            "default": "ollama"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model",
+            "default": "qwen2.5:7b-instruct"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url",
+            "default": "http://localhost:11434"
+          }
+        },
+        "type": "object",
+        "title": "V2LLMConfigUpdateRequest"
+      },
+      "V2LLMVerdictRequest": {
+        "properties": {
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode",
+            "default": "verdict"
+          },
+          "audience": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audience",
+            "default": "HR"
+          },
+          "allow_fallback": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allow Fallback",
+            "default": true
+          },
+          "evidence_packet": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Packet"
+          }
+        },
+        "type": "object",
+        "title": "V2LLMVerdictRequest"
+      },
+      "V2MCDARequest": {
+        "properties": {
+          "weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weights"
+        ],
+        "title": "V2MCDARequest"
+      },
+      "V2PredictAllResponse": {
+        "properties": {
+          "predictions": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/V2PredictResponse"
+            },
+            "type": "object",
+            "title": "Predictions"
+          },
+          "consensus_band": {
+            "type": "string",
+            "title": "Consensus Band"
+          },
+          "agreement_rate": {
+            "type": "number",
+            "title": "Agreement Rate"
+          },
+          "split_decision": {
+            "type": "boolean",
+            "title": "Split Decision"
+          },
+          "champion_key": {
+            "type": "string",
+            "title": "Champion Key"
+          },
+          "champion_prediction": {
+            "$ref": "#/components/schemas/V2PredictResponse"
+          },
+          "latency_ms": {
+            "type": "number",
+            "title": "Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "predictions",
+          "consensus_band",
+          "agreement_rate",
+          "split_decision",
+          "champion_key",
+          "champion_prediction",
+          "latency_ms"
+        ],
+        "title": "V2PredictAllResponse"
+      },
+      "V2PredictRequest": {
+        "properties": {
+          "model_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Key",
+            "default": "rf"
+          },
+          "features": {
+            "$ref": "#/components/schemas/EmployeeFeatures"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "V2PredictRequest"
+      },
+      "V2PredictResponse": {
+        "properties": {
+          "model_key": {
+            "type": "string",
+            "title": "Model Key"
+          },
+          "predicted_band": {
+            "type": "string",
+            "title": "Predicted Band"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "prediction_set": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Prediction Set"
+          },
+          "probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Probabilities"
+          },
+          "stability_score": {
+            "type": "number",
+            "title": "Stability Score"
+          },
+          "performance_index": {
+            "type": "number",
+            "title": "Performance Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model_key",
+          "predicted_band",
+          "confidence",
+          "prediction_set",
+          "probabilities",
+          "stability_score",
+          "performance_index"
+        ],
+        "title": "V2PredictResponse"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -486,6 +1532,17 @@
           "type"
         ],
         "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "login"
+          }
+        }
       }
     }
   }

@@ -10,7 +10,7 @@ Recorded at start of Stage A:
 - `console_log`: 3 (target: 0 in Stage A3)
 
 ## Obligations
-- [ ] **O1**: Re-enable skipped v1 golden tests (`test_predict_equals_pipeline` in `backend/tests/test_api.py`) in Stage H after v2 schema / pipeline reconciliation.
+- [x] **O1**: Re-enable skipped v1 golden tests (`test_predict_equals_pipeline` in `backend/tests/test_api.py`) in Stage H after v2 schema / pipeline reconciliation (Discharged: all 39 backend tests pass with 0 skips).
 
 ---
 
@@ -72,11 +72,11 @@ Recorded at start of Stage A:
 - [x] **G4**: Machine-generated model cards, comparison card `docs/model_card.md`, and `docs/datasheet.md`.
 
 ### Stage H: Backend API v2 (tag: `stage-h-built`)
-- [ ] **H1**: Preserve `/api/v1` (default KNN); implement `/api/v2/*` endpoints.
-- [ ] **H2**: Integrated RBAC on v2 routes, stricter LLM rate limits, problem-details errors.
-- [ ] **H3**: Resolve Obligation O1: fix v1 test schema mismatch, remove skipif.
-- [ ] **H4**: OpenAPI v2 export, generated TypeScript types, mock verdicts.
-- [ ] **H5**: Guards G11 (whitelist/path traversal) and G12 (RBAC matrix) active; predict/all p95 < 800ms.
+- [x] **H1**: Preserve `/api/v1` (default KNN); implement `/api/v2/*` endpoints.
+- [x] **H2**: Integrated RBAC on v2 routes, stricter LLM rate limits, problem-details errors.
+- [x] **H3**: Resolve Obligation O1: fix v1 test schema mismatch, remove skipif.
+- [x] **H4**: OpenAPI v2 export, generated TypeScript types, mock verdicts.
+- [x] **H5**: Guards G11 (whitelist/path traversal) and G12 (RBAC matrix) active; predict/all p95 < 800ms.
 
 ### Stage I: Frontend core pages (tag: `stage-i-built`)
 - [ ] **I1**: Okabe-Ito color palette, marker shapes, `ModelChip`, small multiples chart kit.

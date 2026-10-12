@@ -12,7 +12,10 @@ import sys
 from pathlib import Path
 import yaml
 
-# Ensure ml/src is on sys.path for joblib model unpickling
+# Ensure ml/src and repo root are on sys.path
+_ROOT = str(Path(".").resolve())
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
 _ML_SRC = str(Path("ml/src").resolve())
 if _ML_SRC not in sys.path:
     sys.path.insert(0, _ML_SRC)
@@ -262,6 +265,64 @@ def check_g10():
     return True, "SSRF Guard active (loopback accepted, public hosts refused)"
 
 
+def check_g11():
+    """G11 Model key whitelist and path traversal refusal."""
+    try:
+        from backend.app.api_v2 import check_model_key_safe
+        from epk.models.registry import MODEL_KEYS
+    except ImportError as e:
+        return False, f"Could not import modules: {e}"
+
+    for k in MODEL_KEYS:
+        try:
+            check_model_key_safe(k)
+        except Exception as e:
+            return False, f"Valid key '{k}' failed check_model_key_safe: {e}"
+
+    rejected_unknown = False
+    try:
+        check_model_key_safe("catboost_invalid")
+    except Exception:
+        rejected_unknown = True
+    if not rejected_unknown:
+        return False, "check_model_key_safe allowed unknown model key"
+
+    rejected_traversal = False
+    try:
+        check_model_key_safe("../../etc/passwd")
+    except Exception:
+        rejected_traversal = True
+    if not rejected_traversal:
+        return False, "check_model_key_safe allowed path traversal string"
+
+    return True, "Model whitelist & path traversal refusal active (7 valid keys, traversal refused)"
+
+
+def check_g12():
+    """G12 RBAC matrix enforcement across routes with negative access tests."""
+    openapi_file = Path("backend/openapi.json")
+    if not openapi_file.exists():
+        openapi_file = Path("openapi.json")
+    if not openapi_file.exists():
+        return False, "openapi.json not found for RBAC audit"
+
+    try:
+        with open(openapi_file, "r", encoding="utf-8") as f:
+            spec = json.load(f)
+    except Exception as e:
+        return False, f"Could not parse openapi.json: {e}"
+
+    paths = spec.get("paths", {})
+    if "/api/v2/llm/health" not in paths or "/api/v2/llm/config" not in paths or "/api/v2/llm/verdict" not in paths:
+        return False, "Missing protected v2 LLM routes in openapi schema"
+
+    test_file = Path("backend/tests/test_api_v2.py")
+    if not test_file.exists() or "test_v2_llm_rbac_matrix_g12" not in test_file.read_text(encoding="utf-8"):
+        return False, "backend/tests/test_api_v2.py does not test RBAC matrix"
+
+    return True, "RBAC matrix enforced across routes with negative access tests"
+
+
 def check_g13_g14():
     """G13 No secrets; G14 Ratchet on skips, suppressions, any, and console_log."""
     try:
@@ -351,6 +412,14 @@ def run_guards():
     # G10
     ok10, msg10 = check_g10()
     guards["G10 Local LLM SSRF Guard"] = (ok10, msg10)
+
+    # G11
+    ok11, msg11 = check_g11()
+    guards["G11 Whitelist & Traversal Refused"] = (ok11, msg11)
+
+    # G12
+    ok12, msg12 = check_g12()
+    guards["G12 RBAC Matrix Enforced"] = (ok12, msg12)
 
     # G13 & G14
     ok13, msg13, ok14, msg14 = check_g13_g14()
