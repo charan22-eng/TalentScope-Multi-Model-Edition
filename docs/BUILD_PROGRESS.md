@@ -85,10 +85,10 @@ Recorded at start of Stage A:
 - [x] **I4**: Component & Playwright tests; strict TypeScript.
 
 ### Stage J: Model Arena (tag: `stage-j-built`)
-- [ ] **J1**: Arena pages: Overview, Priorities (live server MCDA), Head-to-Head, Metrics Deep Dive, Cost/Speed, Sensitivity, Explainability, Fairness/Robustness, LLM Verdict.
-- [ ] **J2**: LLM Verdict interactive panel (fact chips highlighting charts, why-not accordion, template fallback state).
-- [ ] **J3**: Table views for every chart, monochrome distinguishable markers, CI whiskers.
-- [ ] **J4**: Component and Playwright tests.
+- [x] **J1**: Arena pages: Overview, Priorities (live server MCDA), Head-to-Head, Metrics Deep Dive, Cost/Speed, Sensitivity, Explainability, Fairness/Robustness, LLM Verdict.
+- [x] **J2**: LLM Verdict interactive panel (fact chips highlighting charts, why-not accordion, template fallback state).
+- [x] **J3**: Table views for every chart, monochrome distinguishable markers, CI whiskers.
+- [x] **J4**: Component and Playwright tests.
 
 ### Stage K: 3D Multi-Model Experiences (tag: `stage-k-built`)
 - [ ] **K1**: Decision Landscape with 2-model overlay & difference surface ($P_A - P_B$), 2D heatmap fallback, similar-cases 3D view.

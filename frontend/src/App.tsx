@@ -6,6 +6,7 @@ import DashboardPage from './pages/Dashboard';
 import ModelLabPage from './pages/ModelLab';
 import MethodologyPage from './pages/Methodology';
 import DataExplorerPage from './pages/DataExplorer';
+import ArenaPage from './pages/arena/ArenaPage';
 import { Login } from './pages/Login';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { ClassChip } from './components/ui/ClassChip';
@@ -49,6 +50,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       <header style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <nav style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <Link to="/" style={{ fontWeight: 'bold', color: 'var(--text-primary)', textDecoration: 'none' }}>TalentScope</Link>
+          <Link to="/arena" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Model Arena</Link>
           <Link to="/predict" style={{ color: 'var(--text-primary)' }}>Predict</Link>
           <Link to="/batch" style={{ color: 'var(--text-primary)' }}>Batch</Link>
           <Link to="/dashboard" style={{ color: 'var(--text-primary)' }}>Dashboard</Link>
@@ -153,6 +155,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/arena/*" element={<ProtectedRoute><ArenaPage /></ProtectedRoute>} />
           <Route path="/predict" element={<ProtectedRoute><PredictPage /></ProtectedRoute>} />
           <Route path="/batch" element={<ProtectedRoute><BatchPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
