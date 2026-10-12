@@ -50,11 +50,11 @@ Recorded at start of Stage A:
 - [x] **D7**: Machine-built evidence packet (`evidence.py`) with numbered facts, caveat `F90`, and G8 scanner.
 
 ### Stage E: Multi-model explainability and uncertainty (tag: `stage-e-built`)
-- [ ] **E1**: Model-agnostic explainers: permutation importance, local attribution, counterfactuals, stability, performance index.
-- [ ] **E2**: Native explainers: coefficients/odds ratios, tree rules, KNN neighbours (`explanation_type="native"`).
-- [ ] **E3**: Similar-cases view for non-KNN models labelled `"not how this model decided"`.
-- [ ] **E4**: Scaled space PCA 2D/3D background sample.
-- [ ] **E5**: 2D surface grids (40x40 default), Spearman importance agreement matrix, neutral summaries.
+- [x] **E1**: Model-agnostic explainers: permutation importance, local attribution, counterfactuals, stability, performance index.
+- [x] **E2**: Native explainers: coefficients/odds ratios, tree rules, KNN neighbours (`explanation_type="native"`).
+- [x] **E3**: Similar-cases view for non-KNN models labelled `"not how this model decided"`.
+- [x] **E4**: Scaled space PCA 2D/3D background sample.
+- [x] **E5**: 2D surface grids (40x40 default), Spearman importance agreement matrix, neutral summaries.
 
 ### Stage F: Local LLM verdict engine (tag: `stage-f-built`)
 - [ ] **F1**: LLM client (`ml/src/epk/llm/`) with `assert_local` guard (G10) for Ollama and OpenAI-compat.

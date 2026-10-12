@@ -7,6 +7,7 @@
 - Stage B completed: Preprocessing for 7 models (`ml/src/epk/features.py`), EDA memo (`docs/03-eda-findings.md`), `ModelSpec` registry stubs, ordered labels (`epk.labels`), leakage tests (G4 passing), mutation script, ablation CV experiments in `reports/experiments.csv`, and ADR-007.
 - Stage C completed: Model registry and modular specs (`ml/src/epk/models/specs/`), frozen 60/10/10/20 split (`data/processed/split.json`), fair training harness `train_all.py`, probability calibration on `cal-A` (Platt scaling / sigmoid per ADR-008), single locked test-set evaluation `final_eval.py` (make final) with G6 lock, and active guards G1, G2, G3, G4, G5, G6, G7, G13, G14.
 - Stage D completed: Comparison science suite (`stats.py`), 2000-resample paired bootstrap CIs, 21-pair McNemar-Holm tests, split-conformal calibration on `cal-B` (alpha=0.10), MCDA engine with 5 profiles and Dirichlet rank probability (`mcda.py`), ADR-009 champion selection rule, variant sensitivity analysis (`make final-variants` and `sensitivity.json`), and machine-built evidence packet (`evidence.py`) verified under guard G8.
+- Stage E completed: Multi-model explainability and uncertainty engine (`epk.explain`), native parameter inspection for all 7 models, local feature attribution, actionable constrained counterfactual search, "not how this model decided" similar cases for non-KNN models, scaled PCA 2D/3D background projection, 2D decision landscapes (40x40 grids in `surfaces.json`), and persona-tailored summaries.
 
 ## Decisions
 - [ADR-001](../docs/adr/ADR-001.md): Stack decisions and versions.
@@ -35,4 +36,4 @@
 - `test_predict_equals_pipeline` explicitly skipped via `skipif` (Obligation O1) pending v2 golden tests in Stage H.
 
 ## Next Step
-- Stage E: Explainability and Uncertainty for Seven Models (MM-S5).
+- Stage F: Local LLM Verdict Engine (MM-S6).
