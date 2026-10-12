@@ -1,0 +1,270 @@
+{
+  "schema_version": "1.0",
+  "dataset": {
+    "name": "employees_v2",
+    "variant": "nonlinear",
+    "rows": 12000,
+    "holdout_test_rows": 2381
+  },
+  "profile": {
+    "name": "Balanced",
+    "weights": {
+      "macro_f1": 0.3,
+      "qwk": 0.1,
+      "calibration": 0.1,
+      "robustness": 0.1,
+      "fairness": 0.1,
+      "stability": 0.05,
+      "latency": 0.05,
+      "train_cost": 0.05,
+      "explainability": 0.15
+    }
+  },
+  "deterministic_winner": "rf",
+  "runner_up": "boost",
+  "decision_strength": "marginal",
+  "synthetic_caveat_fact": "F90",
+  "models": [
+    {
+      "key": "rf",
+      "label": "Random forest",
+      "rank": 1,
+      "mcda_score": 0.6387,
+      "p_rank1": 0.4548
+    },
+    {
+      "key": "boost",
+      "label": "Gradient boosting (histogram)",
+      "rank": 2,
+      "mcda_score": 0.6247,
+      "p_rank1": 0.2364
+    },
+    {
+      "key": "svm",
+      "label": "Support vector machine (RBF)",
+      "rank": 3,
+      "mcda_score": 0.6094,
+      "p_rank1": 0.2588
+    },
+    {
+      "key": "logreg",
+      "label": "Logistic regression (multinomial)",
+      "rank": 4,
+      "mcda_score": 0.5103,
+      "p_rank1": 0.0394
+    },
+    {
+      "key": "knn",
+      "label": "K-nearest neighbours",
+      "rank": 5,
+      "mcda_score": 0.5046,
+      "p_rank1": 0.001
+    },
+    {
+      "key": "linreg",
+      "label": "Linear regression (score to band)",
+      "rank": 6,
+      "mcda_score": 0.4694,
+      "p_rank1": 0.0096
+    },
+    {
+      "key": "dt",
+      "label": "Decision tree",
+      "rank": 7,
+      "mcda_score": 0.4415,
+      "p_rank1": 0.0
+    }
+  ],
+  "facts": [
+    {
+      "id": "F1",
+      "model_key": "rf",
+      "category": "accuracy",
+      "text": "Random forest achieved macro-F1 0.7804 (95% CI 0.7637 to 0.7969) on 2,381 test rows."
+    },
+    {
+      "id": "F2",
+      "model_key": "boost",
+      "category": "accuracy",
+      "text": "Gradient boosting (histogram) achieved macro-F1 0.8038 (95% CI 0.7871 to 0.8195) on 2,381 test rows."
+    },
+    {
+      "id": "F3",
+      "model_key": "svm",
+      "category": "accuracy",
+      "text": "Support vector machine (RBF) achieved macro-F1 0.8164 (95% CI 0.7992 to 0.8314) on 2,381 test rows."
+    },
+    {
+      "id": "F4",
+      "model_key": "logreg",
+      "category": "accuracy",
+      "text": "Logistic regression (multinomial) achieved macro-F1 0.7189 (95% CI 0.6995 to 0.7361) on 2,381 test rows."
+    },
+    {
+      "id": "F5",
+      "model_key": "knn",
+      "category": "accuracy",
+      "text": "K-nearest neighbours achieved macro-F1 0.7543 (95% CI 0.7366 to 0.7714) on 2,381 test rows."
+    },
+    {
+      "id": "F6",
+      "model_key": "linreg",
+      "category": "accuracy",
+      "text": "Linear regression (score to band) achieved macro-F1 0.7032 (95% CI 0.6832 to 0.7204) on 2,381 test rows."
+    },
+    {
+      "id": "F7",
+      "model_key": "dt",
+      "category": "accuracy",
+      "text": "Decision tree achieved macro-F1 0.7094 (95% CI 0.6902 to 0.7282) on 2,381 test rows."
+    },
+    {
+      "id": "F8",
+      "model_key": "rf",
+      "category": "performance",
+      "text": "Random forest overall accuracy 77.7% and quadratic weighted kappa (QWK) 0.7841."
+    },
+    {
+      "id": "F9",
+      "model_key": "boost",
+      "category": "performance",
+      "text": "Gradient boosting (histogram) overall accuracy 80.1% and quadratic weighted kappa (QWK) 0.8075."
+    },
+    {
+      "id": "F10",
+      "model_key": "svm",
+      "category": "performance",
+      "text": "Support vector machine (RBF) overall accuracy 81.5% and quadratic weighted kappa (QWK) 0.8216."
+    },
+    {
+      "id": "F11",
+      "model_key": "logreg",
+      "category": "performance",
+      "text": "Logistic regression (multinomial) overall accuracy 71.5% and quadratic weighted kappa (QWK) 0.7173."
+    },
+    {
+      "id": "F12",
+      "model_key": "knn",
+      "category": "performance",
+      "text": "K-nearest neighbours overall accuracy 75.2% and quadratic weighted kappa (QWK) 0.7550."
+    },
+    {
+      "id": "F13",
+      "model_key": "linreg",
+      "category": "performance",
+      "text": "Linear regression (score to band) overall accuracy 70.1% and quadratic weighted kappa (QWK) 0.6955."
+    },
+    {
+      "id": "F14",
+      "model_key": "dt",
+      "category": "performance",
+      "text": "Decision tree overall accuracy 70.9% and quadratic weighted kappa (QWK) 0.6993."
+    },
+    {
+      "id": "F15",
+      "model_key": "rf",
+      "category": "latency",
+      "text": "Random forest single-row p95 latency 99.38 ms and 5,000-row batch latency 131.4 ms."
+    },
+    {
+      "id": "F16",
+      "model_key": "boost",
+      "category": "latency",
+      "text": "Gradient boosting (histogram) single-row p95 latency 105.77 ms and 5,000-row batch latency 128.9 ms."
+    },
+    {
+      "id": "F17",
+      "model_key": "svm",
+      "category": "latency",
+      "text": "Support vector machine (RBF) single-row p95 latency 23.47 ms and 5,000-row batch latency 2013.6 ms."
+    },
+    {
+      "id": "F18",
+      "model_key": "logreg",
+      "category": "latency",
+      "text": "Logistic regression (multinomial) single-row p95 latency 22.60 ms and 5,000-row batch latency 12.0 ms."
+    },
+    {
+      "id": "F19",
+      "model_key": "knn",
+      "category": "latency",
+      "text": "K-nearest neighbours single-row p95 latency 16.94 ms and 5,000-row batch latency 199.0 ms."
+    },
+    {
+      "id": "F20",
+      "model_key": "linreg",
+      "category": "latency",
+      "text": "Linear regression (score to band) single-row p95 latency 13.23 ms and 5,000-row batch latency 24.9 ms."
+    },
+    {
+      "id": "F21",
+      "model_key": "dt",
+      "category": "latency",
+      "text": "Decision tree single-row p95 latency 16.27 ms and 5,000-row batch latency 8.9 ms."
+    },
+    {
+      "id": "F22",
+      "model_key": "rf",
+      "category": "comparison",
+      "text": "Random forest versus Gradient boosting (histogram) macro-F1 difference 95% CI is -0.0374 to -0.0100 (excludes zero: false)."
+    },
+    {
+      "id": "F23",
+      "model_key": "rf",
+      "category": "significance",
+      "text": "Random forest versus Gradient boosting (histogram) pairwise McNemar test with Holm-Bonferroni correction p-value is 0.0038."
+    },
+    {
+      "id": "F24",
+      "model_key": "rf",
+      "category": "calibration",
+      "text": "Random forest expected calibration error (ECE) 0.0133, Brier score 0.3179, conformal 90% coverage 89.9%, average set size 1.32."
+    },
+    {
+      "id": "F25",
+      "model_key": "boost",
+      "category": "calibration",
+      "text": "Gradient boosting (histogram) expected calibration error (ECE) 0.0904, Brier score 0.3068, conformal 90% coverage 91.6%, average set size 1.33."
+    },
+    {
+      "id": "F26",
+      "model_key": "svm",
+      "category": "calibration",
+      "text": "Support vector machine (RBF) expected calibration error (ECE) 0.0270, Brier score 0.2918, conformal 90% coverage 91.9%, average set size 1.46."
+    },
+    {
+      "id": "F27",
+      "model_key": "rf",
+      "category": "robustness_fairness",
+      "text": "Random forest robustness score 0.9759 (under noise/missingness) and audit demographic disparity ratio 0.8174."
+    },
+    {
+      "id": "F28",
+      "model_key": "boost",
+      "category": "robustness_fairness",
+      "text": "Gradient boosting (histogram) robustness score 0.9765 (under noise/missingness) and audit demographic disparity ratio 0.7603."
+    },
+    {
+      "id": "F29",
+      "model_key": "svm",
+      "category": "robustness_fairness",
+      "text": "Support vector machine (RBF) robustness score 0.9675 (under noise/missingness) and audit demographic disparity ratio 0.6726."
+    },
+    {
+      "id": "F30",
+      "model_key": "rf",
+      "category": "mcda",
+      "text": "Under the Balanced MCDA profile, Random forest achieved score 0.6387 with Dirichlet rank-1 probability 45.5%."
+    },
+    {
+      "id": "F90",
+      "model_key": "global",
+      "category": "caveat",
+      "text": "The dataset is synthetic (12,000 rows) and rankings depend on how it was generated; under linear variants, linear models remain highly competitive."
+    }
+  ],
+  "limits": {
+    "max_facts": 31
+  },
+  "packet_hash": "d856fd8fb9d0b1dfb7f48b6176bdcb9f59a698982035d5eb328cce5161d9227c"
+}

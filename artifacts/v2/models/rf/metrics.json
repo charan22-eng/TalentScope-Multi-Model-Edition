@@ -1,0 +1,66 @@
+{
+  "key": "rf",
+  "label": "Random forest",
+  "family": "Ensemble",
+  "task": "classifier",
+  "variant": "nonlinear",
+  "test_samples": 2381,
+  "accuracy": 0.777,
+  "balanced_accuracy": 0.7726,
+  "macro_f1": 0.7804,
+  "qwk": 0.7841,
+  "mcc": 0.6517,
+  "roc_auc_ovr": 0.9139,
+  "log_loss": 0.5368,
+  "brier": 0.3179,
+  "ece": 0.0133,
+  "exact_share": 0.777,
+  "adjacent_share": 0.2213,
+  "extreme_share": 0.0017,
+  "per_class": {
+    "Low": {
+      "precision": 0.8085,
+      "recall": 0.7678,
+      "f1": 0.7877,
+      "support": 715
+    },
+    "Medium": {
+      "precision": 0.7347,
+      "recall": 0.7957,
+      "f1": 0.764,
+      "support": 1072
+    },
+    "High": {
+      "precision": 0.8281,
+      "recall": 0.7542,
+      "f1": 0.7894,
+      "support": 594
+    }
+  },
+  "confusion_matrix": [
+    [
+      549,
+      165,
+      1
+    ],
+    [
+      127,
+      853,
+      92
+    ],
+    [
+      3,
+      143,
+      448
+    ]
+  ],
+  "latency_single_p50_ms": 59.346,
+  "latency_single_p95_ms": 99.381,
+  "latency_batch_5000_ms": 131.41,
+  "model_size_bytes": 27356818,
+  "tuning_time_sec": 30.17,
+  "stability_std": 0.0055,
+  "explain_tier": "partial",
+  "explain_score": 0.6,
+  "regression_track": {}
+}

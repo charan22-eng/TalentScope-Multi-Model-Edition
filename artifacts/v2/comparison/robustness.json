@@ -1,0 +1,20 @@
+{
+  "noise_stress_5pct_f1_drop": {
+    "svm": 0.024,
+    "rf": 0.018,
+    "boost": 0.022,
+    "knn": 0.045,
+    "logreg": 0.015,
+    "dt": 0.038,
+    "linreg": 0.016
+  },
+  "missing_stress_10pct_f1_drop": {
+    "svm": 0.031,
+    "rf": 0.021,
+    "boost": 0.015,
+    "knn": 0.052,
+    "logreg": 0.02,
+    "dt": 0.041,
+    "linreg": 0.022
+  }
+}

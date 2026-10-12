@@ -1,0 +1,62 @@
+{
+  "profile": "Balanced",
+  "weights": {
+    "macro_f1": 0.3,
+    "qwk": 0.1,
+    "calibration": 0.1,
+    "robustness": 0.1,
+    "fairness": 0.1,
+    "stability": 0.05,
+    "latency": 0.05,
+    "train_cost": 0.05,
+    "explainability": 0.15
+  },
+  "deterministic_winner": "rf",
+  "runner_up": "boost",
+  "decision_strength": "marginal",
+  "winner_p_rank1": 0.4548,
+  "ranking": [
+    {
+      "key": "rf",
+      "rank": 1,
+      "mcda_score": 0.6387,
+      "p_rank1": 0.4548
+    },
+    {
+      "key": "boost",
+      "rank": 2,
+      "mcda_score": 0.6247,
+      "p_rank1": 0.2364
+    },
+    {
+      "key": "svm",
+      "rank": 3,
+      "mcda_score": 0.6094,
+      "p_rank1": 0.2588
+    },
+    {
+      "key": "logreg",
+      "rank": 4,
+      "mcda_score": 0.5103,
+      "p_rank1": 0.0394
+    },
+    {
+      "key": "knn",
+      "rank": 5,
+      "mcda_score": 0.5046,
+      "p_rank1": 0.001
+    },
+    {
+      "key": "linreg",
+      "rank": 6,
+      "mcda_score": 0.4694,
+      "p_rank1": 0.0096
+    },
+    {
+      "key": "dt",
+      "rank": 7,
+      "mcda_score": 0.4415,
+      "p_rank1": 0.0
+    }
+  ]
+}

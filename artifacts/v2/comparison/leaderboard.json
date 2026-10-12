@@ -1,0 +1,629 @@
+{
+  "metrics": [
+    {
+      "key": "boost",
+      "label": "Gradient boosting (histogram)",
+      "family": "Ensemble",
+      "task": "classifier",
+      "variant": "nonlinear",
+      "test_samples": 2381,
+      "accuracy": 0.8013,
+      "balanced_accuracy": 0.7949,
+      "macro_f1": 0.8038,
+      "qwk": 0.8075,
+      "mcc": 0.6898,
+      "roc_auc_ovr": 0.9282,
+      "log_loss": 0.5067,
+      "brier": 0.3068,
+      "ece": 0.0904,
+      "exact_share": 0.8013,
+      "adjacent_share": 0.1974,
+      "extreme_share": 0.0013,
+      "per_class": {
+        "Low": {
+          "precision": 0.8346,
+          "recall": 0.7972,
+          "f1": 0.8155,
+          "support": 715
+        },
+        "Medium": {
+          "precision": 0.7573,
+          "recall": 0.8265,
+          "f1": 0.7904,
+          "support": 1072
+        },
+        "High": {
+          "precision": 0.8561,
+          "recall": 0.7609,
+          "f1": 0.8057,
+          "support": 594
+        }
+      },
+      "confusion_matrix": [
+        [
+          570,
+          144,
+          1
+        ],
+        [
+          111,
+          886,
+          75
+        ],
+        [
+          2,
+          140,
+          452
+        ]
+      ],
+      "latency_single_p50_ms": 45.186,
+      "latency_single_p95_ms": 105.769,
+      "latency_batch_5000_ms": 128.93,
+      "model_size_bytes": 1076226,
+      "tuning_time_sec": 31.92,
+      "stability_std": 0.0028,
+      "explain_tier": "partial",
+      "explain_score": 0.6,
+      "regression_track": {},
+      "robustness": 0.9765,
+      "fairness": 0.7603,
+      "calibration": 0.9096,
+      "stability": 0.9972,
+      "latency": 105.769,
+      "train_cost": 31.92,
+      "explainability": 0.6
+    },
+    {
+      "key": "dt",
+      "label": "Decision tree",
+      "family": "Tree",
+      "task": "classifier",
+      "variant": "nonlinear",
+      "test_samples": 2381,
+      "accuracy": 0.7085,
+      "balanced_accuracy": 0.6995,
+      "macro_f1": 0.7094,
+      "qwk": 0.6993,
+      "mcc": 0.5431,
+      "roc_auc_ovr": 0.8549,
+      "log_loss": 0.7071,
+      "brier": 0.4188,
+      "ece": 0.0342,
+      "exact_share": 0.7085,
+      "adjacent_share": 0.2843,
+      "extreme_share": 0.0071,
+      "per_class": {
+        "Low": {
+          "precision": 0.7395,
+          "recall": 0.7147,
+          "f1": 0.7269,
+          "support": 715
+        },
+        "Medium": {
+          "precision": 0.6655,
+          "recall": 0.7407,
+          "f1": 0.7011,
+          "support": 1072
+        },
+        "High": {
+          "precision": 0.7686,
+          "recall": 0.6431,
+          "f1": 0.7003,
+          "support": 594
+        }
+      },
+      "confusion_matrix": [
+        [
+          511,
+          195,
+          9
+        ],
+        [
+          172,
+          794,
+          106
+        ],
+        [
+          8,
+          204,
+          382
+        ]
+      ],
+      "latency_single_p50_ms": 8.24,
+      "latency_single_p95_ms": 16.269,
+      "latency_batch_5000_ms": 8.95,
+      "model_size_bytes": 20146,
+      "tuning_time_sec": 0.54,
+      "stability_std": 0.0125,
+      "explain_tier": "native",
+      "explain_score": 1.0,
+      "regression_track": {},
+      "robustness": 0.9797,
+      "fairness": 0.6619,
+      "calibration": 0.9658,
+      "stability": 0.9875,
+      "latency": 16.269,
+      "train_cost": 0.54,
+      "explainability": 1.0
+    },
+    {
+      "key": "knn",
+      "label": "K-nearest neighbours",
+      "family": "Instance",
+      "task": "classifier",
+      "variant": "nonlinear",
+      "test_samples": 2381,
+      "accuracy": 0.7518,
+      "balanced_accuracy": 0.7454,
+      "macro_f1": 0.7543,
+      "qwk": 0.755,
+      "mcc": 0.6122,
+      "roc_auc_ovr": 0.9006,
+      "log_loss": 0.5698,
+      "brier": 0.3443,
+      "ece": 0.0246,
+      "exact_share": 0.7518,
+      "adjacent_share": 0.2457,
+      "extreme_share": 0.0025,
+      "per_class": {
+        "Low": {
+          "precision": 0.8217,
+          "recall": 0.7091,
+          "f1": 0.7613,
+          "support": 715
+        },
+        "Medium": {
+          "precision": 0.7031,
+          "recall": 0.7864,
+          "f1": 0.7424,
+          "support": 1072
+        },
+        "High": {
+          "precision": 0.7788,
+          "recall": 0.7407,
+          "f1": 0.7593,
+          "support": 594
+        }
+      },
+      "confusion_matrix": [
+        [
+          507,
+          205,
+          3
+        ],
+        [
+          107,
+          843,
+          122
+        ],
+        [
+          3,
+          151,
+          440
+        ]
+      ],
+      "latency_single_p50_ms": 10.33,
+      "latency_single_p95_ms": 16.94,
+      "latency_batch_5000_ms": 198.99,
+      "model_size_bytes": 1063922,
+      "tuning_time_sec": 1.56,
+      "stability_std": 0.0098,
+      "explain_tier": "partial",
+      "explain_score": 0.6,
+      "regression_track": {},
+      "robustness": 0.9756,
+      "fairness": 0.6571,
+      "calibration": 0.9754,
+      "stability": 0.9902,
+      "latency": 16.94,
+      "train_cost": 1.56,
+      "explainability": 0.6
+    },
+    {
+      "key": "linreg",
+      "label": "Linear regression (score to band)",
+      "family": "Linear",
+      "task": "score_to_band",
+      "variant": "nonlinear",
+      "test_samples": 2381,
+      "accuracy": 0.7014,
+      "balanced_accuracy": 0.6894,
+      "macro_f1": 0.7032,
+      "qwk": 0.6955,
+      "mcc": 0.531,
+      "roc_auc_ovr": 0.8585,
+      "log_loss": 0.6791,
+      "brier": 0.4126,
+      "ece": 0.0213,
+      "exact_share": 0.7014,
+      "adjacent_share": 0.2953,
+      "extreme_share": 0.0034,
+      "per_class": {
+        "Low": {
+          "precision": 0.7439,
+          "recall": 0.6378,
+          "f1": 0.6867,
+          "support": 715
+        },
+        "Medium": {
+          "precision": 0.6458,
+          "recall": 0.7621,
+          "f1": 0.6992,
+          "support": 1072
+        },
+        "High": {
+          "precision": 0.7893,
+          "recall": 0.6684,
+          "f1": 0.7238,
+          "support": 594
+        }
+      },
+      "confusion_matrix": [
+        [
+          456,
+          256,
+          3
+        ],
+        [
+          152,
+          817,
+          103
+        ],
+        [
+          5,
+          192,
+          397
+        ]
+      ],
+      "latency_single_p50_ms": 7.072,
+      "latency_single_p95_ms": 13.226,
+      "latency_batch_5000_ms": 24.92,
+      "model_size_bytes": 7282,
+      "tuning_time_sec": 0.38,
+      "stability_std": 0.0106,
+      "explain_tier": "native",
+      "explain_score": 1.0,
+      "regression_track": {
+        "mae": 7.9367,
+        "rmse": 10.0692,
+        "r2": 0.6669,
+        "spearman": 0.8032
+      },
+      "robustness": 0.9798,
+      "fairness": 0.7014,
+      "calibration": 0.9787,
+      "stability": 0.9894,
+      "latency": 13.226,
+      "train_cost": 0.38,
+      "explainability": 1.0
+    },
+    {
+      "key": "logreg",
+      "label": "Logistic regression (multinomial)",
+      "family": "Linear",
+      "task": "classifier",
+      "variant": "nonlinear",
+      "test_samples": 2381,
+      "accuracy": 0.7148,
+      "balanced_accuracy": 0.7115,
+      "macro_f1": 0.7189,
+      "qwk": 0.7173,
+      "mcc": 0.5542,
+      "roc_auc_ovr": 0.8678,
+      "log_loss": 0.6943,
+      "brier": 0.4295,
+      "ece": 0.1246,
+      "exact_share": 0.7148,
+      "adjacent_share": 0.2814,
+      "extreme_share": 0.0038,
+      "per_class": {
+        "Low": {
+          "precision": 0.7568,
+          "recall": 0.6573,
+          "f1": 0.7036,
+          "support": 715
+        },
+        "Medium": {
+          "precision": 0.6692,
+          "recall": 0.7416,
+          "f1": 0.7035,
+          "support": 1072
+        },
+        "High": {
+          "precision": 0.764,
+          "recall": 0.7357,
+          "f1": 0.7496,
+          "support": 594
+        }
+      },
+      "confusion_matrix": [
+        [
+          470,
+          241,
+          4
+        ],
+        [
+          146,
+          795,
+          131
+        ],
+        [
+          5,
+          152,
+          437
+        ]
+      ],
+      "latency_single_p50_ms": 14.083,
+      "latency_single_p95_ms": 22.6,
+      "latency_batch_5000_ms": 11.97,
+      "model_size_bytes": 7378,
+      "tuning_time_sec": 0.83,
+      "stability_std": 0.0059,
+      "explain_tier": "native",
+      "explain_score": 1.0,
+      "regression_track": {},
+      "robustness": 0.9811,
+      "fairness": 0.7813,
+      "calibration": 0.8754,
+      "stability": 0.9941,
+      "latency": 22.6,
+      "train_cost": 0.83,
+      "explainability": 1.0
+    },
+    {
+      "key": "rf",
+      "label": "Random forest",
+      "family": "Ensemble",
+      "task": "classifier",
+      "variant": "nonlinear",
+      "test_samples": 2381,
+      "accuracy": 0.777,
+      "balanced_accuracy": 0.7726,
+      "macro_f1": 0.7804,
+      "qwk": 0.7841,
+      "mcc": 0.6517,
+      "roc_auc_ovr": 0.9139,
+      "log_loss": 0.5368,
+      "brier": 0.3179,
+      "ece": 0.0133,
+      "exact_share": 0.777,
+      "adjacent_share": 0.2213,
+      "extreme_share": 0.0017,
+      "per_class": {
+        "Low": {
+          "precision": 0.8085,
+          "recall": 0.7678,
+          "f1": 0.7877,
+          "support": 715
+        },
+        "Medium": {
+          "precision": 0.7347,
+          "recall": 0.7957,
+          "f1": 0.764,
+          "support": 1072
+        },
+        "High": {
+          "precision": 0.8281,
+          "recall": 0.7542,
+          "f1": 0.7894,
+          "support": 594
+        }
+      },
+      "confusion_matrix": [
+        [
+          549,
+          165,
+          1
+        ],
+        [
+          127,
+          853,
+          92
+        ],
+        [
+          3,
+          143,
+          448
+        ]
+      ],
+      "latency_single_p50_ms": 59.346,
+      "latency_single_p95_ms": 99.381,
+      "latency_batch_5000_ms": 131.41,
+      "model_size_bytes": 27356818,
+      "tuning_time_sec": 30.17,
+      "stability_std": 0.0055,
+      "explain_tier": "partial",
+      "explain_score": 0.6,
+      "regression_track": {},
+      "robustness": 0.9759,
+      "fairness": 0.8174,
+      "calibration": 0.9867,
+      "stability": 0.9945,
+      "latency": 99.381,
+      "train_cost": 30.17,
+      "explainability": 0.6
+    },
+    {
+      "key": "svm",
+      "label": "Support vector machine (RBF)",
+      "family": "Kernel",
+      "task": "classifier",
+      "variant": "nonlinear",
+      "test_samples": 2381,
+      "accuracy": 0.8148,
+      "balanced_accuracy": 0.8064,
+      "macro_f1": 0.8164,
+      "qwk": 0.8216,
+      "mcc": 0.711,
+      "roc_auc_ovr": 0.9266,
+      "log_loss": 0.4977,
+      "brier": 0.2918,
+      "ece": 0.027,
+      "exact_share": 0.8148,
+      "adjacent_share": 0.1848,
+      "extreme_share": 0.0004,
+      "per_class": {
+        "Low": {
+          "precision": 0.8746,
+          "recall": 0.8,
+          "f1": 0.8356,
+          "support": 715
+        },
+        "Medium": {
+          "precision": 0.7655,
+          "recall": 0.8498,
+          "f1": 0.8055,
+          "support": 1072
+        },
+        "High": {
+          "precision": 0.851,
+          "recall": 0.7694,
+          "f1": 0.8081,
+          "support": 594
+        }
+      },
+      "confusion_matrix": [
+        [
+          572,
+          143,
+          0
+        ],
+        [
+          81,
+          911,
+          80
+        ],
+        [
+          1,
+          136,
+          457
+        ]
+      ],
+      "latency_single_p50_ms": 11.852,
+      "latency_single_p95_ms": 23.471,
+      "latency_batch_5000_ms": 2013.64,
+      "model_size_bytes": 783938,
+      "tuning_time_sec": 20.81,
+      "stability_std": 0.0014,
+      "explain_tier": "post_hoc",
+      "explain_score": 0.3,
+      "regression_track": {},
+      "robustness": 0.9675,
+      "fairness": 0.6726,
+      "calibration": 0.973,
+      "stability": 0.9986,
+      "latency": 23.471,
+      "train_cost": 20.81,
+      "explainability": 0.3
+    }
+  ],
+  "confidence_intervals": {
+    "boost": {
+      "macro_f1_ci": [
+        0.7871,
+        0.8195
+      ],
+      "accuracy_ci": [
+        0.785,
+        0.8173
+      ],
+      "qwk_ci": [
+        0.7898,
+        0.8235
+      ]
+    },
+    "dt": {
+      "macro_f1_ci": [
+        0.6902,
+        0.7282
+      ],
+      "accuracy_ci": [
+        0.69,
+        0.727
+      ],
+      "qwk_ci": [
+        0.6764,
+        0.721
+      ]
+    },
+    "knn": {
+      "macro_f1_ci": [
+        0.7366,
+        0.7714
+      ],
+      "accuracy_ci": [
+        0.7337,
+        0.7686
+      ],
+      "qwk_ci": [
+        0.7349,
+        0.7731
+      ]
+    },
+    "linreg": {
+      "macro_f1_ci": [
+        0.6832,
+        0.7204
+      ],
+      "accuracy_ci": [
+        0.6821,
+        0.7186
+      ],
+      "qwk_ci": [
+        0.6725,
+        0.7158
+      ]
+    },
+    "logreg": {
+      "macro_f1_ci": [
+        0.6995,
+        0.7361
+      ],
+      "accuracy_ci": [
+        0.6955,
+        0.7321
+      ],
+      "qwk_ci": [
+        0.6949,
+        0.7363
+      ]
+    },
+    "rf": {
+      "macro_f1_ci": [
+        0.7637,
+        0.7969
+      ],
+      "accuracy_ci": [
+        0.7606,
+        0.7934
+      ],
+      "qwk_ci": [
+        0.7667,
+        0.802
+      ]
+    },
+    "svm": {
+      "macro_f1_ci": [
+        0.7992,
+        0.8314
+      ],
+      "accuracy_ci": [
+        0.7976,
+        0.8295
+      ],
+      "qwk_ci": [
+        0.8042,
+        0.8368
+      ]
+    }
+  },
+  "rank1_vs_rank2": {
+    "rank1": "rf",
+    "rank2": "boost",
+    "diff_ci_95": [
+      -0.0374,
+      -0.01
+    ],
+    "excludes_zero": false
+  }
+}

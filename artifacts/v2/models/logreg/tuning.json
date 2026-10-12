@@ -1,0 +1,21 @@
+{
+  "key": "logreg",
+  "label": "Logistic regression (multinomial)",
+  "family": "Linear",
+  "task": "classifier",
+  "needs_scaling": true,
+  "explain_tier": "native",
+  "best_params": {
+    "C": 0.07459343285726545,
+    "class_weight": null
+  },
+  "cv_macro_f1_mean": 0.7087,
+  "cv_macro_f1_std": 0.0055,
+  "stability_mean": 0.7062,
+  "stability_std": 0.0059,
+  "tuning_time_sec": 0.62,
+  "calibration_method": "sigmoid",
+  "profile": "fast",
+  "seed": 42,
+  "variant": "nonlinear"
+}

@@ -1,0 +1,23 @@
+{
+  "key": "rf",
+  "label": "Random forest",
+  "family": "Ensemble",
+  "task": "classifier",
+  "needs_scaling": false,
+  "explain_tier": "partial",
+  "best_params": {
+    "max_depth": 20,
+    "max_features": null,
+    "min_samples_leaf": 3,
+    "n_estimators": 264
+  },
+  "cv_macro_f1_mean": 0.7689,
+  "cv_macro_f1_std": 0.0126,
+  "stability_mean": 0.7651,
+  "stability_std": 0.0055,
+  "tuning_time_sec": 21.09,
+  "calibration_method": "sigmoid",
+  "profile": "fast",
+  "seed": 42,
+  "variant": "nonlinear"
+}

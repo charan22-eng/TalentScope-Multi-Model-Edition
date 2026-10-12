@@ -1,0 +1,23 @@
+{
+  "key": "boost",
+  "label": "Gradient boosting (histogram)",
+  "family": "Ensemble",
+  "task": "classifier",
+  "needs_scaling": false,
+  "explain_tier": "partial",
+  "best_params": {
+    "l2_regularization": 0.1235748371091217,
+    "learning_rate": 0.05634303024223015,
+    "max_iter": 293,
+    "max_leaf_nodes": 10
+  },
+  "cv_macro_f1_mean": 0.7932,
+  "cv_macro_f1_std": 0.0053,
+  "stability_mean": 0.7928,
+  "stability_std": 0.0028,
+  "tuning_time_sec": 23.49,
+  "calibration_method": "sigmoid",
+  "profile": "fast",
+  "seed": 42,
+  "variant": "nonlinear"
+}

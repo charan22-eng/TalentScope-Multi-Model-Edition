@@ -1,0 +1,21 @@
+{
+  "key": "svm",
+  "label": "Support vector machine (RBF)",
+  "family": "Kernel",
+  "task": "classifier",
+  "needs_scaling": true,
+  "explain_tier": "post_hoc",
+  "best_params": {
+    "C": 0.8179499475211671,
+    "gamma": 0.037520558551242804
+  },
+  "cv_macro_f1_mean": 0.8014,
+  "cv_macro_f1_std": 0.0072,
+  "stability_mean": 0.8017,
+  "stability_std": 0.0014,
+  "tuning_time_sec": 11.12,
+  "calibration_method": "sigmoid",
+  "profile": "fast",
+  "seed": 42,
+  "variant": "nonlinear"
+}

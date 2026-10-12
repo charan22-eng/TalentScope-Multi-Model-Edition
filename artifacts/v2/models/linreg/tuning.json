@@ -1,0 +1,18 @@
+{
+  "key": "linreg",
+  "label": "Linear regression (score to band)",
+  "family": "Linear",
+  "task": "score_to_band",
+  "needs_scaling": true,
+  "explain_tier": "native",
+  "best_params": {},
+  "cv_macro_f1_mean": 0.6861,
+  "cv_macro_f1_std": 0.0073,
+  "stability_mean": 0.687,
+  "stability_std": 0.0106,
+  "tuning_time_sec": 0.26,
+  "calibration_method": "sigmoid",
+  "profile": "fast",
+  "seed": 42,
+  "variant": "nonlinear"
+}

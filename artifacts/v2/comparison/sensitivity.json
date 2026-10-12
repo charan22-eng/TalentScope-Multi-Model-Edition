@@ -1,0 +1,115 @@
+{
+  "variants": {
+    "linear": {
+      "macro_f1": {
+        "boost": 0.6174,
+        "dt": 0.579,
+        "knn": 0.6166,
+        "linreg": 0.6769,
+        "logreg": 0.6595,
+        "rf": 0.599,
+        "svm": 0.6348
+      },
+      "rankings": {
+        "linreg": 1,
+        "logreg": 2,
+        "svm": 3,
+        "boost": 4,
+        "knn": 5,
+        "rf": 6,
+        "dt": 7
+      },
+      "ranked_keys": [
+        "linreg",
+        "logreg",
+        "svm",
+        "boost",
+        "knn",
+        "rf",
+        "dt"
+      ],
+      "best_model": "linreg",
+      "worst_model": "dt",
+      "spread": 0.0979
+    },
+    "nonlinear": {
+      "macro_f1": {
+        "boost": 0.8038,
+        "dt": 0.7094,
+        "knn": 0.7543,
+        "linreg": 0.7032,
+        "logreg": 0.7189,
+        "rf": 0.7804,
+        "svm": 0.8164
+      },
+      "rankings": {
+        "svm": 1,
+        "boost": 2,
+        "rf": 3,
+        "knn": 4,
+        "logreg": 5,
+        "dt": 6,
+        "linreg": 7
+      },
+      "ranked_keys": [
+        "svm",
+        "boost",
+        "rf",
+        "knn",
+        "logreg",
+        "dt",
+        "linreg"
+      ],
+      "best_model": "svm",
+      "worst_model": "linreg",
+      "spread": 0.1132
+    },
+    "noisy_overlap": {
+      "macro_f1": {
+        "boost": 0.6991,
+        "dt": 0.6229,
+        "knn": 0.6382,
+        "linreg": 0.5988,
+        "logreg": 0.6076,
+        "rf": 0.7125,
+        "svm": 0.6658
+      },
+      "rankings": {
+        "rf": 1,
+        "boost": 2,
+        "svm": 3,
+        "knn": 4,
+        "dt": 5,
+        "logreg": 6,
+        "linreg": 7
+      },
+      "ranked_keys": [
+        "rf",
+        "boost",
+        "svm",
+        "knn",
+        "dt",
+        "logreg",
+        "linreg"
+      ],
+      "best_model": "rf",
+      "worst_model": "linreg",
+      "spread": 0.1137
+    }
+  },
+  "kendall_tau": {
+    "linear_vs_nonlinear": {
+      "tau": -0.0476,
+      "p_value": 1.0
+    },
+    "nonlinear_vs_noisy_overlap": {
+      "tau": 0.619,
+      "p_value": 0.069
+    },
+    "linear_vs_noisy_overlap": {
+      "tau": -0.4286,
+      "p_value": 0.2389
+    }
+  },
+  "observation": "Rankings shift significantly across data variants. Linear and tree models perform comparatively better under linear generative processes, whereas kernel and ensemble models dominate in presence of saturated interactions."
+}

@@ -1,0 +1,48 @@
+{
+  "key": "knn",
+  "label": "K-nearest neighbours",
+  "family": "Instance",
+  "task": "classifier",
+  "explain_tier": "partial",
+  "semver": "2.0.0",
+  "tuning_parameters": {
+    "key": "knn",
+    "label": "K-nearest neighbours",
+    "family": "Instance",
+    "task": "classifier",
+    "needs_scaling": true,
+    "explain_tier": "partial",
+    "best_params": {
+      "weights": "uniform",
+      "p": 2,
+      "n_neighbors": 31
+    },
+    "cv_macro_f1_mean": 0.7011,
+    "cv_macro_f1_std": 0.0044,
+    "stability_mean": 0.6919,
+    "stability_std": 0.0098,
+    "tuning_time_sec": 1.56,
+    "calibration_method": "sigmoid",
+    "profile": "fast",
+    "seed": 42,
+    "variant": "nonlinear"
+  },
+  "metrics_summary": {
+    "macro_f1": 0.7543,
+    "accuracy": 0.7518,
+    "qwk": 0.755,
+    "ece": 0.0246,
+    "brier": 0.3443,
+    "p95_latency_ms": 16.94,
+    "batch_5000_latency_ms": 198.99,
+    "model_size_bytes": 1063922
+  },
+  "split_hash": "45a90aaf72c97cca88719f05862d44517a45a145a80257457e4d56941fb5d7de",
+  "data_hash": "",
+  "library_versions": {
+    "scikit-learn": "1.2.2",
+    "numpy": "1.26.4",
+    "pandas": "3.0.5"
+  },
+  "created_at": "2026-10-12T16:43:35Z"
+}

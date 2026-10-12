@@ -1,0 +1,31 @@
+{
+  "name": "employees_v2",
+  "semver": "2.0.0",
+  "description": "TalentScope Multi-Model 12,000-row synthetic benchmark dataset",
+  "variants": [
+    "linear",
+    "nonlinear",
+    "noisy_overlap"
+  ],
+  "default_variant": "nonlinear",
+  "total_rows": 11904,
+  "features": [
+    "attendance",
+    "experience_years",
+    "training_hours",
+    "projects_completed",
+    "weekly_hours",
+    "prev_score",
+    "peer_feedback",
+    "tasks_on_time_pct",
+    "certifications",
+    "department",
+    "job_level"
+  ],
+  "targets": [
+    "performance",
+    "performance_score"
+  ],
+  "data_clean_sha256": "",
+  "license": "Internal Research / Fair Benchmark"
+}

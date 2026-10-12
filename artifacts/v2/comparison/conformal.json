@@ -1,0 +1,72 @@
+{
+  "boost": {
+    "alpha": 0.1,
+    "threshold": 0.6459,
+    "min_prob_threshold": 0.3541,
+    "empirical_coverage": 0.9156,
+    "avg_set_size": 1.334,
+    "single_label_share": 0.6661,
+    "multi_label_share": 0.3339,
+    "empty_share": 0.0
+  },
+  "dt": {
+    "alpha": 0.1,
+    "threshold": 0.8518,
+    "min_prob_threshold": 0.1482,
+    "empirical_coverage": 0.9147,
+    "avg_set_size": 1.705,
+    "single_label_share": 0.3066,
+    "multi_label_share": 0.6934,
+    "empty_share": 0.0
+  },
+  "knn": {
+    "alpha": 0.1,
+    "threshold": 0.7703,
+    "min_prob_threshold": 0.2297,
+    "empirical_coverage": 0.9185,
+    "avg_set_size": 1.486,
+    "single_label_share": 0.5195,
+    "multi_label_share": 0.4805,
+    "empty_share": 0.0
+  },
+  "linreg": {
+    "alpha": 0.1,
+    "threshold": 0.82,
+    "min_prob_threshold": 0.18,
+    "empirical_coverage": 0.9143,
+    "avg_set_size": 1.624,
+    "single_label_share": 0.3759,
+    "multi_label_share": 0.6241,
+    "empty_share": 0.0
+  },
+  "logreg": {
+    "alpha": 0.1,
+    "threshold": 0.6747,
+    "min_prob_threshold": 0.3253,
+    "empirical_coverage": 0.9135,
+    "avg_set_size": 1.659,
+    "single_label_share": 0.341,
+    "multi_label_share": 0.659,
+    "empty_share": 0.0
+  },
+  "rf": {
+    "alpha": 0.1,
+    "threshold": 0.7721,
+    "min_prob_threshold": 0.2279,
+    "empirical_coverage": 0.8988,
+    "avg_set_size": 1.324,
+    "single_label_share": 0.6766,
+    "multi_label_share": 0.3234,
+    "empty_share": 0.0
+  },
+  "svm": {
+    "alpha": 0.1,
+    "threshold": 0.8418,
+    "min_prob_threshold": 0.1582,
+    "empirical_coverage": 0.9189,
+    "avg_set_size": 1.459,
+    "single_label_share": 0.5414,
+    "multi_label_share": 0.4586,
+    "empty_share": 0.0
+  }
+}

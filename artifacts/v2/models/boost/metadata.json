@@ -1,0 +1,49 @@
+{
+  "key": "boost",
+  "label": "Gradient boosting (histogram)",
+  "family": "Ensemble",
+  "task": "classifier",
+  "explain_tier": "partial",
+  "semver": "2.0.0",
+  "tuning_parameters": {
+    "key": "boost",
+    "label": "Gradient boosting (histogram)",
+    "family": "Ensemble",
+    "task": "classifier",
+    "needs_scaling": false,
+    "explain_tier": "partial",
+    "best_params": {
+      "l2_regularization": 0.1235748371091217,
+      "learning_rate": 0.05634303024223015,
+      "max_iter": 293,
+      "max_leaf_nodes": 10
+    },
+    "cv_macro_f1_mean": 0.7932,
+    "cv_macro_f1_std": 0.0053,
+    "stability_mean": 0.7928,
+    "stability_std": 0.0028,
+    "tuning_time_sec": 31.92,
+    "calibration_method": "sigmoid",
+    "profile": "fast",
+    "seed": 42,
+    "variant": "nonlinear"
+  },
+  "metrics_summary": {
+    "macro_f1": 0.8038,
+    "accuracy": 0.8013,
+    "qwk": 0.8075,
+    "ece": 0.0904,
+    "brier": 0.3068,
+    "p95_latency_ms": 105.769,
+    "batch_5000_latency_ms": 128.93,
+    "model_size_bytes": 1076226
+  },
+  "split_hash": "45a90aaf72c97cca88719f05862d44517a45a145a80257457e4d56941fb5d7de",
+  "data_hash": "",
+  "library_versions": {
+    "scikit-learn": "1.2.2",
+    "numpy": "1.26.4",
+    "pandas": "3.0.5"
+  },
+  "created_at": "2026-10-12T16:43:35Z"
+}

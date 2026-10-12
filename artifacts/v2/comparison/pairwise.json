@@ -1,0 +1,426 @@
+{
+  "pairwise_tests": [
+    {
+      "model_a": "boost",
+      "model_b": "dt",
+      "b_discordant": 160,
+      "c_discordant": 381,
+      "stat": 89.464,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "boost",
+      "model_b": "linreg",
+      "b_discordant": 183,
+      "c_discordant": 421,
+      "stat": 92.995,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "boost",
+      "model_b": "logreg",
+      "b_discordant": 171,
+      "c_discordant": 377,
+      "stat": 76.688,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "dt",
+      "model_b": "svm",
+      "b_discordant": 402,
+      "c_discordant": 149,
+      "stat": 115.252,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "linreg",
+      "model_b": "svm",
+      "b_discordant": 377,
+      "c_discordant": 107,
+      "stat": 149.506,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "logreg",
+      "model_b": "svm",
+      "b_discordant": 323,
+      "c_discordant": 85,
+      "stat": 137.669,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "knn",
+      "model_b": "svm",
+      "b_discordant": 243,
+      "c_discordant": 93,
+      "stat": 66.074,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "dt",
+      "model_b": "rf",
+      "b_discordant": 292,
+      "c_discordant": 129,
+      "stat": 62.337,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "linreg",
+      "model_b": "rf",
+      "b_discordant": 422,
+      "c_discordant": 242,
+      "stat": 48.255,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "logreg",
+      "model_b": "rf",
+      "b_discordant": 377,
+      "c_discordant": 229,
+      "stat": 35.658,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "boost",
+      "model_b": "knn",
+      "b_discordant": 142,
+      "c_discordant": 260,
+      "stat": 34.052,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "knn",
+      "model_b": "linreg",
+      "b_discordant": 202,
+      "c_discordant": 322,
+      "stat": 27.025,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    {
+      "model_a": "rf",
+      "model_b": "svm",
+      "b_discordant": 208,
+      "c_discordant": 118,
+      "stat": 24.298,
+      "raw_p": 0.0,
+      "holm_p": 1e-05,
+      "significant": true
+    },
+    {
+      "model_a": "dt",
+      "model_b": "knn",
+      "b_discordant": 366,
+      "c_discordant": 263,
+      "stat": 16.541,
+      "raw_p": 5e-05,
+      "holm_p": 0.00038,
+      "significant": true
+    },
+    {
+      "model_a": "knn",
+      "model_b": "logreg",
+      "b_discordant": 189,
+      "c_discordant": 277,
+      "stat": 16.242,
+      "raw_p": 6e-05,
+      "holm_p": 0.00039,
+      "significant": true
+    },
+    {
+      "model_a": "boost",
+      "model_b": "rf",
+      "b_discordant": 110,
+      "c_discordant": 168,
+      "stat": 11.687,
+      "raw_p": 0.00063,
+      "holm_p": 0.00378,
+      "significant": true
+    },
+    {
+      "model_a": "knn",
+      "model_b": "rf",
+      "b_discordant": 257,
+      "c_discordant": 197,
+      "stat": 7.667,
+      "raw_p": 0.00562,
+      "holm_p": 0.02811,
+      "significant": true
+    },
+    {
+      "model_a": "linreg",
+      "model_b": "logreg",
+      "b_discordant": 134,
+      "c_discordant": 102,
+      "stat": 4.072,
+      "raw_p": 0.0436,
+      "holm_p": 0.17439,
+      "significant": false
+    },
+    {
+      "model_a": "boost",
+      "model_b": "svm",
+      "b_discordant": 138,
+      "c_discordant": 106,
+      "stat": 3.939,
+      "raw_p": 0.04719,
+      "holm_p": 0.17439,
+      "significant": false
+    },
+    {
+      "model_a": "dt",
+      "model_b": "linreg",
+      "b_discordant": 370,
+      "c_discordant": 387,
+      "stat": 0.338,
+      "raw_p": 0.56088,
+      "holm_p": 1.0,
+      "significant": false
+    },
+    {
+      "model_a": "dt",
+      "model_b": "logreg",
+      "b_discordant": 350,
+      "c_discordant": 335,
+      "stat": 0.286,
+      "raw_p": 0.59271,
+      "holm_p": 1.0,
+      "significant": false
+    }
+  ],
+  "pair_map": {
+    "boost_vs_dt": {
+      "model_a": "boost",
+      "model_b": "dt",
+      "b_discordant": 160,
+      "c_discordant": 381,
+      "stat": 89.464,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "boost_vs_linreg": {
+      "model_a": "boost",
+      "model_b": "linreg",
+      "b_discordant": 183,
+      "c_discordant": 421,
+      "stat": 92.995,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "boost_vs_logreg": {
+      "model_a": "boost",
+      "model_b": "logreg",
+      "b_discordant": 171,
+      "c_discordant": 377,
+      "stat": 76.688,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "dt_vs_svm": {
+      "model_a": "dt",
+      "model_b": "svm",
+      "b_discordant": 402,
+      "c_discordant": 149,
+      "stat": 115.252,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "linreg_vs_svm": {
+      "model_a": "linreg",
+      "model_b": "svm",
+      "b_discordant": 377,
+      "c_discordant": 107,
+      "stat": 149.506,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "logreg_vs_svm": {
+      "model_a": "logreg",
+      "model_b": "svm",
+      "b_discordant": 323,
+      "c_discordant": 85,
+      "stat": 137.669,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "knn_vs_svm": {
+      "model_a": "knn",
+      "model_b": "svm",
+      "b_discordant": 243,
+      "c_discordant": 93,
+      "stat": 66.074,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "dt_vs_rf": {
+      "model_a": "dt",
+      "model_b": "rf",
+      "b_discordant": 292,
+      "c_discordant": 129,
+      "stat": 62.337,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "linreg_vs_rf": {
+      "model_a": "linreg",
+      "model_b": "rf",
+      "b_discordant": 422,
+      "c_discordant": 242,
+      "stat": 48.255,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "logreg_vs_rf": {
+      "model_a": "logreg",
+      "model_b": "rf",
+      "b_discordant": 377,
+      "c_discordant": 229,
+      "stat": 35.658,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "boost_vs_knn": {
+      "model_a": "boost",
+      "model_b": "knn",
+      "b_discordant": 142,
+      "c_discordant": 260,
+      "stat": 34.052,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "knn_vs_linreg": {
+      "model_a": "knn",
+      "model_b": "linreg",
+      "b_discordant": 202,
+      "c_discordant": 322,
+      "stat": 27.025,
+      "raw_p": 0.0,
+      "holm_p": 0.0,
+      "significant": true
+    },
+    "rf_vs_svm": {
+      "model_a": "rf",
+      "model_b": "svm",
+      "b_discordant": 208,
+      "c_discordant": 118,
+      "stat": 24.298,
+      "raw_p": 0.0,
+      "holm_p": 1e-05,
+      "significant": true
+    },
+    "dt_vs_knn": {
+      "model_a": "dt",
+      "model_b": "knn",
+      "b_discordant": 366,
+      "c_discordant": 263,
+      "stat": 16.541,
+      "raw_p": 5e-05,
+      "holm_p": 0.00038,
+      "significant": true
+    },
+    "knn_vs_logreg": {
+      "model_a": "knn",
+      "model_b": "logreg",
+      "b_discordant": 189,
+      "c_discordant": 277,
+      "stat": 16.242,
+      "raw_p": 6e-05,
+      "holm_p": 0.00039,
+      "significant": true
+    },
+    "boost_vs_rf": {
+      "model_a": "boost",
+      "model_b": "rf",
+      "b_discordant": 110,
+      "c_discordant": 168,
+      "stat": 11.687,
+      "raw_p": 0.00063,
+      "holm_p": 0.00378,
+      "significant": true
+    },
+    "knn_vs_rf": {
+      "model_a": "knn",
+      "model_b": "rf",
+      "b_discordant": 257,
+      "c_discordant": 197,
+      "stat": 7.667,
+      "raw_p": 0.00562,
+      "holm_p": 0.02811,
+      "significant": true
+    },
+    "linreg_vs_logreg": {
+      "model_a": "linreg",
+      "model_b": "logreg",
+      "b_discordant": 134,
+      "c_discordant": 102,
+      "stat": 4.072,
+      "raw_p": 0.0436,
+      "holm_p": 0.17439,
+      "significant": false
+    },
+    "boost_vs_svm": {
+      "model_a": "boost",
+      "model_b": "svm",
+      "b_discordant": 138,
+      "c_discordant": 106,
+      "stat": 3.939,
+      "raw_p": 0.04719,
+      "holm_p": 0.17439,
+      "significant": false
+    },
+    "dt_vs_linreg": {
+      "model_a": "dt",
+      "model_b": "linreg",
+      "b_discordant": 370,
+      "c_discordant": 387,
+      "stat": 0.338,
+      "raw_p": 0.56088,
+      "holm_p": 1.0,
+      "significant": false
+    },
+    "dt_vs_logreg": {
+      "model_a": "dt",
+      "model_b": "logreg",
+      "b_discordant": 350,
+      "c_discordant": 335,
+      "stat": 0.286,
+      "raw_p": 0.59271,
+      "holm_p": 1.0,
+      "significant": false
+    }
+  }
+}

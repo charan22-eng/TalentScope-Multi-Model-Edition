@@ -1,0 +1,13 @@
+{
+  "audit_attribute": "department",
+  "parity_tolerance": 0.8,
+  "disparity_ratios": {
+    "svm": 0.88,
+    "rf": 0.89,
+    "boost": 0.87,
+    "knn": 0.84,
+    "logreg": 0.83,
+    "dt": 0.81,
+    "linreg": 0.82
+  }
+}

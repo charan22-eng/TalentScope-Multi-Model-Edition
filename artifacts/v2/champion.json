@@ -1,0 +1,8 @@
+{
+  "champion": "rf",
+  "selection_rule": "ADR-009 Balanced Profile MCDA",
+  "decision_strength": "marginal",
+  "margin": 0.031,
+  "runner_up": "boost",
+  "rollback": true
+}

@@ -1,0 +1,66 @@
+{
+  "key": "logreg",
+  "label": "Logistic regression (multinomial)",
+  "family": "Linear",
+  "task": "classifier",
+  "variant": "nonlinear",
+  "test_samples": 2381,
+  "accuracy": 0.7148,
+  "balanced_accuracy": 0.7115,
+  "macro_f1": 0.7189,
+  "qwk": 0.7173,
+  "mcc": 0.5542,
+  "roc_auc_ovr": 0.8678,
+  "log_loss": 0.6943,
+  "brier": 0.4295,
+  "ece": 0.1246,
+  "exact_share": 0.7148,
+  "adjacent_share": 0.2814,
+  "extreme_share": 0.0038,
+  "per_class": {
+    "Low": {
+      "precision": 0.7568,
+      "recall": 0.6573,
+      "f1": 0.7036,
+      "support": 715
+    },
+    "Medium": {
+      "precision": 0.6692,
+      "recall": 0.7416,
+      "f1": 0.7035,
+      "support": 1072
+    },
+    "High": {
+      "precision": 0.764,
+      "recall": 0.7357,
+      "f1": 0.7496,
+      "support": 594
+    }
+  },
+  "confusion_matrix": [
+    [
+      470,
+      241,
+      4
+    ],
+    [
+      146,
+      795,
+      131
+    ],
+    [
+      5,
+      152,
+      437
+    ]
+  ],
+  "latency_single_p50_ms": 14.083,
+  "latency_single_p95_ms": 22.6,
+  "latency_batch_5000_ms": 11.97,
+  "model_size_bytes": 7378,
+  "tuning_time_sec": 0.83,
+  "stability_std": 0.0059,
+  "explain_tier": "native",
+  "explain_score": 1.0,
+  "regression_track": {}
+}

@@ -1,0 +1,47 @@
+{
+  "key": "svm",
+  "label": "Support vector machine (RBF)",
+  "family": "Kernel",
+  "task": "classifier",
+  "explain_tier": "post_hoc",
+  "semver": "2.0.0",
+  "tuning_parameters": {
+    "key": "svm",
+    "label": "Support vector machine (RBF)",
+    "family": "Kernel",
+    "task": "classifier",
+    "needs_scaling": true,
+    "explain_tier": "post_hoc",
+    "best_params": {
+      "C": 0.8179499475211671,
+      "gamma": 0.037520558551242804
+    },
+    "cv_macro_f1_mean": 0.8014,
+    "cv_macro_f1_std": 0.0072,
+    "stability_mean": 0.8017,
+    "stability_std": 0.0014,
+    "tuning_time_sec": 20.81,
+    "calibration_method": "sigmoid",
+    "profile": "fast",
+    "seed": 42,
+    "variant": "nonlinear"
+  },
+  "metrics_summary": {
+    "macro_f1": 0.8164,
+    "accuracy": 0.8148,
+    "qwk": 0.8216,
+    "ece": 0.027,
+    "brier": 0.2918,
+    "p95_latency_ms": 23.471,
+    "batch_5000_latency_ms": 2013.64,
+    "model_size_bytes": 783938
+  },
+  "split_hash": "45a90aaf72c97cca88719f05862d44517a45a145a80257457e4d56941fb5d7de",
+  "data_hash": "",
+  "library_versions": {
+    "scikit-learn": "1.2.2",
+    "numpy": "1.26.4",
+    "pandas": "3.0.5"
+  },
+  "created_at": "2026-10-12T16:43:35Z"
+}

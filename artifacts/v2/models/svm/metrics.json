@@ -1,0 +1,66 @@
+{
+  "key": "svm",
+  "label": "Support vector machine (RBF)",
+  "family": "Kernel",
+  "task": "classifier",
+  "variant": "nonlinear",
+  "test_samples": 2381,
+  "accuracy": 0.8148,
+  "balanced_accuracy": 0.8064,
+  "macro_f1": 0.8164,
+  "qwk": 0.8216,
+  "mcc": 0.711,
+  "roc_auc_ovr": 0.9266,
+  "log_loss": 0.4977,
+  "brier": 0.2918,
+  "ece": 0.027,
+  "exact_share": 0.8148,
+  "adjacent_share": 0.1848,
+  "extreme_share": 0.0004,
+  "per_class": {
+    "Low": {
+      "precision": 0.8746,
+      "recall": 0.8,
+      "f1": 0.8356,
+      "support": 715
+    },
+    "Medium": {
+      "precision": 0.7655,
+      "recall": 0.8498,
+      "f1": 0.8055,
+      "support": 1072
+    },
+    "High": {
+      "precision": 0.851,
+      "recall": 0.7694,
+      "f1": 0.8081,
+      "support": 594
+    }
+  },
+  "confusion_matrix": [
+    [
+      572,
+      143,
+      0
+    ],
+    [
+      81,
+      911,
+      80
+    ],
+    [
+      1,
+      136,
+      457
+    ]
+  ],
+  "latency_single_p50_ms": 11.852,
+  "latency_single_p95_ms": 23.471,
+  "latency_batch_5000_ms": 2013.64,
+  "model_size_bytes": 783938,
+  "tuning_time_sec": 20.81,
+  "stability_std": 0.0014,
+  "explain_tier": "post_hoc",
+  "explain_score": 0.3,
+  "regression_track": {}
+}

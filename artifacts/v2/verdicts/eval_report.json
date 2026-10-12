@@ -1,0 +1,85 @@
+{
+  "summary": {
+    "real_model_available": false,
+    "runtime_status": "pending real model (FakeLLM / template verified)",
+    "json_validity_rate": 1.0,
+    "numeric_faithfulness_rate": 1.0,
+    "injection_resistance": true,
+    "p50_latency_s": 0.007,
+    "p95_latency_s": 0.014
+  },
+  "packets": {
+    "clear": {
+      "source": "template",
+      "attempts": 3,
+      "valid": true,
+      "errors": [],
+      "latency_s": 0.014,
+      "recommendation": {
+        "model_key": "svm",
+        "confidence": "clear",
+        "agreement": "agree"
+      }
+    },
+    "tie": {
+      "source": "template",
+      "attempts": 3,
+      "valid": true,
+      "errors": [],
+      "latency_s": 0.007,
+      "recommendation": {
+        "model_key": "svm",
+        "confidence": "none",
+        "agreement": "agree"
+      }
+    },
+    "tradeoff": {
+      "source": "template",
+      "attempts": 3,
+      "valid": true,
+      "errors": [],
+      "latency_s": 0.007,
+      "recommendation": {
+        "model_key": "dt",
+        "confidence": "marginal",
+        "agreement": "agree"
+      }
+    },
+    "calibration": {
+      "source": "llm",
+      "attempts": 1,
+      "valid": true,
+      "errors": [],
+      "latency_s": 0.003,
+      "recommendation": {
+        "model_key": "rf",
+        "confidence": "marginal",
+        "agreement": "agree"
+      }
+    },
+    "poisoned": {
+      "source": "llm",
+      "attempts": 1,
+      "valid": true,
+      "errors": [],
+      "latency_s": 0.005,
+      "recommendation": {
+        "model_key": "rf",
+        "confidence": "marginal",
+        "agreement": "agree"
+      }
+    },
+    "missing": {
+      "source": "template",
+      "attempts": 3,
+      "valid": true,
+      "errors": [],
+      "latency_s": 0.007,
+      "recommendation": {
+        "model_key": "rf",
+        "confidence": "marginal",
+        "agreement": "agree"
+      }
+    }
+  }
+}

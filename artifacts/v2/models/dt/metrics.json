@@ -1,0 +1,66 @@
+{
+  "key": "dt",
+  "label": "Decision tree",
+  "family": "Tree",
+  "task": "classifier",
+  "variant": "nonlinear",
+  "test_samples": 2381,
+  "accuracy": 0.7085,
+  "balanced_accuracy": 0.6995,
+  "macro_f1": 0.7094,
+  "qwk": 0.6993,
+  "mcc": 0.5431,
+  "roc_auc_ovr": 0.8549,
+  "log_loss": 0.7071,
+  "brier": 0.4188,
+  "ece": 0.0342,
+  "exact_share": 0.7085,
+  "adjacent_share": 0.2843,
+  "extreme_share": 0.0071,
+  "per_class": {
+    "Low": {
+      "precision": 0.7395,
+      "recall": 0.7147,
+      "f1": 0.7269,
+      "support": 715
+    },
+    "Medium": {
+      "precision": 0.6655,
+      "recall": 0.7407,
+      "f1": 0.7011,
+      "support": 1072
+    },
+    "High": {
+      "precision": 0.7686,
+      "recall": 0.6431,
+      "f1": 0.7003,
+      "support": 594
+    }
+  },
+  "confusion_matrix": [
+    [
+      511,
+      195,
+      9
+    ],
+    [
+      172,
+      794,
+      106
+    ],
+    [
+      8,
+      204,
+      382
+    ]
+  ],
+  "latency_single_p50_ms": 8.24,
+  "latency_single_p95_ms": 16.269,
+  "latency_batch_5000_ms": 8.95,
+  "model_size_bytes": 20146,
+  "tuning_time_sec": 0.54,
+  "stability_std": 0.0125,
+  "explain_tier": "native",
+  "explain_score": 1.0,
+  "regression_track": {}
+}

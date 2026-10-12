@@ -1,0 +1,44 @@
+{
+  "boost": {
+    "roc_auc_ovr": 0.9282,
+    "brier": 0.3068,
+    "ece": 0.0904,
+    "log_loss": 0.5067
+  },
+  "dt": {
+    "roc_auc_ovr": 0.8549,
+    "brier": 0.4188,
+    "ece": 0.0342,
+    "log_loss": 0.7071
+  },
+  "knn": {
+    "roc_auc_ovr": 0.9006,
+    "brier": 0.3443,
+    "ece": 0.0246,
+    "log_loss": 0.5698
+  },
+  "linreg": {
+    "roc_auc_ovr": 0.8585,
+    "brier": 0.4126,
+    "ece": 0.0213,
+    "log_loss": 0.6791
+  },
+  "logreg": {
+    "roc_auc_ovr": 0.8678,
+    "brier": 0.4295,
+    "ece": 0.1246,
+    "log_loss": 0.6943
+  },
+  "rf": {
+    "roc_auc_ovr": 0.9139,
+    "brier": 0.3179,
+    "ece": 0.0133,
+    "log_loss": 0.5368
+  },
+  "svm": {
+    "roc_auc_ovr": 0.9266,
+    "brier": 0.2918,
+    "ece": 0.027,
+    "log_loss": 0.4977
+  }
+}

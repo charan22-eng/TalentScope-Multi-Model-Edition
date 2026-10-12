@@ -1,0 +1,49 @@
+{
+  "key": "dt",
+  "label": "Decision tree",
+  "family": "Tree",
+  "task": "classifier",
+  "explain_tier": "native",
+  "semver": "2.0.0",
+  "tuning_parameters": {
+    "key": "dt",
+    "label": "Decision tree",
+    "family": "Tree",
+    "task": "classifier",
+    "needs_scaling": false,
+    "explain_tier": "native",
+    "best_params": {
+      "ccp_alpha": 0.0006838478430964043,
+      "criterion": "gini",
+      "max_depth": 13,
+      "min_samples_leaf": 25
+    },
+    "cv_macro_f1_mean": 0.6957,
+    "cv_macro_f1_std": 0.0137,
+    "stability_mean": 0.6939,
+    "stability_std": 0.0125,
+    "tuning_time_sec": 0.54,
+    "calibration_method": "sigmoid",
+    "profile": "fast",
+    "seed": 42,
+    "variant": "nonlinear"
+  },
+  "metrics_summary": {
+    "macro_f1": 0.7094,
+    "accuracy": 0.7085,
+    "qwk": 0.6993,
+    "ece": 0.0342,
+    "brier": 0.4188,
+    "p95_latency_ms": 16.269,
+    "batch_5000_latency_ms": 8.95,
+    "model_size_bytes": 20146
+  },
+  "split_hash": "45a90aaf72c97cca88719f05862d44517a45a145a80257457e4d56941fb5d7de",
+  "data_hash": "",
+  "library_versions": {
+    "scikit-learn": "1.2.2",
+    "numpy": "1.26.4",
+    "pandas": "3.0.5"
+  },
+  "created_at": "2026-10-12T16:43:35Z"
+}

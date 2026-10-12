@@ -1,0 +1,177 @@
+{
+  "boost": {
+    "label": "Gradient boosting (histogram)",
+    "matrix": [
+      [
+        570,
+        144,
+        1
+      ],
+      [
+        111,
+        886,
+        75
+      ],
+      [
+        2,
+        140,
+        452
+      ]
+    ],
+    "classes": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "dt": {
+    "label": "Decision tree",
+    "matrix": [
+      [
+        511,
+        195,
+        9
+      ],
+      [
+        172,
+        794,
+        106
+      ],
+      [
+        8,
+        204,
+        382
+      ]
+    ],
+    "classes": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "knn": {
+    "label": "K-nearest neighbours",
+    "matrix": [
+      [
+        507,
+        205,
+        3
+      ],
+      [
+        107,
+        843,
+        122
+      ],
+      [
+        3,
+        151,
+        440
+      ]
+    ],
+    "classes": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "linreg": {
+    "label": "Linear regression (score to band)",
+    "matrix": [
+      [
+        456,
+        256,
+        3
+      ],
+      [
+        152,
+        817,
+        103
+      ],
+      [
+        5,
+        192,
+        397
+      ]
+    ],
+    "classes": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "logreg": {
+    "label": "Logistic regression (multinomial)",
+    "matrix": [
+      [
+        470,
+        241,
+        4
+      ],
+      [
+        146,
+        795,
+        131
+      ],
+      [
+        5,
+        152,
+        437
+      ]
+    ],
+    "classes": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "rf": {
+    "label": "Random forest",
+    "matrix": [
+      [
+        549,
+        165,
+        1
+      ],
+      [
+        127,
+        853,
+        92
+      ],
+      [
+        3,
+        143,
+        448
+      ]
+    ],
+    "classes": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "svm": {
+    "label": "Support vector machine (RBF)",
+    "matrix": [
+      [
+        572,
+        143,
+        0
+      ],
+      [
+        81,
+        911,
+        80
+      ],
+      [
+        1,
+        136,
+        457
+      ]
+    ],
+    "classes": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  }
+}

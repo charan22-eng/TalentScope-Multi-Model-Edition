@@ -1,0 +1,22 @@
+{
+  "key": "knn",
+  "label": "K-nearest neighbours",
+  "family": "Instance",
+  "task": "classifier",
+  "needs_scaling": true,
+  "explain_tier": "partial",
+  "best_params": {
+    "weights": "uniform",
+    "p": 2,
+    "n_neighbors": 31
+  },
+  "cv_macro_f1_mean": 0.7011,
+  "cv_macro_f1_std": 0.0044,
+  "stability_mean": 0.6919,
+  "stability_std": 0.0098,
+  "tuning_time_sec": 1.31,
+  "calibration_method": "sigmoid",
+  "profile": "fast",
+  "seed": 42,
+  "variant": "nonlinear"
+}
