@@ -1,0 +1,25 @@
+name: TalentScope Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build & Package Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify Guard Suite
+        run: |
+          pip install pyyaml pytest
+          pip install -r backend/requirements.txt
+          python scripts/guard.py
+      - name: Build Docker images
+        run: |
+          docker compose build

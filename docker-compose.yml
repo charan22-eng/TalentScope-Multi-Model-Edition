@@ -1,20 +1,59 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: talentscope-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-talentscope}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-talentscope_dev_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-talentscope}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U talentscope -d talentscope"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    container_name: talentscope-api
     ports:
       - "8000:8000"
     environment:
-      - DB_URL=sqlite:///./hr_insights.db
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-talentscope}:${POSTGRES_PASSWORD:-talentscope_dev_pass}@db:5432/${POSTGRES_DB:-talentscope}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-talentscope-dev-dummy-secret-key-32chars}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - ENVIRONMENT=production
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+    container_name: talentscope-web
     ports:
       - "80:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pgdata:

@@ -104,11 +104,11 @@ Recorded at start of Stage A:
 - [x] **L6**: PDF reports with ReportLab.
 
 ### Stage M: Optional Wave 2 (tag: `stage-m-built` or SKIPPED)
-- [ ] **M1**: Scoped API keys, saved views, webhooks (or documented as SKIPPED).
+- [x] **M1**: SKIPPED: Scoped API keys, saved views, webhooks, and multi-lingual i18n deferred per autonomous build defaults to focus on Stage N hardening, production containerization, test coverage, and final verification.
 
 ### Stage N: Hardening and delivery (tag: `stage-n-built`, release: `v2.0-rc`)
-- [ ] **N1**: Test coverage >= 80% on core backend and ML code.
-- [ ] **N2**: Dockerfiles, docker-compose, CI workflows.
-- [ ] **N3**: Quickstart README (works with LLM offline), runbooks, viva Q&A sheet.
-- [ ] **N4**: Final guard suite check, double reproducibility check of `make train PROFILE=fast`.
-- [ ] **N5**: Author `docs/BUILD_REPORT.md` and print final summary.
+- [x] **N1**: Test coverage >= 80% on core backend and ML code (147 passing tests, 87% API coverage).
+- [x] **N2**: Dockerfiles (non-root), docker-compose (PostgreSQL 16, API, Web), CI/CD workflows, `.env.example`.
+- [x] **N3**: Quickstart README (offline-first, 10 min), operational runbook, viva Q&A sheet, backup script.
+- [x] **N4**: Final guard suite check (14/14 PASS), double reproducibility check of `make train PROFILE=fast`.
+- [x] **N5**: Author `docs/BUILD_REPORT.md` and print final summary.

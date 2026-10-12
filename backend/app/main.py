@@ -139,6 +139,24 @@ def create_app():
     def health():
         return {"status": "ok"}
 
+    @app.get("/ready")
+    def readiness(db: Session = Depends(get_db)):
+        from sqlalchemy import text
+        from epk.artifacts import default_loader
+        db_status = "connected"
+        try:
+            db.execute(text("SELECT 1"))
+        except Exception:
+            db_status = "unavailable"
+
+        champ_status = "available" if (default_loader.root_dir / "champion.json").exists() else "missing"
+        is_ready = (db_status == "connected" and champ_status == "available")
+        return {
+            "status": "ready" if is_ready else "not_ready",
+            "database": db_status,
+            "artifacts": champ_status,
+        }
+
     @app.get("/version")
     def version():
         return {"api_version": settings.api_version, "model_version": metadata.get("version", "unknown")}

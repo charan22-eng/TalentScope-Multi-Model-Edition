@@ -49,5 +49,8 @@ data/processed/*
 project/qa-evidence/
 scratch/
 *.db
+backups/
+.coverage
+.coverage.*
 *~
 *.swp
