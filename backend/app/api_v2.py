@@ -251,8 +251,8 @@ def run_single_model_predict(model_key: str, features_dict: Dict[str, Any]) -> V
 # ==============================================================================
 
 @router.get("/models")
-def list_models():
-    """List all seven models with their specs, metadata, and test metrics (all roles)."""
+def list_models(current_user: User = Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))):
+    """List all seven models with their specs, metadata, and test metrics (all authenticated roles)."""
     manifest = default_loader.manifest.get("files", {})
     champion_data = default_loader.load_champion()
     out = []
