@@ -36,6 +36,9 @@ def test_explain():
         "projects_completed": [5, 10, 20],
         "weekly_hours": [40, 40, 40],
         "prev_score": [3, 4, 5],
+        "peer_feedback": [4.0, 3.5, 4.2],
+        "tasks_on_time_pct": [90.0, 85.0, 95.0],
+        "certifications": [1, 2, 0],
         "department": ["Sales", "HR", "Engineering"],
         "job_level": ["Junior", "Senior", "Mid"],
     })

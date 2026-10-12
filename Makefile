@@ -21,7 +21,10 @@ data:
 	uv run python -m epk.data --out data --seed 42
 
 train:
-	uv run python -m epk.train --config ml/configs/train.yaml
+	python ml/src/epk/train_all.py --profile $${PROFILE:-fast}
+
+final:
+	python ml/src/epk/final_eval.py --variant $${VARIANT:-nonlinear}
 
 api:
 	uv run uvicorn app.main:app --reload --app-dir backend

@@ -1,0 +1,2 @@
+timestamp_utc,variant,config_hash,reason
+2026-10-12T13:41:03.711110+00:00,nonlinear,01ba89823e26e0190edcbc926cbb281d2c33a72a197598bba7cd0874881b66a5,Fix utf-8 encoding in report generator

@@ -32,13 +32,13 @@ Recorded at start of Stage A:
 - [x] **B6**: Ablation on representative scaled and tree models; log CV; author `docs/adr/007-preprocessing-policy.md`.
 
 ### Stage C: Registry, training, final evaluation (tag: `stage-c-built`)
-- [ ] **C1**: `ml/src/epk/models/registry.py` and `ScoreToBand` regressor wrapper; 7 full model specs.
-- [ ] **C2**: Frozen split 60/20/20 (seed 42) into `data/processed/split.json` (cal-A & cal-B disjoint, G5, G7).
-- [ ] **C3**: `train_all.py --profile {fast,standard,thorough}` with equal tuning budget and logging to `reports/experiments.csv`.
-- [ ] **C4**: Probability calibration on `cal-A` via `docs/adr/008-calibration-method.md`.
-- [ ] **C5**: Repeated split seeds for stability std evaluation.
-- [ ] **C6**: `make final` with G6 lock for locked test evaluation, metric catalogue, `test_predictions.csv`, `reports/v2_final.md`.
-- [ ] **C7**: Activate guards G3, G4, G5, G6, G7.
+- [x] **C1**: `ml/src/epk/models/registry.py` and `ScoreToBand` regressor wrapper; 7 full model specs under `ml/src/epk/models/specs/`.
+- [x] **C2**: Frozen split 60/20/20 (seed 42) into `data/processed/split.json` (cal-A & cal-B disjoint, G5, G7).
+- [x] **C3**: `train_all.py --profile {fast,standard,thorough}` with equal tuning budget and logging to `reports/experiments.csv`.
+- [x] **C4**: Probability calibration on `cal-A` via `docs/adr/008-calibration-method.md` (Platt scaling / sigmoid).
+- [x] **C5**: Repeated split seeds for stability std evaluation.
+- [x] **C6**: `make final` with G6 lock for locked test evaluation, metric catalogue, `test_predictions.csv`, `reports/v2_final.md`.
+- [x] **C7**: Activate guards G3, G4, G5, G6, G7 in `scripts/guard.py`.
 
 ### Stage D: Comparison science and evidence packet (tag: `stage-d-built`)
 - [ ] **D1**: Paired stratified bootstrap 95% CIs (2,000 resamples) for macro-F1, accuracy, QWK, and rank 1 vs 2 difference.

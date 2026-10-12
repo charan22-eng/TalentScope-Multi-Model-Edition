@@ -1,9 +1,16 @@
-run_id,phase,model,cv_macro_f1,test_macro_f1,notes
-baseline_majority,3.2,Dummy Prior,,0.207,Majority class
-baseline_lr,3.2,LogReg,,0.742,Balanced weights
-knn_unscaled,3.5,KNN(k=5 unscaled),0.574,,Ablation
-knn_scaled,3.5,KNN(k=5 scaled),0.655,0.662,Primary model
-ablation_logreg_winsor_on,MM-S2,LogisticRegression,0.7076 +- 0.0056,N/A (CV only),"Ablation winsorizing=on, scaling=StandardScaler"
-ablation_logreg_winsor_off,MM-S2,LogisticRegression,0.7093 +- 0.0060,N/A (CV only),"Ablation winsorizing=off, scaling=StandardScaler"
-ablation_rf_winsor_on,MM-S2,RandomForest,0.7723 +- 0.0077,N/A (CV only),"Ablation winsorizing=on, scaling=None"
-ablation_rf_winsor_off,MM-S2,RandomForest,0.7733 +- 0.0061,N/A (CV only),"Ablation winsorizing=off, scaling=None"
+run_id,phase,model,cv_macro_f1,test_macro_f1,params,seed,data_checksum,split_hash,profile,notes
+baseline_majority,3.2,Dummy Prior,,0.207,,,,,,Majority class
+baseline_lr,3.2,LogReg,,0.742,,,,,,Balanced weights
+knn_unscaled,3.5,KNN(k=5 unscaled),0.574,,,,,,,Ablation
+knn_scaled,3.5,KNN(k=5 scaled),0.655,0.662,,,,,,Primary model
+ablation_logreg_winsor_on,MM-S2,LogisticRegression,0.7076 +- 0.0056,N/A (CV only),,,,,,"Ablation winsorizing=on, scaling=StandardScaler"
+ablation_logreg_winsor_off,MM-S2,LogisticRegression,0.7093 +- 0.0060,N/A (CV only),,,,,,"Ablation winsorizing=off, scaling=StandardScaler"
+ablation_rf_winsor_on,MM-S2,RandomForest,0.7723 +- 0.0077,N/A (CV only),,,,,,"Ablation winsorizing=on, scaling=None"
+ablation_rf_winsor_off,MM-S2,RandomForest,0.7733 +- 0.0061,N/A (CV only),,,,,,"Ablation winsorizing=off, scaling=None"
+train_fast_boost_nonlinear,MM-S3,boost,0.7932 +- 0.0053,N/A (untouched),"{""l2_regularization"": 0.1235748371091217, ""learning_rate"": 0.05634303024223015, ""max_iter"": 293, ""max_leaf_nodes"": 10}",42.0,0d2967bd3b5caa2c47baeaa81f1ef31bb6c7678f250b6ec0586918b6978ce87b,817af29ea8eb0735d828058c3cd83ed30d6102d13233da03e7e8e0181c1e2ac8,fast,"Tuned (10 iters), calibrated on cal-A, stability_std=0.0028"
+train_fast_dt_nonlinear,MM-S3,dt,0.6957 +- 0.0137,N/A (untouched),"{""ccp_alpha"": 0.0006838478430964043, ""criterion"": ""gini"", ""max_depth"": 13, ""min_samples_leaf"": 25}",42.0,0d2967bd3b5caa2c47baeaa81f1ef31bb6c7678f250b6ec0586918b6978ce87b,817af29ea8eb0735d828058c3cd83ed30d6102d13233da03e7e8e0181c1e2ac8,fast,"Tuned (10 iters), calibrated on cal-A, stability_std=0.0125"
+train_fast_knn_nonlinear,MM-S3,knn,0.7011 +- 0.0044,N/A (untouched),"{""weights"": ""uniform"", ""p"": 2, ""n_neighbors"": 31}",42.0,0d2967bd3b5caa2c47baeaa81f1ef31bb6c7678f250b6ec0586918b6978ce87b,817af29ea8eb0735d828058c3cd83ed30d6102d13233da03e7e8e0181c1e2ac8,fast,"Tuned (10 iters), calibrated on cal-A, stability_std=0.0098"
+train_fast_linreg_nonlinear,MM-S3,linreg,0.6861 +- 0.0073,N/A (untouched),{},42.0,0d2967bd3b5caa2c47baeaa81f1ef31bb6c7678f250b6ec0586918b6978ce87b,817af29ea8eb0735d828058c3cd83ed30d6102d13233da03e7e8e0181c1e2ac8,fast,"Tuned (10 iters), calibrated on cal-A, stability_std=0.0106"
+train_fast_logreg_nonlinear,MM-S3,logreg,0.7087 +- 0.0055,N/A (untouched),"{""C"": 0.07459343285726545, ""class_weight"": null}",42.0,0d2967bd3b5caa2c47baeaa81f1ef31bb6c7678f250b6ec0586918b6978ce87b,817af29ea8eb0735d828058c3cd83ed30d6102d13233da03e7e8e0181c1e2ac8,fast,"Tuned (10 iters), calibrated on cal-A, stability_std=0.0059"
+train_fast_rf_nonlinear,MM-S3,rf,0.7689 +- 0.0126,N/A (untouched),"{""max_depth"": 20, ""max_features"": null, ""min_samples_leaf"": 3, ""n_estimators"": 264}",42.0,0d2967bd3b5caa2c47baeaa81f1ef31bb6c7678f250b6ec0586918b6978ce87b,817af29ea8eb0735d828058c3cd83ed30d6102d13233da03e7e8e0181c1e2ac8,fast,"Tuned (10 iters), calibrated on cal-A, stability_std=0.0055"
+train_fast_svm_nonlinear,MM-S3,svm,0.8014 +- 0.0072,N/A (untouched),"{""C"": 0.8179499475211671, ""gamma"": 0.037520558551242804}",42.0,0d2967bd3b5caa2c47baeaa81f1ef31bb6c7678f250b6ec0586918b6978ce87b,817af29ea8eb0735d828058c3cd83ed30d6102d13233da03e7e8e0181c1e2ac8,fast,"Tuned (10 iters), calibrated on cal-A, stability_std=0.0014"
