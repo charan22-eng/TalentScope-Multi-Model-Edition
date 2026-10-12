@@ -182,6 +182,35 @@ def check_g7():
     return True, "Calibration sets (cal-A, cal-B) strictly isolated from model tuning"
 
 
+def check_g8():
+    """G8 Evidence packet contains no employee data and every fact is generated."""
+    pkt_path = Path("artifacts/v2/comparison/evidence_packet.json")
+    if not pkt_path.exists():
+        return False, "artifacts/v2/comparison/evidence_packet.json not found"
+
+    with open(pkt_path, "r", encoding="utf-8") as f:
+        pkt = json.load(f)
+
+    try:
+        from epk.evidence import scan_packet_for_forbidden_keys
+        violations = scan_packet_for_forbidden_keys(pkt)
+        if violations:
+            return False, f"Forbidden employee keys in packet: {violations}"
+    except ImportError as e:
+        return False, f"Could not import scanner: {e}"
+
+    if not pkt.get("deterministic_winner"):
+        return False, "Missing deterministic_winner"
+    if pkt.get("decision_strength") not in ("clear", "marginal", "none"):
+        return False, "Missing or invalid decision_strength"
+    if not pkt.get("synthetic_caveat_fact"):
+        return False, "Missing synthetic_caveat_fact"
+    if len(pkt.get("facts", [])) < 20:
+        return False, f"Too few facts: {len(pkt.get('facts', []))} < 20"
+
+    return True, f"Packet clean ({len(pkt['facts'])} facts, winner={pkt['deterministic_winner']}, strength={pkt['decision_strength']})"
+
+
 def check_g13_g14():
     """G13 No secrets; G14 Ratchet on skips, suppressions, any, and console_log."""
     try:
@@ -259,6 +288,10 @@ def run_guards():
     # G7
     ok7, msg7 = check_g7()
     guards["G7 Calibration Set Isolated"] = (ok7, msg7)
+
+    # G8
+    ok8, msg8 = check_g8()
+    guards["G8 Evidence Packet Safe"] = (ok8, msg8)
 
     # G13 & G14
     ok13, msg13, ok14, msg14 = check_g13_g14()

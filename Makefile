@@ -26,6 +26,9 @@ train:
 final:
 	python ml/src/epk/final_eval.py --variant $${VARIANT:-nonlinear}
 
+final-variants:
+	python ml/src/epk/sensitivity.py
+
 api:
 	uv run uvicorn app.main:app --reload --app-dir backend
 

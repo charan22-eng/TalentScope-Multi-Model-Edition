@@ -41,13 +41,13 @@ Recorded at start of Stage A:
 - [x] **C7**: Activate guards G3, G4, G5, G6, G7 in `scripts/guard.py`.
 
 ### Stage D: Comparison science and evidence packet (tag: `stage-d-built`)
-- [ ] **D1**: Paired stratified bootstrap 95% CIs (2,000 resamples) for macro-F1, accuracy, QWK, and rank 1 vs 2 difference.
-- [ ] **D2**: Pairwise McNemar tests across 21 pairs with Holm correction.
-- [ ] **D3**: Calibration metrics (ECE, Brier) & conformal sets on `cal-B` (alpha 0.1).
-- [ ] **D4**: Robustness, fairness, and stability metrics per model.
-- [ ] **D5**: MCDA module with 5 profiles, Dirichlet rank probability, decision strength rule; `docs/adr/009-champion-selection-rule.md`.
-- [ ] **D6**: Data sensitivity across `linear`, `nonlinear`, `noisy_overlap` via `make final-variants` and `sensitivity.json`.
-- [ ] **D7**: Machine-built evidence packet (`evidence.py`) with numbered facts and G8 scanner.
+- [x] **D1**: Paired stratified bootstrap 95% CIs (2,000 resamples) for macro-F1, accuracy, QWK, and rank 1 vs 2 difference (`stats.py`).
+- [x] **D2**: Pairwise McNemar tests across 21 pairs with Holm correction (`pairwise.json`).
+- [x] **D3**: Calibration metrics (ECE, Brier) & conformal sets on `cal-B` (alpha 0.1) (`conformal.json`).
+- [x] **D4**: Robustness stress-testing, demographic fairness disparity ratios, and stability metrics per model.
+- [x] **D5**: MCDA module (`mcda.py`) with 5 profiles, Dirichlet rank probability, decision strength rule; author `docs/adr/009-champion-selection-rule.md`.
+- [x] **D6**: Data sensitivity across `linear`, `nonlinear`, `noisy_overlap` via `make final-variants` and `artifacts/v2/comparison/sensitivity.json`.
+- [x] **D7**: Machine-built evidence packet (`evidence.py`) with numbered facts, caveat `F90`, and G8 scanner.
 
 ### Stage E: Multi-model explainability and uncertainty (tag: `stage-e-built`)
 - [ ] **E1**: Model-agnostic explainers: permutation importance, local attribution, counterfactuals, stability, performance index.
