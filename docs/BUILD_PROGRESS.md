@@ -91,9 +91,9 @@ Recorded at start of Stage A:
 - [x] **J4**: Component and Playwright tests.
 
 ### Stage K: 3D Multi-Model Experiences (tag: `stage-k-built`)
-- [ ] **K1**: Decision Landscape with 2-model overlay & difference surface ($P_A - P_B$), 2D heatmap fallback, similar-cases 3D view.
-- [ ] **K2**: Talent Galaxy hero scene with pause control.
-- [ ] **K3**: Disposal/leak tests, performance budgets recorded in `docs/performance.md`.
+- [x] **K1**: Decision Landscape with 2-model overlay & difference surface ($P_A - P_B$), 2D heatmap fallback, similar-cases 3D view.
+- [x] **K2**: Talent Galaxy hero scene with pause control.
+- [x] **K3**: Disposal/leak tests, performance budgets recorded in `docs/performance.md`.
 
 ### Stage L: Secure app and MLOps (tag: `stage-l-built`)
 - [ ] **L1**: SQLite & PostgreSQL database migrations for all tables.

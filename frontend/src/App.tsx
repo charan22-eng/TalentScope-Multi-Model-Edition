@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import PredictPage from './pages/Predict';
 import BatchPage from './pages/Batch';
@@ -7,13 +7,11 @@ import ModelLabPage from './pages/ModelLab';
 import MethodologyPage from './pages/Methodology';
 import DataExplorerPage from './pages/DataExplorer';
 import ArenaPage from './pages/arena/ArenaPage';
+import ThreePage from './pages/ThreePage';
 import { Login } from './pages/Login';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { ClassChip } from './components/ui/ClassChip';
 import './index.css';
-
-// Lazy loaded 3D scene frame
-const SceneFrame = lazy(() => import('./components/three/SceneFrame'));
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -86,37 +84,6 @@ function HomePage() {
   );
 }
 
-function ThreeViewerPage() {
-  const [tier, setTier] = useState<'high' | 'off'>('high');
-
-  return (
-    <div>
-      <h2>3D Galaxy Viewer</h2>
-      <label style={{ display: 'block', marginBottom: '1rem' }}>
-        Quality Tier:
-        <select value={tier} onChange={(e) => setTier(e.target.value as 'high' | 'off')} style={{ marginLeft: '0.5rem' }}>
-          <option value="high">High</option>
-          <option value="off">Off (Fallback)</option>
-        </select>
-      </label>
-      
-      <Suspense fallback={<div>Loading 3D Engine...</div>}>
-        <SceneFrame 
-          tier={tier} 
-          fallback={<div data-testid="scene-fallback" style={{ padding: '2rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius)', textAlign: 'center' }}>3D Visualization is currently disabled or unavailable.</div>}
-        >
-          {/* Simple rotating mesh for the test */}
-          <mesh>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color="hotpink" />
-          </mesh>
-          <ambientLight intensity={0.5} />
-        </SceneFrame>
-      </Suspense>
-    </div>
-  );
-}
-
 function ComponentsPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -162,7 +129,7 @@ export default function App() {
           <Route path="/model-lab" element={<ProtectedRoute><ModelLabPage /></ProtectedRoute>} />
           <Route path="/data-explorer" element={<ProtectedRoute><DataExplorerPage /></ProtectedRoute>} />
           <Route path="/methodology" element={<ProtectedRoute><MethodologyPage /></ProtectedRoute>} />
-          <Route path="/3d" element={<ProtectedRoute><ThreeViewerPage /></ProtectedRoute>} />
+          <Route path="/3d" element={<ProtectedRoute><ThreePage /></ProtectedRoute>} />
           <Route path="/components" element={<ProtectedRoute><ComponentsPage /></ProtectedRoute>} />
         </Routes>
       </AppShell>
