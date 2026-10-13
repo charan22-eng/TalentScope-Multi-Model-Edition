@@ -43,10 +43,10 @@
     "alpha": 0.1,
     "threshold": 0.6747,
     "min_prob_threshold": 0.3253,
-    "empirical_coverage": 0.9135,
+    "empirical_coverage": 0.9131,
     "avg_set_size": 1.659,
-    "single_label_share": 0.341,
-    "multi_label_share": 0.659,
+    "single_label_share": 0.3415,
+    "multi_label_share": 0.6585,
     "empty_share": 0.0
   },
   "rf": {

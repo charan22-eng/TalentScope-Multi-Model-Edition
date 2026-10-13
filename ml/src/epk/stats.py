@@ -194,7 +194,7 @@ def compute_conformal_sets_cal_b(
         # Evaluate on test set using the shared prediction-set function
         p_test = model.predict_proba(X_test)
         sets = [
-            get_prediction_set(p_test[i], classes=[0, 1, 2], min_prob_threshold=min_prob_threshold)
+            get_prediction_set(p_test[i], classes=[0, 1, 2], threshold=threshold)
             for i in range(len(test_df))
         ]
 

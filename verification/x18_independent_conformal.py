@@ -32,12 +32,12 @@ def verify_conformal():
         probs = df[["prob_low", "prob_med", "prob_high"]].values
         
         rep = stored.get(key, {})
-        min_p = rep.get("min_prob_threshold", 0.0)
+        thresh = rep.get("threshold", 0.8)
         rep_cov = rep.get("empirical_coverage", 0.0)
         rep_size = rep.get("avg_set_size", 0.0)
         
-        # Conformal prediction set per sample via shared get_prediction_set function
-        sets = [get_prediction_set(p, classes=[0, 1, 2], min_prob_threshold=min_p) for p in probs]
+        # Conformal prediction set per sample via shared get_prediction_set function (standard split conformal)
+        sets = [get_prediction_set(p, classes=[0, 1, 2], threshold=thresh) for p in probs]
         set_sizes = [len(s) for s in sets]
         
         # Empirical coverage: true label in conformal set
