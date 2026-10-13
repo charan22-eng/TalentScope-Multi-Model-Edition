@@ -10,7 +10,7 @@
 - Test QWK: 0.8142
 - Conformal test coverage (alpha=0.1): 0.8988 (avg set size: 1.324)
 - MCDA Balanced Profile Score: 0.6387 (Rank #1)
-- Generator Freeze Hash: `72248D00A2374351BD0E8CD610D6CF072895697666270E40A8686CE15147FFFB`
+- Generator Freeze Hash: `72248D00A23714FAC157E7E5438F4CA75FEA24D041425FE8CC0EE59FDC468305`
 - Test Evaluation Lock: `reports/test_eval.lock` (LOCKED, config `01ba89823e26...`)
 
 ---
