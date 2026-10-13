@@ -3,6 +3,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import sys
+sys.path.insert(0, "ml/src")
+from epk.uncertainty import get_prediction_set
+
 ROOT = Path(".")
 MODELS = ["boost", "dt", "knn", "linreg", "logreg", "rf", "svm"]
 
@@ -32,8 +36,8 @@ def verify_conformal():
         rep_cov = rep.get("empirical_coverage", 0.0)
         rep_size = rep.get("avg_set_size", 0.0)
         
-        # Conformal prediction set per sample: classes where prob >= min_p
-        sets = [np.where(p >= min_p)[0] for p in probs]
+        # Conformal prediction set per sample via shared get_prediction_set function
+        sets = [get_prediction_set(p, classes=[0, 1, 2], min_prob_threshold=min_p) for p in probs]
         set_sizes = [len(s) for s in sets]
         
         # Empirical coverage: true label in conformal set

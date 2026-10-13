@@ -21,6 +21,7 @@ from epk.features import ALL_FEATURES, NUMERIC_FEATURES
 from epk.labels import encode_bands
 from epk.models.registry import MODEL_KEYS
 from epk.split import load_split
+from epk.uncertainty import get_prediction_set
 
 
 def paired_stratified_bootstrap(
@@ -187,13 +188,15 @@ def compute_conformal_sets_cal_b(
         # Conformal quantile: ceil((n+1)(1-alpha)) / n
         q_level = float(np.ceil((n_cal_b + 1) * (1.0 - alpha)) / n_cal_b)
         q_level = min(1.0, q_level)
-        threshold = float(np.quantile(nonconformity, q_level))
+        threshold = round(float(np.quantile(nonconformity, q_level)), 4)
+        min_prob_threshold = round(max(0.0, 1.0 - threshold), 4)
 
-        # Evaluate on test set
+        # Evaluate on test set using the shared prediction-set function
         p_test = model.predict_proba(X_test)
-        # Prediction set: classes with non-conformity <= threshold <=> prob >= 1 - threshold
-        min_prob_threshold = max(0.0, 1.0 - threshold)
-        sets = [np.where(p_test[i] >= min_prob_threshold)[0] for i in range(len(test_df))]
+        sets = [
+            get_prediction_set(p_test[i], classes=[0, 1, 2], min_prob_threshold=min_prob_threshold)
+            for i in range(len(test_df))
+        ]
 
         # Guarantee non-empty sets if required (or measure empty share)
         set_sizes = np.array([len(s) for s in sets])
@@ -201,8 +204,8 @@ def compute_conformal_sets_cal_b(
 
         results[key] = {
             "alpha": alpha,
-            "threshold": round(threshold, 4),
-            "min_prob_threshold": round(min_prob_threshold, 4),
+            "threshold": threshold,
+            "min_prob_threshold": min_prob_threshold,
             "empirical_coverage": round(float(np.mean(coverages)), 4),
             "avg_set_size": round(float(np.mean(set_sizes)), 3),
             "single_label_share": round(float(np.mean(set_sizes == 1)), 4),

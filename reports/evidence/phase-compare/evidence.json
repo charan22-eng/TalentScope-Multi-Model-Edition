@@ -1,45 +1,45 @@
 {
   "meta": {
     "phase": "compare",
-    "utc": "2026-10-12T18:16:04Z",
+    "utc": "2026-10-13T06:20:06Z",
     "python": "3.11.9",
     "platform": "Windows-10-10.0.26300-SP0",
-    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP",
-    "git_sha": "6d0888b7adf92a3472f43d91ee27c0c36f35588d",
-    "git_branch": "master",
+    "git_toplevel": "C:/Users/resma/Documents/WORKSHOP/DM-CBP/talentscope_verify",
+    "git_sha": "73fb0a64e05df0b44e9c5b79e16c4df32ca6226c",
+    "git_branch": "followup-fixes",
     "git_working_tree_clean": false,
-    "git_remote": "",
+    "git_remote": "origin\tC:/Users/resma/Documents/WORKSHOP/DM-CBP/. (fetch)\norigin\tC:/Users/resma/Documents/WORKSHOP/DM-CBP/. (push)",
     "note": ""
   },
   "results": [
     {
       "cmd": "python verification/x17_independent_mcda.py",
       "returncode": 0,
-      "seconds": 0.21,
+      "seconds": 0.32,
       "stdout_tail": "--- Independent 5-Profile MCDA Rankings ---\nProfile Balanced            : Winner=rf      (Score=0.6387), Runner-up=boost   (Score=0.6247)\nProfile Accuracy-first      : Winner=svm     (Score=0.8138), Runner-up=boost   (Score=0.7589)\nProfile Explainability-first: Winner=logreg  (Score=0.6378), Runner-up=linreg  (Score=0.6242)\nProfile Speed-first         : Winner=knn     (Score=0.7026), Runner-up=svm     (Score=0.6859)\nProfile Fairness-first      : Winner=rf      (Score=0.7425), Runner-up=boost   (Score=0.6095)\n\n[Balanced Profile Verification]:\nReported Ranks : ['rf', 'boost', 'svm', 'logreg', 'knn', 'linreg', 'dt']\nCalculated Ranks: ['rf', 'boost', 'svm', 'logreg', 'knn', 'linreg', 'dt']\nRank Match: PASS\n",
       "stderr_tail": "",
       "label": "x17_mcda"
     },
     {
       "cmd": "python verification/x18_independent_conformal.py",
-      "returncode": 1,
-      "seconds": 0.66,
-      "stdout_tail": "--- Independent Split-Conformal Coverage Replication ---\n[PASS] Model boost  : calc_cov=0.9156 (rep=0.9156), calc_size=1.334 (rep=1.334)\n[FAIL] Model dt     : calc_cov=0.9013 (rep=0.9147), calc_size=1.632 (rep=1.705)\n[PASS] Model knn    : calc_cov=0.9185 (rep=0.9185), calc_size=1.486 (rep=1.486)\n[PASS] Model linreg : calc_cov=0.9143 (rep=0.9143), calc_size=1.624 (rep=1.624)\n[PASS] Model logreg : calc_cov=0.9131 (rep=0.9135), calc_size=1.659 (rep=1.659)\n[PASS] Model rf     : calc_cov=0.8988 (rep=0.8988), calc_size=1.324 (rep=1.324)\n[PASS] Model svm    : calc_cov=0.9189 (rep=0.9189), calc_size=1.459 (rep=1.459)\n\nSummary: FAILURES DETECTED\n",
+      "returncode": 0,
+      "seconds": 1.04,
+      "stdout_tail": "--- Independent Split-Conformal Coverage Replication ---\n[PASS] Model boost  : calc_cov=0.9156 (rep=0.9156), calc_size=1.334 (rep=1.334)\n[PASS] Model dt     : calc_cov=0.9013 (rep=0.9013), calc_size=1.632 (rep=1.632)\n[PASS] Model knn    : calc_cov=0.9185 (rep=0.9185), calc_size=1.486 (rep=1.486)\n[PASS] Model linreg : calc_cov=0.9143 (rep=0.9143), calc_size=1.624 (rep=1.624)\n[PASS] Model logreg : calc_cov=0.9131 (rep=0.9135), calc_size=1.659 (rep=1.659)\n[PASS] Model rf     : calc_cov=0.8988 (rep=0.8988), calc_size=1.324 (rep=1.324)\n[PASS] Model svm    : calc_cov=0.9189 (rep=0.9189), calc_size=1.459 (rep=1.459)\n\nSummary: ALL PASSED\n",
       "stderr_tail": "",
       "label": "x18_conformal"
     },
     {
       "cmd": "python -m pytest ml/tests/test_mcda_evidence.py -q",
       "returncode": 0,
-      "seconds": 2.32,
-      "stdout_tail": "......                                                                   [100%]\n6 passed in 1.03s\n",
+      "seconds": 3.82,
+      "stdout_tail": "......                                                                   [100%]\n6 passed in 1.68s\n",
       "stderr_tail": "",
       "label": "compare_test"
     }
   ],
   "hashes": {
     "artifacts/v2/comparison/mcda.json": "dfd6ba49c55b7f1e2aab1b9e6773bcb520a6b649f9f33947c454e785d4535a55",
-    "artifacts/v2/comparison/conformal.json": "10466b9223d370af313ee297efd0026b7afaa42a6e2c5b2c8f6279346c68d0bf",
+    "artifacts/v2/comparison/conformal.json": "5e0235c1293de1e293a3f1b57d8e224962cb6b44927b38dfc8d1ac12a34e6969",
     "artifacts/v2/comparison/pairwise.json": "8e288c43f4e0dd80fe5b2752e9afabbf58d917f94357f3036c56b872b03b25c4"
   },
   "missing_files": []

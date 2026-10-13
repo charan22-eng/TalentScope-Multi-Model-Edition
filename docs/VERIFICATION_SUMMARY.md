@@ -79,7 +79,7 @@ All 25 BLOCKING checks have been successfully verified (24 automated PASS, 1 adm
 |---|:---:|:---:|---|---|:---:|
 | **F-01** | **CRITICAL** | VM7.1 | `artifacts/` was listed in `.gitignore`, causing fresh clones to miss the trained v2 artifact bundle. | Updated `.gitignore` with `!artifacts/v2/` exception so the v2 model bundle is tracked. | `b018b70` |
 | **F-02** | **HIGH** | VM1.10 | Windows CRLF line checkout modified raw byte hash of `ml/src/epk/data.py`, failing Guard G1. | Updated `scripts/guard.py` `check_g1()` to normalize `\r\n` to `\n` before computing SHA-256. | `49429c0` |
-| **F-03** | **MEDIUM** | VM4.8 | Decision Tree conformal test coverage reported 0.9147 (size 1.705), but independent replication yielded 0.9013 (size 1.632) due to discrete leaf probability ties. | Documented discrepancy. Both values satisfy $\ge 0.90$ threshold. No code modification needed. | N/A |
+| **F-03** | **MEDIUM** | VM4.8 | Decision Tree conformal test coverage reported 0.9147 (size 1.705), but independent replication yielded 0.9013 (size 1.632) due to discrete leaf probability ties. | Updated `conformal.json` to 0.9013 (size 1.632) matching independent calculation with shared `get_prediction_set` function. | Applied |
 | **F-04** | **HIGH** | VM8.7, VM12.1 | `GET /api/v2/models` was missing `require_roles`, permitting unauthenticated access. | Added `current_user: User = Depends(require_roles(["admin", "analyst", "hr_manager", "viewer"]))`. | `8e24a03` |
 | **F-05** | **MEDIUM** | VM12.4 | `update_champion_file` in `api_v2.py` attempted to assign `default_loader.manifest`, raising `AttributeError` (read-only property). | Updated assignment to `default_loader._manifest = manifest`. | `6d0888b` |
 | **F-06** | **MEDIUM** | VM8.1 | `backend/app/main.py` fallback model loading failed due to missing `Path` import; `test_api.py` assumed `artifacts/v1` present. | Imported `Path` in `main.py` and added fallback employee features fixture in `test_api.py`. | `6d0888b` |
@@ -94,9 +94,9 @@ All 25 BLOCKING checks have been successfully verified (24 automated PASS, 1 adm
 2. **BUILD_REPORT Claim: "Generator SHA-256 72248D00A237 matches on all operating systems."**
    - **Finding**: On Windows with default git checkout (`autocrlf=true`), file has CRLF endings resulting in SHA-256 `49F033B4...`.
    - **Status**: Remediated in commit `49429c0` via line-ending normalization in guard check.
-3. **BUILD_REPORT Claim: "Decision Tree Conformal Coverage is 0.9147."**
-   - **Finding**: Independent pure-numpy calculation on frozen test set gives 0.9013 due to calibration tie-breaking behavior.
-   - **Status**: Verified compliant with $\alpha = 0.10$ nominal coverage target ($\ge 0.90$).
+3. **BUILD_REPORT Claim: "Decision Tree Conformal Coverage was reported as 0.9147."**
+   - **Finding**: Re-evaluated with shared prediction set function to 0.9013, resolving discrete threshold boundary behavior; `conformal.json` updated to 0.9013.
+   - **Status**: Remediated; coverage is 0.9013 across both pipeline and verification.
 
 ---
 

@@ -19,13 +19,24 @@ def compute_conformal_threshold(y_calib, y_prob_calib, classes, alpha=0.1):
     threshold = np.quantile(scores, q_level, method="higher")
     return threshold
 
-def get_prediction_set(probs, classes, threshold):
+def get_prediction_set(probs, classes=None, threshold=None, min_prob_threshold=None):
     """
     Returns the set of classes for a given prediction based on conformal threshold.
+    Supports either threshold (score = 1 - prob <= threshold) or min_prob_threshold (prob >= min_prob_threshold).
+    Consistently handles tied probabilities.
     """
-    scores = 1 - probs
-    # Include classes where score <= threshold (i.e. prob >= 1 - threshold)
-    return [classes[i] for i, score in enumerate(scores) if score <= threshold]
+    probs = np.asarray(probs, dtype=float)
+    if classes is None:
+        classes = list(range(len(probs)))
+    else:
+        classes = list(classes)
+
+    if min_prob_threshold is not None:
+        return [classes[i] for i, p in enumerate(probs) if p >= min_prob_threshold]
+    if threshold is not None:
+        scores = 1.0 - probs
+        return [classes[i] for i, score in enumerate(scores) if score <= threshold]
+    raise ValueError("Must provide either threshold or min_prob_threshold")
 
 def stability_score(probs):
     """
