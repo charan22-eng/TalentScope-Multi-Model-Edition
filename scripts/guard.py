@@ -300,7 +300,7 @@ def check_g11():
 
 
 def check_g12():
-    """G12 RBAC matrix enforcement across routes with negative access tests."""
+    """G12 RBAC matrix and Default-Deny guard across OpenAPI routes."""
     openapi_file = Path("backend/openapi.json")
     if not openapi_file.exists():
         openapi_file = Path("openapi.json")
@@ -317,11 +317,48 @@ def check_g12():
     if "/api/v2/llm/health" not in paths or "/api/v2/llm/config" not in paths or "/api/v2/llm/verdict" not in paths:
         return False, "Missing protected v2 LLM routes in openapi schema"
 
+    # Default-Deny Guard: Every route in openapi.json must require auth or be on the explicit public allowlist
+    public_allowlist = {
+        ("GET", "/health"),
+        ("GET", "/ready"),
+        ("GET", "/version"),
+        ("POST", "/login"),
+        ("GET", "/analytics/drift"),
+        ("POST", "/explain"),
+        ("POST", "/batch"),
+        ("GET", "/batch/report/pdf"),
+        ("GET", "/viz/galaxy"),
+        ("GET", "/viz/surface"),
+        ("GET", "/analytics"),
+        ("GET", "/analytics/constellation"),
+        ("GET", "/drift/projection"),
+        ("POST", "/api/v2/predict/all"),
+        ("POST", "/api/v2/explain"),
+        ("GET", "/api/v2/compare/{topic}"),
+        ("POST", "/api/v2/compare/mcda"),
+        ("POST", "/api/v2/viz/surface"),
+        ("GET", "/api/v2/viz/surface"),
+        ("GET", "/api/v2/viz/pca"),
+    }
+
+    unprotected = []
+    for p, methods in paths.items():
+        for m, details in methods.items():
+            if m.lower() in ("parameters", "$ref"):
+                continue
+            has_auth = len(details.get("security", [])) > 0
+            is_allowlisted = (m.upper(), p) in public_allowlist
+            if not has_auth and not is_allowlisted:
+                unprotected.append(f"{m.upper()} {p}")
+
+    if unprotected:
+        return False, f"Default-deny violation! Routes without auth or allowlist: {unprotected}"
+
     test_file = Path("backend/tests/test_api_v2.py")
     if not test_file.exists() or "test_v2_llm_rbac_matrix_g12" not in test_file.read_text(encoding="utf-8"):
         return False, "backend/tests/test_api_v2.py does not test RBAC matrix"
 
-    return True, "RBAC matrix enforced across routes with negative access tests"
+    return True, "Default-deny and RBAC matrix enforced across routes with negative access tests"
 
 
 def check_g13_g14():
