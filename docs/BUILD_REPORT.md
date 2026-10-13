@@ -180,7 +180,7 @@ All architectural trade-offs adhere to the DECIDE-AND-LOG protocol recorded in [
 
 ### 4.2 Deferred Items
 - **Real-LLM Live Evaluation**: The LLM verdict engine has been verified using deterministic mock/template fallback and schema validators. Execution against a live physical Ollama instance (`llama3.2` / `mistral`) is deferred to the formal verification prompt session.
-- **Human Invariant Checks (VM1.2, VM1.3)**: Visual inspection of 3D Canvas scenes and human sign-off on narrative fairness reports are deferred to verification.
+- **Human Invariant Data Checks (VM1.2, VM1.3)**: Dataset determinism across seeds/runs (VM1.2) and variant macro-F1 difficulty spread checks across linear, nonlinear, and noisy_overlap datasets (VM1.3) are data reproducibility checks (not 3D canvas inspection), assigned to human verification in the check kit.
 - **Wave 2 Feature Expansion**: Scoped API keys, outgoing webhooks, and internationalization (i18n) were deferred per Stage M protocol.
 
 ---

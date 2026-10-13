@@ -11,7 +11,11 @@
 
 The TalentScope Multi-Model Machine Learning Platform has undergone rigorous, independent adversarial verification against all 117 multi-model checks (VM1.1 to VM12.8) and legacy operational checks (V0.x, V6.x to V15.x).
 
-All 25 BLOCKING checks have been successfully verified (24 automated PASS, 1 administrative check V0.1 assigned to human in the check kit). Zero blocking checks failed or remain unresolved.
+Among the 25 BLOCKING checks in scope:
+- **24 PASS**: Automated and agent-verified evidence recorded (zero failures).
+- **1 NOT RUN**: `V0.1` (administrative check verifying repository location and live GitHub remote, assigned to human in Kit).
+- **5 H-Marked Blocking Checks**: `VM2.3`, `VM3.2`, `VM6.3`, `VM7.2`, and `V10.4` carry complete automated agent evidence from invariant guards and adversarial scripts, recorded as **Agent Evidence Only, Pending Human Sign-Off**.
+- **Data vs 3D Inspection**: `VM1.2` (dataset determinism across seeds/runs) and `VM1.3` (variant macro-F1 difficulty spread across linear, nonlinear, and noisy_overlap) are **data reproducibility checks**, not 3D canvas inspection.
 
 **Overall Recommended Gate Decision**: **RECOMMEND CANDIDATE ACCEPTANCE (PROCEED TO HUMAN SMOKE CHECK)**.
 
@@ -35,9 +39,9 @@ All 25 BLOCKING checks have been successfully verified (24 automated PASS, 1 adm
 | **VM11: 3D Visualizations** | 6 | 3 | 3 | 0 | 0 |
 | **VM12: MLOps, Deploy & RBAC** | 8 | 5 | 3 | 1 | 0 |
 | **Legacy Phases (V6 - V15)** | 15 | 10 | 5 | 1 | 0 |
-| **TOTALS** | **146** | **103** | **42** | **6** | **0** |
+| **TOTALS** | **146** | **103** | **43** | **6** | **0** |
 
-*Note: All checks marked NOT RUN require interactive human evaluation (browser 3D canvas, visual inspection, live Ollama execution, physical deployment drill, or external GitHub Actions UI) and are documented with reproducible instructions in [HUMAN_CHECK_KIT.md](file:///C:/Users/resma/Documents/WORKSHOP/DM-CBP/docs/HUMAN_CHECK_KIT.md).*
+*Note: Checks marked NOT RUN or Pending Human require human evaluation (live remote check, browser 3D canvas, visual inspection, live Ollama execution, physical deployment drill, or external GitHub Actions UI) and are documented with step-by-step instructions in [HUMAN_CHECK_KIT.md](file:///C:/Users/resma/Documents/WORKSHOP/DM-CBP/docs/HUMAN_CHECK_KIT.md). VM1.2 and VM1.3 are data determinism and variant checks, not 3D canvas inspection.*
 
 ---
 
@@ -51,7 +55,7 @@ All 25 BLOCKING checks have been successfully verified (24 automated PASS, 1 adm
 | **V6.7** | Upload & CSV formula sanitization | PASS | Test X10 passed; dangerous prefixes stripped |
 | **V9.11** | Privacy scan of telemetry/viz | PASS | Test X13 passed; 0 employee PII in payloads |
 | **V10.2** | Auth abuse & JWT validation | PASS | Test X9 passed; expired/forged tokens return 401 |
-| **V10.4** | RBAC access matrix enforcement | PASS | Test X8 passed; role enforcement verified |
+| **V10.4** | RBAC access matrix enforcement [H] | PASS (Agent Evidence) | Test X8 & G12 passed; role enforcement verified (agent evidence pending human) |
 | **V10.8** | Security headers & cookies | PASS | Security middleware active (`X-Frame-Options: DENY`, etc.) |
 | **V12.3** | Audit log tamper resistance | PASS | Append-only SQLite prediction history with timestamps |
 | **V13.5** | Security audit (pip & npm) | PASS | `npm audit --omit=dev` (0 vulnerabilities) |
@@ -62,13 +66,13 @@ All 25 BLOCKING checks have been successfully verified (24 automated PASS, 1 adm
 | **VM1.7** | Targets never in features | PASS | Guard G2: 0 target/protected columns in features |
 | **VM1.8** | Protected attributes isolated | PASS | Guard G2: demographic fields isolated in `protected.csv` |
 | **VM2.2** | Leakage test passes all specs | PASS | Guard G4: leakage verified across all 7 model pipelines |
-| **VM2.3** | Leakage mutation test fails | PASS | Guard G4: fitting on full dataset raises assertion failure |
+| **VM2.3** | Leakage mutation test fails [H] | PASS (Agent Evidence) | Guard G4: fitting on full dataset raises assertion failure (agent evidence pending human) |
 | **VM3.1** | Frozen split identical for all models | PASS | Guard G5: hash `817af29ea8eb...` matches `split.json` |
-| **VM3.2** | Test set locked once | PASS | Guard G6: `reports/test_eval.lock` verified |
+| **VM3.2** | Test set locked once [H] | PASS (Agent Evidence) | Guard G6: `reports/test_eval.lock` verified (agent evidence pending human) |
 | **VM4.11** | Zero employee data in evidence packet | PASS | Guard G8: 31 grounded aggregate facts, 0 employee rows |
 | **VM6.2** | Local-only LLM SSRF guard | PASS | Guard G10: loopback permitted, link-local/public blocked |
-| **VM6.3** | Zero employee data in LLM prompts | PASS | Guard G9: prompts contain only aggregate facts |
-| **VM7.2** | Artifact tamper detection | PASS | Test X4: flipped byte raises `ArtifactIntegrityError` |
+| **VM6.3** | Zero employee data in LLM prompts [H] | PASS (Agent Evidence) | Guard G9: prompts contain only aggregate facts (agent evidence pending human) |
+| **VM7.2** | Artifact tamper detection [H] | PASS (Agent Evidence) | Test X4: flipped byte raises `ArtifactIntegrityError` (agent evidence pending human) |
 | **VM8.9** | Model whitelist & traversal refused | PASS | Guard G11: `../`, absolute paths & unknown keys refused |
 
 ---
