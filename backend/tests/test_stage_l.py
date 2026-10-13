@@ -10,6 +10,7 @@ Tests:
 """
 
 import json
+from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import inspect
@@ -243,33 +244,45 @@ def test_l3_privacy_deletion_request():
 # ==============================================================================
 
 def test_l4_retrain_and_champion_lifecycle():
-    app.dependency_overrides[get_current_user] = lambda: ADMIN_USER
+    champ_path = Path("artifacts/v2/champion.json")
+    manifest_path = Path("artifacts/v2/MANIFEST.json")
+    orig_champ = champ_path.read_bytes() if champ_path.exists() else None
+    orig_manifest = manifest_path.read_bytes() if manifest_path.exists() else None
+    try:
+        app.dependency_overrides[get_current_user] = lambda: ADMIN_USER
 
-    # 1. Trigger retrain candidate evaluation
-    retrain_resp = client.post("/api/v2/retrain", json={"profile": "fast"})
-    assert retrain_resp.status_code == 200
-    r_data = retrain_resp.json()
-    assert r_data["status"] == "candidate_ready"
-    assert r_data["requires_admin_approval"] is True
+        # 1. Trigger retrain candidate evaluation
+        retrain_resp = client.post("/api/v2/retrain", json={"profile": "fast"})
+        assert retrain_resp.status_code == 200
+        r_data = retrain_resp.json()
+        assert r_data["status"] == "candidate_ready"
+        assert r_data["requires_admin_approval"] is True
 
-    # 2. Approve champion
-    approve_resp = client.post(
-        "/api/v2/models/approve-champion",
-        json={"champion_key": "boost", "version": "v2.1"},
-    )
-    assert approve_resp.status_code == 200
-    assert approve_resp.json()["champion"] == "boost"
+        # 2. Approve champion
+        approve_resp = client.post(
+            "/api/v2/models/approve-champion",
+            json={"champion_key": "boost", "version": "v2.1"},
+        )
+        assert approve_resp.status_code == 200
+        assert approve_resp.json()["champion"] == "boost"
 
-    # 3. Rollback champion to baseline
-    rollback_resp = client.post("/api/v2/models/rollback")
-    assert rollback_resp.status_code == 200
-    assert rollback_resp.json()["active_champion"] == "rf"
+        # 3. Rollback champion to baseline
+        rollback_resp = client.post("/api/v2/models/rollback")
+        assert rollback_resp.status_code == 200
+        assert rollback_resp.json()["active_champion"] == "rf"
 
-    # 4. List model versions
-    versions_resp = client.get("/api/v2/models/versions")
-    assert versions_resp.status_code == 200
-    v_list = versions_resp.json()
-    assert len(v_list) >= 7
+        # 4. List model versions
+        versions_resp = client.get("/api/v2/models/versions")
+        assert versions_resp.status_code == 200
+        v_list = versions_resp.json()
+        assert len(v_list) >= 7
+    finally:
+        if orig_champ is not None:
+            champ_path.write_bytes(orig_champ)
+        if orig_manifest is not None:
+            manifest_path.write_bytes(orig_manifest)
+        from backend.app.api_v2 import default_loader
+        default_loader._manifest = None
 
 
 # ==============================================================================

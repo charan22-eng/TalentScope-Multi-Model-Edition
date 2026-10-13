@@ -61,6 +61,13 @@ class ArtifactLoader:
         actual_hash = h.hexdigest()
 
         if actual_hash != expected_hash:
+            # Allow text files (e.g. .json, .csv) to match if discrepancy is CRLF vs LF line endings
+            if full_path.suffix in [".json", ".csv", ".txt", ".md"]:
+                content = full_path.read_bytes()
+                norm_lf = hashlib.sha256(content.replace(b"\r\n", b"\n")).hexdigest()
+                norm_crlf = hashlib.sha256(content.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")).hexdigest()
+                if expected_hash in (norm_lf, norm_crlf):
+                    return
             raise ArtifactIntegrityError(
                 f"Tampered or corrupted artifact: '{rel_path}' expected SHA-256 {expected_hash}, got {actual_hash}"
             )
