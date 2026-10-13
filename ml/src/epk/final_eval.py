@@ -110,7 +110,7 @@ def check_and_acquire_g6_lock(
                 combined = pd.concat([prev_log, log_df], ignore_index=True)
             else:
                 combined = log_df
-            combined.to_csv(log_file, index=False)
+            combined.to_csv(log_file, index=False, lineterminator="\n")
             print(f"[G6] Re-evaluating test split under --new-config reason: '{new_config_reason}'")
 
     # Write new lock
@@ -318,7 +318,7 @@ def run_final_evaluation(
         if pred_scores is not None:
             preds_df["pred_score"] = np.round(pred_scores, 2)
 
-        preds_df.to_csv(Path(models_dir) / key / "test_predictions.csv", index=False)
+        preds_df.to_csv(Path(models_dir) / key / "test_predictions.csv", index=False, lineterminator="\n")
         results[key] = metric_data
 
         # Sanity check: G7 leakage check (any metric >= 0.97 means investigate leakage)

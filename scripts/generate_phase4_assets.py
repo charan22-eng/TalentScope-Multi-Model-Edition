@@ -33,7 +33,7 @@ def main():
         
     # Anonymize
     sample["employee_id"] = [f"BKG{i:04d}" for i in range(len(sample))]
-    sample.to_csv("data/processed/assets/background_sample.csv", index=False)
+    sample.to_csv("data/processed/assets/background_sample.csv", index=False, lineterminator="\n")
     
     # 2. Fit PCA 2D and 3D
     prep = build_preprocessor()

@@ -2,10 +2,11 @@ import pytest
 import pandas as pd
 import numpy as np
 import yaml
+import json
 from pathlib import Path
 import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
-from epk.data import make_employee_data
+from epk.data import make_employee_data, hash_dataframe
 
 @pytest.fixture(scope="module")
 def default_data():
@@ -63,3 +64,27 @@ def test_variant_properties():
     assert len(df_l) >= 10000
     assert len(df_n) >= 10000
     assert len(df_no) >= 10000
+
+
+def test_manifest_hashes_match():
+    manifest_path = Path(__file__).resolve().parent.parent.parent / "data" / "manifest.json"
+    if not manifest_path.exists():
+        pytest.skip("data/manifest.json not present")
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+    data_dir = manifest_path.parent
+    for variant, files in manifest.get("variants", {}).items():
+        for filename, meta in files.items():
+            csv_path = data_dir / variant / filename
+            assert csv_path.exists(), f"File {csv_path} not found"
+            df = pd.read_csv(csv_path)
+            computed_hash = hash_dataframe(df)
+            assert computed_hash == meta["sha256"], (
+                f"Hash mismatch for {variant}/{filename}: "
+                f"expected {meta['sha256']}, got {computed_hash}"
+            )
+            assert len(df) == meta["rows"], (
+                f"Row count mismatch for {variant}/{filename}: "
+                f"expected {meta['rows']}, got {len(df)}"
+            )
+

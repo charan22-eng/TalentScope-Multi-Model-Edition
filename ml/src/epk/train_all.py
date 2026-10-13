@@ -96,7 +96,7 @@ def log_experiment(
         combined = pd.concat([existing[cols], df_row[cols]], ignore_index=True)
     else:
         combined = df_row[cols]
-    combined.to_csv(out_path, index=False)
+    combined.to_csv(out_path, index=False, lineterminator="\n")
 
 
 def run_training_pipeline(

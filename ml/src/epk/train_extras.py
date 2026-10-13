@@ -65,7 +65,7 @@ def main():
     bg_pca = pca.transform(bg_scaled)
     bg_sample["pca_x"] = bg_pca[:, 0]
     bg_sample["pca_y"] = bg_pca[:, 1]
-    bg_sample.to_csv("artifacts/v1/background_sample.csv", index=False)
+    bg_sample.to_csv("artifacts/v1/background_sample.csv", index=False, lineterminator="\n")
 
     # Global permutation importance (using train for simplicity as it's just KNN)
     print("Calculating permutation importance...")
