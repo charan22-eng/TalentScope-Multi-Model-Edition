@@ -367,7 +367,11 @@ async def predict_single(
     return res
 
 
-@router.post("/predict/all", response_model=V2PredictAllResponse)
+@router.post(
+    "/predict/all",
+    response_model=V2PredictAllResponse,
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
 @limiter.limit("30/minute")
 async def predict_all(request: Request, features: EmployeeFeatures):
     """Run inference across all seven models, returning consensus and split-decision flags.
@@ -412,7 +416,11 @@ async def predict_all(request: Request, features: EmployeeFeatures):
 # Explainability
 # ==============================================================================
 
-@router.post("/explain", response_model=V2ExplainResponse)
+@router.post(
+    "/explain",
+    response_model=V2ExplainResponse,
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
 @limiter.limit("30/minute")
 async def explain_model(request: Request, body: V2ExplainRequest):
     """Provide model-specific native and agnostic explanations (all roles)."""
@@ -481,7 +489,10 @@ async def explain_model(request: Request, body: V2ExplainRequest):
 # Comparison Science & MCDA
 # ==============================================================================
 
-@router.get("/compare/{topic}")
+@router.get(
+    "/compare/{topic}",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
 def get_comparison_data(topic: str):
     """Retrieve precomputed model comparison science JSON (all roles)."""
     if topic not in ALLOWED_COMPARISON_TOPICS:
@@ -503,7 +514,10 @@ def get_comparison_data(topic: str):
         )
 
 
-@router.post("/compare/mcda")
+@router.post(
+    "/compare/mcda",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
 def recalculate_mcda(body: V2MCDARequest):
     """Dynamically recompute MCDA rankings with validated user weights (all roles)."""
     weights = body.weights
@@ -559,8 +573,14 @@ def recalculate_mcda(body: V2MCDARequest):
 # 2D/3D Visualizations
 # ==============================================================================
 
-@router.get("/viz/surface")
-@router.post("/viz/surface")
+@router.get(
+    "/viz/surface",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
+@router.post(
+    "/viz/surface",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
 def get_surface_landscape(model_key: str = "rf", grid_size: int = 40):
     """Retrieve decision surface grid for 2D/3D visualization (all roles)."""
     check_model_key_safe(model_key)
@@ -585,7 +605,10 @@ def get_surface_landscape(model_key: str = "rf", grid_size: int = 40):
     )
 
 
-@router.get("/viz/pca")
+@router.get(
+    "/viz/pca",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
 def get_pca_projection():
     """Retrieve PCA 2D/3D projection coordinates and background sample (all roles)."""
     pca_path = default_loader.root_dir / "explainability" / "pca.json"

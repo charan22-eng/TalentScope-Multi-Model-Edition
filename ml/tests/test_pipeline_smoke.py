@@ -175,8 +175,7 @@ def test_stats_robustness_and_conformal(sample_data):
 def test_evidence_packet_inspection():
     """Verify evidence packet inspection, selection, and forbidden key scanning."""
     packet_path = Path("artifacts/v2/comparison/evidence_packet.json")
-    if not packet_path.exists():
-        pytest.skip("artifacts/v2/comparison/evidence_packet.json not found")
+    assert packet_path.exists(), "artifacts/v2/comparison/evidence_packet.json not found"
 
     with open(packet_path, "r", encoding="utf-8") as f:
         packet = json.load(f)

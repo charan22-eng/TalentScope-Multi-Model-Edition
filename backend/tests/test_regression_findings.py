@@ -77,22 +77,6 @@ def test_default_deny_openapi_guard():
         ("GET", "/ready"),
         ("GET", "/version"),
         ("POST", "/login"),
-        ("GET", "/analytics/drift"),
-        ("POST", "/explain"),
-        ("POST", "/batch"),
-        ("GET", "/batch/report/pdf"),
-        ("GET", "/viz/galaxy"),
-        ("GET", "/viz/surface"),
-        ("GET", "/analytics"),
-        ("GET", "/analytics/constellation"),
-        ("GET", "/drift/projection"),
-        ("POST", "/api/v2/predict/all"),
-        ("POST", "/api/v2/explain"),
-        ("GET", "/api/v2/compare/{topic}"),
-        ("POST", "/api/v2/compare/mcda"),
-        ("POST", "/api/v2/viz/surface"),
-        ("GET", "/api/v2/viz/surface"),
-        ("GET", "/api/v2/viz/pca"),
     }
 
     violations = []

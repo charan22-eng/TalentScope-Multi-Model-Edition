@@ -203,14 +203,14 @@ def create_app():
         )
 
     @app.get("/analytics/drift")
-    def drift_report(db: Session = Depends(get_db)):
+    def drift_report(db: Session = Depends(get_db), current_user: str = Depends(get_current_user_email)):
         history = db.query(PredictionHistory).order_by(PredictionHistory.timestamp.desc()).limit(1000).all()
         drift_result = get_current_drift(history, {})
         return drift_result
 
     @app.post("/explain", response_model=ExplainResponse)
     @limiter.limit("20/minute")
-    async def explain_pred(request: Request, features: EmployeeFeatures, k: int = 5):
+    async def explain_pred(request: Request, features: EmployeeFeatures, k: int = 5, current_user: str = Depends(get_current_user_email)):
         df = pd.DataFrame([features.model_dump()])
         probs = calibrated_knn.predict_proba(df)[0]
         classes = list(calibrated_knn.classes_)
@@ -249,7 +249,7 @@ def create_app():
 
     @app.post("/batch")
     @limiter.limit("5/minute")
-    async def batch(request: Request, file: UploadFile = File(...)):
+    async def batch(request: Request, file: UploadFile = File(...), current_user: str = Depends(get_current_user_email)):
         if not file.filename.endswith(".csv"):
             raise HTTPException(status_code=400, detail="Only CSV files allowed")
         
@@ -301,7 +301,7 @@ def create_app():
         return {"results": results, "errors": errors, "latency_ms": (t1-t0)*1000}
 
     @app.get("/batch/report/pdf")
-    def export_pdf_report(db: Session = Depends(get_db)):
+    def export_pdf_report(db: Session = Depends(get_db), current_user: str = Depends(get_current_user_email)):
         if not HAS_REPORTLAB:
             return Response(content="ReportLab not installed", media_type="text/plain")
         buffer = io.BytesIO()
@@ -325,26 +325,26 @@ def create_app():
         return Response(content=pdf, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=report.pdf"})
 
     @app.get("/viz/galaxy")
-    def galaxy():
+    def galaxy(current_user: str = Depends(get_current_user_email)):
         bkg = pd.read_csv(f"{settings.artifact_path}/assets/background_sample.csv")
         return bkg.to_dict(orient="records")
 
     @app.get("/viz/surface")
-    def surface(size: int = 40):
+    def surface(size: int = 40, current_user: str = Depends(get_current_user_email)):
         if size > 80:
             raise HTTPException(status_code=400, detail="Grid size too large")
         return {"status": "stubbed"}
 
     @app.get("/analytics")
-    def analytics():
+    def analytics(current_user: str = Depends(get_current_user_email)):
         return {"status": "stubbed"}
         
     @app.get("/analytics/constellation")
-    def constellation():
+    def constellation(current_user: str = Depends(get_current_user_email)):
         return {"status": "stubbed"}
         
     @app.get("/drift/projection")
-    def drift():
+    def drift(current_user: str = Depends(get_current_user_email)):
         return {"status": "stubbed"}
 
     from backend.app.api_v2 import router as v2_router
