@@ -32,7 +32,7 @@ All figures below are read directly from machine-generated artifact files.
 |---|---|---|---|---|---|---|---|---|---|
 | `boost` | Ensemble: Hist Gradient Boosting | **0.8038** | **0.8013** | **0.8075** | **0.3068** | 0.0904 | 105.77 ms | 0.7603 | 0.9765 |
 | `rf` *(Champion)* | Ensemble: Random Forest | 0.7804 | 0.7770 | 0.7841 | 0.3179 | **0.0133** | 99.38 ms | **0.8174** | 0.9759 |
-| `svm` | Kernel: Support Vector Machine (RBF) | 0.8014 | 0.8010 | 0.8041 | 0.3210 | 0.0384 | 142.10 ms | 0.7410 | 0.9712 |
+| `svm` | Kernel: Support Vector Machine (RBF) | 0.8164 | 0.8148 | 0.8216 | 0.2918 | 0.0270 | 147.16 ms | 0.7410 | 0.9712 |
 | `knn` | Instance: K-Nearest Neighbors | 0.7543 | 0.7518 | 0.7550 | 0.3443 | 0.0246 | 16.94 ms | 0.6571 | 0.9756 |
 | `logreg` | Linear: Multinomial Logistic Reg | 0.7189 | 0.7148 | 0.7173 | 0.4295 | 0.1246 | 22.60 ms | 0.7813 | **0.9811** |
 | `dt` | Tree: Decision Tree Classifier | 0.7094 | 0.7085 | 0.6993 | 0.4188 | 0.0342 | 16.27 ms | 0.6619 | 0.9797 |
