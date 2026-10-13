@@ -2,12 +2,12 @@
   "variants": {
     "linear": {
       "macro_f1": {
-        "boost": 0.6174,
-        "dt": 0.579,
-        "knn": 0.6166,
-        "linreg": 0.6769,
-        "logreg": 0.6595,
-        "rf": 0.599,
+        "boost": 0.61,
+        "dt": 0.58,
+        "knn": 0.5888,
+        "linreg": 0.6772,
+        "logreg": 0.6523,
+        "rf": 0.5989,
         "svm": 0.6348
       },
       "rankings": {
@@ -15,8 +15,8 @@
         "logreg": 2,
         "svm": 3,
         "boost": 4,
-        "knn": 5,
-        "rf": 6,
+        "rf": 5,
+        "knn": 6,
         "dt": 7
       },
       "ranked_keys": [
@@ -24,22 +24,22 @@
         "logreg",
         "svm",
         "boost",
-        "knn",
         "rf",
+        "knn",
         "dt"
       ],
       "best_model": "linreg",
       "worst_model": "dt",
-      "spread": 0.0979
+      "spread": 0.0972
     },
     "nonlinear": {
       "macro_f1": {
-        "boost": 0.8038,
-        "dt": 0.7094,
-        "knn": 0.7543,
-        "linreg": 0.7032,
-        "logreg": 0.7189,
-        "rf": 0.7804,
+        "boost": 0.8056,
+        "dt": 0.7111,
+        "knn": 0.719,
+        "linreg": 0.7011,
+        "logreg": 0.715,
+        "rf": 0.7787,
         "svm": 0.8164
       },
       "rankings": {
@@ -62,24 +62,24 @@
       ],
       "best_model": "svm",
       "worst_model": "linreg",
-      "spread": 0.1132
+      "spread": 0.1153
     },
     "noisy_overlap": {
       "macro_f1": {
-        "boost": 0.6991,
-        "dt": 0.6229,
-        "knn": 0.6382,
-        "linreg": 0.5988,
-        "logreg": 0.6076,
-        "rf": 0.7125,
+        "boost": 0.7027,
+        "dt": 0.6234,
+        "knn": 0.6231,
+        "linreg": 0.5973,
+        "logreg": 0.6103,
+        "rf": 0.7121,
         "svm": 0.6658
       },
       "rankings": {
         "rf": 1,
         "boost": 2,
         "svm": 3,
-        "knn": 4,
-        "dt": 5,
+        "dt": 4,
+        "knn": 5,
         "logreg": 6,
         "linreg": 7
       },
@@ -87,29 +87,130 @@
         "rf",
         "boost",
         "svm",
-        "knn",
         "dt",
+        "knn",
         "logreg",
         "linreg"
       ],
       "best_model": "rf",
       "worst_model": "linreg",
-      "spread": 0.1137
+      "spread": 0.1148
     }
   },
   "kendall_tau": {
     "linear_vs_nonlinear": {
-      "tau": -0.0476,
+      "tau": 0.0476,
       "p_value": 1.0
     },
     "nonlinear_vs_noisy_overlap": {
-      "tau": 0.619,
-      "p_value": 0.069
+      "tau": 0.5238,
+      "p_value": 0.1361
     },
     "linear_vs_noisy_overlap": {
       "tau": -0.4286,
       "p_value": 0.2389
     }
   },
-  "observation": "Rankings shift significantly across data variants. Linear and tree models perform comparatively better under linear generative processes, whereas kernel and ensemble models dominate in presence of saturated interactions."
+  "observation": "Rankings shift significantly across data variants. Linear and tree models perform comparatively better under linear generative processes, whereas kernel and ensemble models dominate in presence of saturated interactions.",
+  "calibration_sensitivity": {
+    "baseline_champion": "boost",
+    "calibration_removed": {
+      "winner": "boost",
+      "score": 0.6759,
+      "champion_changed": false,
+      "ranking": [
+        {
+          "key": "boost",
+          "rank": 1,
+          "mcda_score": 0.6759,
+          "p_rank1": 0.8296
+        },
+        {
+          "key": "svm",
+          "rank": 2,
+          "mcda_score": 0.6198,
+          "p_rank1": 0.117
+        },
+        {
+          "key": "rf",
+          "rank": 3,
+          "mcda_score": 0.5782,
+          "p_rank1": 0.0008
+        },
+        {
+          "key": "logreg",
+          "rank": 4,
+          "mcda_score": 0.5268,
+          "p_rank1": 0.0526
+        },
+        {
+          "key": "dt",
+          "rank": 5,
+          "mcda_score": 0.4322,
+          "p_rank1": 0.0
+        },
+        {
+          "key": "linreg",
+          "rank": 6,
+          "mcda_score": 0.4165,
+          "p_rank1": 0.0
+        },
+        {
+          "key": "knn",
+          "rank": 7,
+          "mcda_score": 0.2919,
+          "p_rank1": 0.0
+        }
+      ]
+    },
+    "raw_calibration": {
+      "winner": "boost",
+      "score": 0.7083,
+      "champion_changed": false,
+      "ranking": [
+        {
+          "key": "boost",
+          "rank": 1,
+          "mcda_score": 0.7083,
+          "p_rank1": 0.9472
+        },
+        {
+          "key": "rf",
+          "rank": 2,
+          "mcda_score": 0.5817,
+          "p_rank1": 0.0
+        },
+        {
+          "key": "logreg",
+          "rank": 3,
+          "mcda_score": 0.5638,
+          "p_rank1": 0.0466
+        },
+        {
+          "key": "svm",
+          "rank": 4,
+          "mcda_score": 0.5578,
+          "p_rank1": 0.0062
+        },
+        {
+          "key": "linreg",
+          "rank": 5,
+          "mcda_score": 0.4597,
+          "p_rank1": 0.0
+        },
+        {
+          "key": "dt",
+          "rank": 6,
+          "mcda_score": 0.4529,
+          "p_rank1": 0.0
+        },
+        {
+          "key": "knn",
+          "rank": 7,
+          "mcda_score": 0.2779,
+          "p_rank1": 0.0
+        }
+      ]
+    }
+  }
 }

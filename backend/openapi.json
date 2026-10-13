@@ -89,6 +89,48 @@
         }
       }
     },
+    "/refresh": {
+      "post": {
+        "summary": "Refresh",
+        "operationId": "refresh_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/logout": {
+      "post": {
+        "summary": "Logout",
+        "operationId": "logout_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/predict": {
       "post": {
         "summary": "Predict",
@@ -505,6 +547,119 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/batch": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Batch Predict V2",
+        "description": "Run batch prediction on uploaded CSV file (roles: admin, hr_manager, analyst).",
+        "operationId": "batch_predict_v2_api_v2_batch_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "model_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_batch_predict_v2_api_v2_batch_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/auth/logout": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Logout V2",
+        "description": "Revoke JWT token on logout.",
+        "operationId": "logout_v2_api_v2_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/auth/refresh": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Refresh V2",
+        "description": "Rotate JWT token on refresh (revoking the old token).",
+        "operationId": "refresh_v2_api_v2_auth_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -1031,6 +1186,61 @@
               "type": "integer",
               "default": 50,
               "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/{user_id}/role": {
+      "put": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Update User Role",
+        "description": "Update a user's RBAC role with immutable audit trail (Admin only).",
+        "operationId": "update_user_role_api_v2_users__user_id__role_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "new_role",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "New Role"
             }
           }
         ],
@@ -1702,6 +1912,20 @@
           "file"
         ],
         "title": "Body_batch_batch_post"
+      },
+      "Body_batch_predict_v2_api_v2_batch_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_batch_predict_v2_api_v2_batch_post"
       },
       "Body_login_login_post": {
         "properties": {

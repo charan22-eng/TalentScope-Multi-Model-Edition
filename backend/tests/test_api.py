@@ -6,8 +6,12 @@ import io
 
 client = TestClient(app)
 
-from backend.core.security import get_current_user_email
+from backend.core.security import get_current_user, get_current_user_email, oauth2_scheme
+from backend.db.models import User
+admin_user = User(id=1, email="admin@test.com", role="admin")
+app.dependency_overrides[oauth2_scheme] = lambda: "mock-token"
 app.dependency_overrides[get_current_user_email] = lambda: "admin@test.com"
+app.dependency_overrides[get_current_user] = lambda: admin_user
 
 def test_health():
     response = client.get("/health")

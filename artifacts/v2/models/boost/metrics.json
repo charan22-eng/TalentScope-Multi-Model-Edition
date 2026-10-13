@@ -5,60 +5,66 @@
   "task": "classifier",
   "variant": "nonlinear",
   "test_samples": 2381,
-  "accuracy": 0.8013,
-  "balanced_accuracy": 0.7949,
-  "macro_f1": 0.8038,
-  "qwk": 0.8075,
-  "mcc": 0.6898,
-  "roc_auc_ovr": 0.9282,
-  "log_loss": 0.5067,
-  "brier": 0.3068,
-  "ece": 0.0904,
-  "exact_share": 0.8013,
-  "adjacent_share": 0.1974,
-  "extreme_share": 0.0013,
+  "accuracy": 0.8026,
+  "balanced_accuracy": 0.7977,
+  "macro_f1": 0.8056,
+  "qwk": 0.8107,
+  "mcc": 0.6919,
+  "roc_auc_ovr": 0.931,
+  "log_loss": 0.4608,
+  "brier": 0.279,
+  "ece": 0.0126,
+  "raw_accuracy": 0.8026,
+  "raw_macro_f1": 0.8056,
+  "raw_log_loss": 0.4617,
+  "raw_brier": 0.2794,
+  "raw_ece": 0.0198,
+  "calibration_temperature": 0.9623,
+  "exact_share": 0.8026,
+  "adjacent_share": 0.1966,
+  "extreme_share": 0.0008,
   "per_class": {
     "Low": {
-      "precision": 0.8346,
-      "recall": 0.7972,
-      "f1": 0.8155,
+      "precision": 0.8428,
+      "recall": 0.7874,
+      "f1": 0.8142,
       "support": 715
     },
     "Medium": {
-      "precision": 0.7573,
-      "recall": 0.8265,
-      "f1": 0.7904,
+      "precision": 0.7595,
+      "recall": 0.8246,
+      "f1": 0.7907,
       "support": 1072
     },
     "High": {
-      "precision": 0.8561,
-      "recall": 0.7609,
-      "f1": 0.8057,
+      "precision": 0.8452,
+      "recall": 0.7811,
+      "f1": 0.8119,
       "support": 594
     }
   },
   "confusion_matrix": [
     [
-      570,
-      144,
-      1
+      563,
+      152,
+      0
     ],
     [
-      111,
-      886,
-      75
+      103,
+      884,
+      85
     ],
     [
       2,
-      140,
-      452
+      128,
+      464
     ]
   ],
-  "latency_single_p50_ms": 45.186,
-  "latency_single_p95_ms": 105.769,
-  "latency_batch_5000_ms": 128.93,
-  "model_size_bytes": 1076226,
-  "tuning_time_sec": 31.92,
+  "latency_single_p50_ms": 46.781,
+  "latency_single_p95_ms": 100.818,
+  "latency_batch_5000_ms": 122.41,
+  "model_size_bytes": 1075711,
+  "tuning_time_sec": 23.49,
   "stability_std": 0.0028,
   "explain_tier": "partial",
   "explain_score": 0.6,

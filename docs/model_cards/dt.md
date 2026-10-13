@@ -9,20 +9,20 @@
 - **Dataset Split Hash**: `45a90aaf72c97cca...`
 
 ## 2. Test Performance Metrics (Holdout N = 2,381)
-- **Macro-F1**: `0.7094`
-- **Accuracy**: `0.7085`
-- **Quadratic Weighted Kappa (QWK)**: `0.6993`
-- **Expected Calibration Error (ECE)**: `0.0342`
-- **Brier Score**: `0.4188`
-- **Single-Row Latency (p95)**: `16.27 ms`
-- **5,000-Row Batch Latency**: `8.95 ms`
+- **Macro-F1**: `0.7111`
+- **Accuracy**: `0.7102`
+- **Quadratic Weighted Kappa (QWK)**: `0.7015`
+- **Expected Calibration Error (ECE)**: `0.0399`
+- **Brier Score**: `0.4154`
+- **Single-Row Latency (p95)**: `10.68 ms`
+- **5,000-Row Batch Latency**: `16.51 ms`
 - **Serialized Size**: `0.02 MB`
 
 ## 3. Class-Level Performance
 | Band | Precision | Recall | F1-Score | Support |
 |---|---|---|---|---|
-| **Low** | 0.7395 | 0.7147 | 0.7269 | 715 |
-| **Medium** | 0.6655 | 0.7407 | 0.7011 | 1072 |
+| **Low** | 0.7403 | 0.7217 | 0.7309 | 715 |
+| **Medium** | 0.6681 | 0.7397 | 0.7021 | 1072 |
 | **High** | 0.7686 | 0.6431 | 0.7003 | 594 |
 
 ## 4. Hyperparameters & Tuning

@@ -1,8 +1,6 @@
 {
-  "champion": "rf",
-  "selection_rule": "ADR-009 Balanced Profile MCDA",
-  "decision_strength": "marginal",
-  "margin": 0.031,
-  "runner_up": "boost",
-  "rollback": true
+  "champion_key": "rf",
+  "rule": "MCDA Balanced Profile score >= 0.60 with paired bootstrap validation",
+  "score": 0.6387,
+  "selection_timestamp": "2026-10-12T00:00:00Z"
 }

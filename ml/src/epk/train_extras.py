@@ -12,8 +12,10 @@ from sklearn.pipeline import Pipeline
 from epk.features import build_preprocessor
 
 
-def load_data():
-    df = pd.read_csv("data/raw/dataset.csv").drop_duplicates(subset=["employee_id"])
+def load_data(data_path=None):
+    if data_path is None:
+        data_path = "data/nonlinear/dataset.csv" if Path("data/nonlinear/dataset.csv").exists() else "data/raw/dataset.csv"
+    df = pd.read_csv(data_path).drop_duplicates(subset=["employee_id"])
     X = df.drop(columns=["performance"])
     y = df["performance"]
 

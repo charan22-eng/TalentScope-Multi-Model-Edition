@@ -42,6 +42,9 @@ def authenticate_user(db, email: str, password: str):
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
+    if "jti" not in to_encode:
+        import uuid
+        to_encode["jti"] = str(uuid.uuid4())
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
@@ -51,7 +54,27 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
+# In-memory revocation set (V10.12 token revocation)
+REVOKED_TOKENS: set = set()
+
+
+def revoke_token(token: str) -> None:
+    """Add a JWT token to the revocation blacklist."""
+    REVOKED_TOKENS.add(token)
+
+
+def is_token_revoked(token: str) -> bool:
+    """Check if a JWT token has been revoked."""
+    return token in REVOKED_TOKENS
+
+
 async def get_current_user_email(token: str = Depends(oauth2_scheme)):
+    if is_token_revoked(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -68,6 +91,12 @@ async def get_current_user_email(token: str = Depends(oauth2_scheme)):
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
+    if is_token_revoked(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     from backend.db.database import SessionLocal
     from backend.db.models import User
     try:

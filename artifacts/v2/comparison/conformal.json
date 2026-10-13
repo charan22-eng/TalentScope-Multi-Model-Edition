@@ -1,72 +1,135 @@
 {
   "boost": {
     "alpha": 0.1,
-    "threshold": 0.6459,
-    "min_prob_threshold": 0.3541,
-    "empirical_coverage": 0.9156,
-    "avg_set_size": 1.334,
-    "single_label_share": 0.6661,
-    "multi_label_share": 0.3339,
-    "empty_share": 0.0
+    "threshold": 0.7254,
+    "empirical_coverage": 0.9139,
+    "avg_set_size": 1.291,
+    "single_label_share": 0.7098,
+    "multi_label_share": 0.2902,
+    "empty_share": 0.0,
+    "with_fallback": {
+      "empirical_coverage": 0.9139,
+      "avg_set_size": 1.291,
+      "empty_share": 0.0
+    },
+    "without_fallback": {
+      "empirical_coverage": 0.9139,
+      "avg_set_size": 1.291,
+      "empty_share": 0.0
+    }
   },
   "dt": {
     "alpha": 0.1,
-    "threshold": 0.8518,
-    "min_prob_threshold": 0.1482,
-    "empirical_coverage": 0.9013,
-    "avg_set_size": 1.632,
-    "single_label_share": 0.3797,
-    "multi_label_share": 0.6203,
-    "empty_share": 0.0
+    "threshold": 0.7865,
+    "empirical_coverage": 0.8954,
+    "avg_set_size": 1.582,
+    "single_label_share": 0.4225,
+    "multi_label_share": 0.5775,
+    "empty_share": 0.0,
+    "with_fallback": {
+      "empirical_coverage": 0.8954,
+      "avg_set_size": 1.582,
+      "empty_share": 0.0
+    },
+    "without_fallback": {
+      "empirical_coverage": 0.8954,
+      "avg_set_size": 1.582,
+      "empty_share": 0.0
+    }
   },
   "knn": {
     "alpha": 0.1,
-    "threshold": 0.7703,
-    "min_prob_threshold": 0.2297,
-    "empirical_coverage": 0.9185,
-    "avg_set_size": 1.486,
-    "single_label_share": 0.5195,
-    "multi_label_share": 0.4805,
-    "empty_share": 0.0
+    "threshold": 0.7742,
+    "empirical_coverage": 0.9236,
+    "avg_set_size": 1.549,
+    "single_label_share": 0.4536,
+    "multi_label_share": 0.5464,
+    "empty_share": 0.0,
+    "with_fallback": {
+      "empirical_coverage": 0.9236,
+      "avg_set_size": 1.549,
+      "empty_share": 0.0
+    },
+    "without_fallback": {
+      "empirical_coverage": 0.9236,
+      "avg_set_size": 1.549,
+      "empty_share": 0.0
+    }
   },
   "linreg": {
     "alpha": 0.1,
-    "threshold": 0.82,
-    "min_prob_threshold": 0.18,
-    "empirical_coverage": 0.9143,
-    "avg_set_size": 1.624,
-    "single_label_share": 0.3759,
-    "multi_label_share": 0.6241,
-    "empty_share": 0.0
+    "threshold": 0.7591,
+    "empirical_coverage": 0.9101,
+    "avg_set_size": 1.623,
+    "single_label_share": 0.3772,
+    "multi_label_share": 0.6228,
+    "empty_share": 0.0,
+    "with_fallback": {
+      "empirical_coverage": 0.9101,
+      "avg_set_size": 1.623,
+      "empty_share": 0.0
+    },
+    "without_fallback": {
+      "empirical_coverage": 0.9101,
+      "avg_set_size": 1.623,
+      "empty_share": 0.0
+    }
   },
   "logreg": {
     "alpha": 0.1,
-    "threshold": 0.6747,
-    "min_prob_threshold": 0.3253,
-    "empirical_coverage": 0.9131,
-    "avg_set_size": 1.659,
-    "single_label_share": 0.3415,
-    "multi_label_share": 0.6585,
-    "empty_share": 0.0
+    "threshold": 0.7606,
+    "empirical_coverage": 0.9072,
+    "avg_set_size": 1.581,
+    "single_label_share": 0.4213,
+    "multi_label_share": 0.5787,
+    "empty_share": 0.0,
+    "with_fallback": {
+      "empirical_coverage": 0.9072,
+      "avg_set_size": 1.581,
+      "empty_share": 0.0
+    },
+    "without_fallback": {
+      "empirical_coverage": 0.9072,
+      "avg_set_size": 1.581,
+      "empty_share": 0.0
+    }
   },
   "rf": {
     "alpha": 0.1,
-    "threshold": 0.7721,
-    "min_prob_threshold": 0.2279,
-    "empirical_coverage": 0.8988,
-    "avg_set_size": 1.324,
-    "single_label_share": 0.6766,
-    "multi_label_share": 0.3234,
-    "empty_share": 0.0
+    "threshold": 0.72,
+    "empirical_coverage": 0.8975,
+    "avg_set_size": 1.32,
+    "single_label_share": 0.6812,
+    "multi_label_share": 0.3188,
+    "empty_share": 0.0,
+    "with_fallback": {
+      "empirical_coverage": 0.8975,
+      "avg_set_size": 1.32,
+      "empty_share": 0.0
+    },
+    "without_fallback": {
+      "empirical_coverage": 0.8975,
+      "avg_set_size": 1.32,
+      "empty_share": 0.0
+    }
   },
   "svm": {
     "alpha": 0.1,
-    "threshold": 0.8418,
-    "min_prob_threshold": 0.1582,
-    "empirical_coverage": 0.9189,
-    "avg_set_size": 1.459,
-    "single_label_share": 0.5414,
-    "multi_label_share": 0.4586,
-    "empty_share": 0.0
+    "threshold": 0.8294,
+    "empirical_coverage": 0.9097,
+    "avg_set_size": 1.494,
+    "single_label_share": 0.5061,
+    "multi_label_share": 0.4939,
+    "empty_share": 0.0,
+    "with_fallback": {
+      "empirical_coverage": 0.9097,
+      "avg_set_size": 1.494,
+      "empty_share": 0.0
+    },
+    "without_fallback": {
+      "empirical_coverage": 0.9097,
+      "avg_set_size": 1.494,
+      "empty_share": 0.0
+    }
   }
 }

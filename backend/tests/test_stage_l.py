@@ -261,15 +261,15 @@ def test_l4_retrain_and_champion_lifecycle():
         # 2. Approve champion
         approve_resp = client.post(
             "/api/v2/models/approve-champion",
-            json={"champion_key": "boost", "version": "v2.1"},
+            json={"champion_key": "svm", "version": "v2.1"},
         )
         assert approve_resp.status_code == 200
-        assert approve_resp.json()["champion"] == "boost"
+        assert approve_resp.json()["champion"] == "svm"
 
         # 3. Rollback champion to baseline
         rollback_resp = client.post("/api/v2/models/rollback")
         assert rollback_resp.status_code == 200
-        assert rollback_resp.json()["active_champion"] == "rf"
+        assert rollback_resp.json()["active_champion"] == "boost"
 
         # 4. List model versions
         versions_resp = client.get("/api/v2/models/versions")

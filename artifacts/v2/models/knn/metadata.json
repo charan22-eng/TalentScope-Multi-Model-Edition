@@ -21,21 +21,22 @@
     "cv_macro_f1_std": 0.0044,
     "stability_mean": 0.6919,
     "stability_std": 0.0098,
-    "tuning_time_sec": 1.56,
-    "calibration_method": "sigmoid",
+    "tuning_time_sec": 1.31,
+    "calibration_method": "temperature_scaling",
     "profile": "fast",
     "seed": 42,
-    "variant": "nonlinear"
+    "variant": "nonlinear",
+    "calibration_temperature": 0.6648
   },
   "metrics_summary": {
-    "macro_f1": 0.7543,
-    "accuracy": 0.7518,
-    "qwk": 0.755,
-    "ece": 0.0246,
-    "brier": 0.3443,
-    "p95_latency_ms": 16.94,
-    "batch_5000_latency_ms": 198.99,
-    "model_size_bytes": 1063922
+    "macro_f1": 0.719,
+    "accuracy": 0.7278,
+    "qwk": 0.7017,
+    "ece": 0.0239,
+    "brier": 0.3724,
+    "p95_latency_ms": 12.897,
+    "batch_5000_latency_ms": 126.3,
+    "model_size_bytes": 1063407
   },
   "split_hash": "45a90aaf72c97cca88719f05862d44517a45a145a80257457e4d56941fb5d7de",
   "data_hash": "",
@@ -44,5 +45,5 @@
     "numpy": "1.26.4",
     "pandas": "3.0.5"
   },
-  "created_at": "2026-10-12T16:43:35Z"
+  "created_at": "2026-10-13T20:38:39Z"
 }

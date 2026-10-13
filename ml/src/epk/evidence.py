@@ -157,6 +157,47 @@ def build_comparison_suite(
         mcnemar_holm_p=mcnemar_p,
     )
 
+    # Re-run MCDA for all 5 profiles per Prompt A.4
+    all_profiles_res = {
+        p_name: run_mcda_pipeline(
+            metrics_df,
+            profile_name=p_name,
+            diff_excludes_zero=diff_excludes_zero if p_name == "Balanced" else False,
+            mcnemar_holm_p=mcnemar_p if p_name == "Balanced" else 1.0,
+        )
+        for p_name in PROFILES
+    }
+
+    # Sensitivity runs per Prompt A.4:
+    # (a) calibration criterion removed
+    weights_no_cal = PROFILES["Balanced"].copy()
+    weights_no_cal["calibration"] = 0.0
+    mcda_no_cal = run_mcda_pipeline(metrics_df, custom_weights=weights_no_cal)
+
+    # (b) calibration measured on raw (uncalibrated) probabilities
+    metrics_df_raw_cal = metrics_df.copy()
+    metrics_df_raw_cal["calibration"] = round(1.0 - metrics_df_raw_cal["raw_ece"], 4)
+    mcda_raw_cal = run_mcda_pipeline(metrics_df_raw_cal, profile_name="Balanced")
+
+    calibration_sensitivity = {
+        "baseline_champion": final_mcda["deterministic_winner"],
+        "calibration_removed": {
+            "winner": mcda_no_cal["deterministic_winner"],
+            "score": mcda_no_cal["ranking"][0]["mcda_score"],
+            "champion_changed": bool(mcda_no_cal["deterministic_winner"] != final_mcda["deterministic_winner"]),
+            "ranking": mcda_no_cal["ranking"],
+        },
+        "raw_calibration": {
+            "winner": mcda_raw_cal["deterministic_winner"],
+            "score": mcda_raw_cal["ranking"][0]["mcda_score"],
+            "champion_changed": bool(mcda_raw_cal["deterministic_winner"] != final_mcda["deterministic_winner"]),
+            "ranking": mcda_raw_cal["ranking"],
+        },
+    }
+
+    final_mcda["all_profiles"] = all_profiles_res
+    final_mcda["calibration_sensitivity"] = calibration_sensitivity
+
     # Save comparison artifacts
     with open(comp_path / "leaderboard.json", "w") as f:
         json.dump({
@@ -185,6 +226,7 @@ def build_comparison_suite(
         mcda_res=final_mcda,
         robustness_dict=robustness_dict,
         fairness_dict=fairness_dict,
+        calibration_sensitivity=calibration_sensitivity,
     )
 
     with open(comp_path / "evidence_packet.json", "w") as f:
@@ -203,6 +245,7 @@ def build_evidence_packet_from_data(
     mcda_res: Dict[str, Any],
     robustness_dict: Dict[str, Any],
     fairness_dict: Dict[str, Any],
+    calibration_sensitivity: Dict[str, Any] = None,
 ) -> Dict[str, Any]:
     """Synthesize numbered facts strictly from machine evaluation data."""
     facts = []
@@ -318,6 +361,30 @@ def build_evidence_packet_from_data(
     })
     fact_counter += 1
 
+    # F37 & F38: Sensitivity analysis facts per Prompt A.4
+    if calibration_sensitivity:
+        no_cal_w = calibration_sensitivity["calibration_removed"]["winner"]
+        no_cal_score = calibration_sensitivity["calibration_removed"]["score"]
+        no_cal_label = get_model_spec(no_cal_w).label
+        facts.append({
+            "id": f"F{fact_counter}",
+            "model_key": no_cal_w,
+            "category": "sensitivity",
+            "text": f"Sensitivity analysis with calibration criterion removed: top model is {no_cal_label} with MCDA score {no_cal_score:.4f} (champion changed: {str(calibration_sensitivity['calibration_removed']['champion_changed']).lower()}).",
+        })
+        fact_counter += 1
+
+        raw_cal_w = calibration_sensitivity["raw_calibration"]["winner"]
+        raw_cal_score = calibration_sensitivity["raw_calibration"]["score"]
+        raw_cal_label = get_model_spec(raw_cal_w).label
+        facts.append({
+            "id": f"F{fact_counter}",
+            "model_key": raw_cal_w,
+            "category": "sensitivity",
+            "text": f"Sensitivity analysis evaluating calibration on raw uncalibrated probabilities: top model is {raw_cal_label} with MCDA score {raw_cal_score:.4f} (champion changed: {str(calibration_sensitivity['raw_calibration']['champion_changed']).lower()}).",
+        })
+        fact_counter += 1
+
     # F90: MANDATORY SYNTHETIC DATA CAVEAT FACT
     facts.append({
         "id": "F90",
@@ -342,6 +409,7 @@ def build_evidence_packet_from_data(
         "runner_up": runner_up,
         "decision_strength": strength,
         "synthetic_caveat_fact": "F90",
+        "calibration_sensitivity": calibration_sensitivity,
         "models": [
             {
                 "key": m["key"],
@@ -396,3 +464,8 @@ def select_facts(
                 selected.append(f)
 
     return selected
+
+
+if __name__ == "__main__":
+    packet = build_comparison_suite()
+    print(f"[evidence.py] Comparison suite successfully built. Deterministic winner: {packet['deterministic_winner']}, Decision strength: {packet['decision_strength']}")

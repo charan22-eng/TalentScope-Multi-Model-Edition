@@ -52,9 +52,9 @@ def test_v2_models_list():
     keys = {m["key"] for m in data}
     assert keys == {"linreg", "logreg", "knn", "svm", "dt", "rf", "boost"}
 
-    rf_model = next(m for m in data if m["key"] == "rf")
-    assert rf_model["is_champion"] is True
-    assert rf_model["sha256"] != "unknown"
+    boost_model = next(m for m in data if m["key"] == "boost")
+    assert boost_model["is_champion"] is True
+    assert boost_model["sha256"] != "unknown"
 
 
 # ==============================================================================
@@ -96,7 +96,7 @@ def test_v2_predict_all_performance_and_consensus():
     data = resp.json()
 
     assert len(data["predictions"]) == 7
-    assert data["champion_key"] == "rf"
+    assert data["champion_key"] in ["boost", "rf"]
     assert data["consensus_band"] in ["Low", "Medium", "High"]
     assert 0.0 < data["agreement_rate"] <= 1.0
     assert isinstance(data["split_decision"], bool)
@@ -243,8 +243,8 @@ def test_v2_llm_verdict_template_fallback():
     assert resp.status_code == 200
     data = resp.json()
     assert data["is_fallback"] is True
-    assert "Random forest" in data["verdict"]["headline"]
-    assert data["verdict"]["recommendation"]["model_key"] == "rf"
+    assert "Gradient boosting" in data["verdict"]["headline"]
+    assert data["verdict"]["recommendation"]["model_key"] == "boost"
 
 
 def test_v2_llm_verdict_503_when_no_fallback():

@@ -1,7 +1,7 @@
 {
   "variant": "nonlinear",
-  "config_hash": "01ba89823e26e0190edcbc926cbb281d2c33a72a197598bba7cd0874881b66a5",
-  "dataset_hash": "0d2967bd3b5caa2c47baeaa81f1ef31bb6c7678f250b6ec0586918b6978ce87b",
+  "config_hash": "212cfecc7ea1c41fa6b90f16549ee882e3c151d5e2b9c3eb2235cc55e6a87e13",
+  "dataset_hash": "9ddbad0429042ca85e1b8549dd841bb8657ac96d49cbdf7af5fade16b06ce166",
   "split_hash": "817af29ea8eb0735d828058c3cd83ed30d6102d13233da03e7e8e0181c1e2ac8",
-  "utc_time": "2026-10-12T13:41:03.715829+00:00"
+  "utc_time": "2026-10-13T19:42:54.525866+00:00"
 }

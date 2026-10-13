@@ -23,10 +23,11 @@ if str(_SRC_DIR) not in sys.path:
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import f1_score
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
+
+from epk.calibration import TemperatureScalingCalibrator
 
 from epk.features import ALL_FEATURES, build_preprocessor
 from epk.labels import encode_bands
@@ -203,16 +204,12 @@ def run_training_pipeline(
 
         print(f"CV Macro-F1: {cv_mean:.4f} ± {cv_std:.4f} (tuning time: {tuning_time:.2f}s)")
 
-        # C4: Probability Calibration on Cal-A via Platt scaling (sigmoid) per ADR-008
+        # C4: Probability Calibration on Cal-A via Temperature Scaling per ADR-014
         cal_start = time.time()
-        calibrated_model = CalibratedClassifierCV(
-            estimator=best_pipe,
-            method="sigmoid",
-            cv="prefit",
-        )
+        calibrated_model = TemperatureScalingCalibrator(estimator=best_pipe)
         calibrated_model.fit(X_cal_a, y_cal_a_band)
         cal_time = time.time() - cal_start
-        print(f"Calibrated on Cal-A ({len(X_cal_a)} rows) in {cal_time:.2f}s")
+        print(f"Calibrated on Cal-A ({len(X_cal_a)} rows) in {cal_time:.2f}s (temperature={calibrated_model.temperature_:.4f})")
 
         # C5: Stability evaluation over repeated development splits
         repeat_scores = []
@@ -254,7 +251,8 @@ def run_training_pipeline(
             "stability_mean": round(stability_mean, 4),
             "stability_std": round(stability_std, 4),
             "tuning_time_sec": round(tuning_time, 2),
-            "calibration_method": "sigmoid",
+            "calibration_method": "temperature_scaling",
+            "calibration_temperature": round(calibrated_model.temperature_, 4),
             "profile": profile,
             "seed": seed,
             "variant": variant,

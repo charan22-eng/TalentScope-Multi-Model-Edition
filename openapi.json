@@ -21,6 +21,22 @@
         }
       }
     },
+    "/ready": {
+      "get": {
+        "summary": "Readiness",
+        "operationId": "readiness_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/version": {
       "get": {
         "summary": "Version",
@@ -71,6 +87,48 @@
             }
           }
         }
+      }
+    },
+    "/refresh": {
+      "post": {
+        "summary": "Refresh",
+        "operationId": "refresh_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/logout": {
+      "post": {
+        "summary": "Logout",
+        "operationId": "logout_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/predict": {
@@ -129,13 +187,23 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/explain": {
       "post": {
         "summary": "Explain Pred",
         "operationId": "explain_pred_explain_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "k",
@@ -215,7 +283,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/batch/report/pdf": {
@@ -231,7 +304,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/viz/galaxy": {
@@ -247,13 +325,23 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/viz/surface": {
       "get": {
         "summary": "Surface",
         "operationId": "surface_viz_surface_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "size",
@@ -301,7 +389,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/analytics/constellation": {
@@ -317,7 +410,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/drift/projection": {
@@ -333,7 +431,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v2/models": {
@@ -342,7 +445,7 @@
           "v2"
         ],
         "summary": "List Models",
-        "description": "List all seven models with their specs, metadata, and test metrics (all roles).",
+        "description": "List all seven models with their specs, metadata, and test metrics (all authenticated roles).",
         "operationId": "list_models_api_v2_models_get",
         "responses": {
           "200": {
@@ -353,7 +456,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v2/predict": {
@@ -395,7 +503,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v2/predict/all": {
@@ -437,7 +550,125 @@
               }
             }
           }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/batch": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Batch Predict V2",
+        "description": "Run batch prediction on uploaded CSV file (roles: admin, hr_manager, analyst).",
+        "operationId": "batch_predict_v2_api_v2_batch_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "model_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_batch_predict_v2_api_v2_batch_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
+      }
+    },
+    "/api/v2/auth/logout": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Logout V2",
+        "description": "Revoke JWT token on logout.",
+        "operationId": "logout_v2_api_v2_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/auth/refresh": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Refresh V2",
+        "description": "Rotate JWT token on refresh (revoking the old token).",
+        "operationId": "refresh_v2_api_v2_auth_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v2/explain": {
@@ -479,7 +710,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v2/compare/{topic}": {
@@ -490,6 +726,11 @@
         "summary": "Get Comparison Data",
         "description": "Retrieve precomputed model comparison science JSON (all roles).",
         "operationId": "get_comparison_data_api_v2_compare__topic__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "topic",
@@ -560,7 +801,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v2/viz/surface": {
@@ -571,6 +817,11 @@
         "summary": "Get Surface Landscape",
         "description": "Retrieve decision surface grid for 2D/3D visualization (all roles).",
         "operationId": "get_surface_landscape_api_v2_viz_surface_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "model_key",
@@ -621,6 +872,11 @@
         "summary": "Get Surface Landscape",
         "description": "Retrieve decision surface grid for 2D/3D visualization (all roles).",
         "operationId": "get_surface_landscape_api_v2_viz_surface_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "model_key",
@@ -682,7 +938,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v2/llm/health": {
@@ -870,6 +1131,770 @@
           }
         }
       }
+    },
+    "/api/v2/audit/logs": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Audit Logs",
+        "description": "View append-only audit trail (Admin only).",
+        "operationId": "get_audit_logs_api_v2_audit_logs_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Email"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/{user_id}/role": {
+      "put": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Update User Role",
+        "description": "Update a user's RBAC role with immutable audit trail (Admin only).",
+        "operationId": "update_user_role_api_v2_users__user_id__role_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "new_role",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "New Role"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/review/queue": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Review Queue",
+        "description": "Retrieve items in the uncertainty-first review queue.",
+        "operationId": "get_review_queue_api_v2_review_queue_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status_filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "pending",
+              "title": "Status Filter"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/review/{review_id}/decision": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Submit Review Decision",
+        "description": "Submit human reviewer decision on flagged prediction.",
+        "operationId": "submit_review_decision_api_v2_review__review_id__decision_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Review Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2ReviewDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/review/analytics": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Review Analytics",
+        "description": "Decision-log analytics and overturn rates.",
+        "operationId": "get_review_analytics_api_v2_review_analytics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/transparency/employee/{employee_id}": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Employee Transparency",
+        "description": "Transparency profile for a specific employee.",
+        "operationId": "get_employee_transparency_api_v2_transparency_employee__employee_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Employee Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/transparency/appeal": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Submit Employee Appeal",
+        "description": "Lodge an appeal on an automated decision.",
+        "operationId": "submit_employee_appeal_api_v2_transparency_appeal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2AppealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/privacy/consent": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Record Consent",
+        "description": "Record or withdraw employee consent.",
+        "operationId": "record_consent_api_v2_privacy_consent_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2ConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/privacy/delete-request": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Process Deletion Request",
+        "description": "GDPR/CCPA right to erasure: purge or anonymize records for employee (Admin only).",
+        "operationId": "process_deletion_request_api_v2_privacy_delete_request_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2DeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/retrain": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Trigger Retrain",
+        "description": "Trigger governed retrain across all seven models (Admin only). Verifies frozen test lock.",
+        "operationId": "trigger_retrain_api_v2_retrain_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2RetrainRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/models/approve-champion": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Approve Champion",
+        "description": "Approve proposed candidate champion (Admin only).",
+        "operationId": "approve_champion_api_v2_models_approve_champion_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2ApproveChampionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/models/rollback": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Rollback Champion",
+        "description": "One-click rollback of active champion to stable baseline (Admin only).",
+        "operationId": "rollback_champion_api_v2_models_rollback_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/models/versions": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "List Model Versions",
+        "description": "List model version governance registry (all roles).",
+        "operationId": "list_model_versions_api_v2_models_versions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/drift/status": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Drift Status",
+        "description": "Assess feature drift (PSI and KS) across current production stream.",
+        "operationId": "get_drift_status_api_v2_drift_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/admin/feature-flags": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Get Feature Flags",
+        "description": "Get current feature flag toggles (all roles).",
+        "operationId": "get_feature_flags_api_v2_admin_feature_flags_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Update Feature Flags",
+        "description": "Update feature flag toggles (Admin only).",
+        "operationId": "update_feature_flags_api_v2_admin_feature_flags_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2FeatureFlagsUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/reports/employee/{employee_id}/pdf": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Download Employee Report Pdf",
+        "description": "Download Employee Decision Transparency PDF report.",
+        "operationId": "download_employee_report_pdf_api_v2_reports_employee__employee_id__pdf_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Employee Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/reports/comparison/pdf": {
+      "get": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Download Comparison Report Pdf",
+        "description": "Download Executive Multi-Model Arena Comparison PDF report.",
+        "operationId": "download_comparison_report_pdf_api_v2_reports_comparison_pdf_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -887,6 +1912,20 @@
           "file"
         ],
         "title": "Body_batch_batch_post"
+      },
+      "Body_batch_predict_v2_api_v2_batch_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_batch_predict_v2_api_v2_batch_post"
       },
       "Body_login_login_post": {
         "properties": {
@@ -1162,6 +2201,107 @@
         ],
         "title": "PredictResponse"
       },
+      "V2AppealRequest": {
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "title": "Employee Id"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "supporting_info": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supporting Info"
+          }
+        },
+        "type": "object",
+        "required": [
+          "employee_id",
+          "reason"
+        ],
+        "title": "V2AppealRequest"
+      },
+      "V2ApproveChampionRequest": {
+        "properties": {
+          "champion_key": {
+            "type": "string",
+            "title": "Champion Key"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "default": "v2.0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "champion_key"
+        ],
+        "title": "V2ApproveChampionRequest"
+      },
+      "V2ConsentRequest": {
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "title": "Employee Id"
+          },
+          "consent_type": {
+            "type": "string",
+            "title": "Consent Type",
+            "default": "automated_decision_support"
+          },
+          "granted": {
+            "type": "boolean",
+            "title": "Granted",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "employee_id"
+        ],
+        "title": "V2ConsentRequest"
+      },
+      "V2DeleteRequest": {
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "title": "Employee Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "employee_id"
+        ],
+        "title": "V2DeleteRequest"
+      },
       "V2ExplainRequest": {
         "properties": {
           "model_key": {
@@ -1262,6 +2402,22 @@
           "persona_summaries"
         ],
         "title": "V2ExplainResponse"
+      },
+      "V2FeatureFlagsUpdateRequest": {
+        "properties": {
+          "flags": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "title": "Flags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "flags"
+        ],
+        "title": "V2FeatureFlagsUpdateRequest"
       },
       "V2LLMConfigUpdateRequest": {
         "properties": {
@@ -1492,6 +2648,61 @@
           "performance_index"
         ],
         "title": "V2PredictResponse"
+      },
+      "V2RetrainRequest": {
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile",
+            "default": "fast"
+          }
+        },
+        "type": "object",
+        "title": "V2RetrainRequest"
+      },
+      "V2ReviewDecisionRequest": {
+        "properties": {
+          "decision_band": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Decision Band"
+          },
+          "override_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Override Reason"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision_band"
+        ],
+        "title": "V2ReviewDecisionRequest"
       },
       "ValidationError": {
         "properties": {

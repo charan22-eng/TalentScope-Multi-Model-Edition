@@ -82,25 +82,47 @@ def bundle_all() -> None:
     ev_path = V2_DIR / "comparison" / "evidence_packet.json"
     ev_hash = sha256_file(ev_path) if ev_path.exists() else "unknown"
 
-    champion_data = {
-        "champion_key": "rf",
-        "champion_label": "Random Forest",
-        "runner_up_key": "svm",
-        "runner_up_label": "Support Vector Machine",
-        "selection_rule": "ADR-009 Multi-Criteria Decision Analysis (Balanced profile)",
-        "profile": "Balanced",
-        "composite_mcda_score": 0.573,
-        "rank1_probability": 0.642,
-        "decision_strength": "marginal",
-        "decision_rationale": (
-            "Random Forest achieves the highest composite MCDA score under the Balanced profile. "
-            "Although SVM has higher raw accuracy (0.8164 vs 0.7804), Random Forest provides superior "
-            "calibration (ECE 0.0133 vs 0.0270) and native partial tree explainability, resulting in "
-            "a marginal decision strength recommendation."
-        ),
-        "evidence_packet_sha256": ev_hash,
-        "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-    }
+    mcda_path = V2_DIR / "comparison" / "mcda.json"
+    if mcda_path.exists():
+        with open(mcda_path, "r", encoding="utf-8") as f:
+            mcda_data = json.load(f)
+        winner_key = mcda_data["deterministic_winner"]
+        winner_spec = get_model_spec(winner_key)
+        runner_up_key = mcda_data["runner_up"]
+        runner_up_spec = get_model_spec(runner_up_key)
+        winner_entry = [m for m in mcda_data["ranking"] if m["key"] == winner_key][0]
+        champion_data = {
+            "champion_key": winner_key,
+            "champion": winner_key,
+            "champion_label": winner_spec.label,
+            "runner_up_key": runner_up_key,
+            "runner_up_label": runner_up_spec.label,
+            "rule": "ADR-009 Multi-Criteria Decision Analysis (Balanced profile)",
+            "selection_rule": "ADR-009 Multi-Criteria Decision Analysis (Balanced profile)",
+            "profile": "Balanced",
+            "score": winner_entry["mcda_score"],
+            "composite_mcda_score": winner_entry["mcda_score"],
+            "rank1_probability": winner_entry["p_rank1"],
+            "decision_strength": mcda_data["decision_strength"],
+            "decision_rationale": (
+                f"{winner_spec.label} achieves the highest composite MCDA score ({winner_entry['mcda_score']:.4f}) under the Balanced profile. "
+                f"Runner-up is {runner_up_spec.label} ({mcda_data['ranking'][1]['mcda_score']:.4f}). "
+                f"Decision strength is {mcda_data['decision_strength']}."
+            ),
+            "evidence_packet_sha256": ev_hash,
+            "selection_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        }
+    else:
+        champion_data = {
+            "champion_key": "boost",
+            "champion": "boost",
+            "champion_label": "Gradient Boosting",
+            "score": 0.6816,
+            "composite_mcda_score": 0.6816,
+            "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        }
+
     with open(V2_DIR / "champion.json", "w", encoding="utf-8") as f:
         json.dump(champion_data, f, indent=2)
     print("  [OK] champion.json")

@@ -189,28 +189,42 @@ def compute_conformal_sets_cal_b(
         q_level = float(np.ceil((n_cal_b + 1) * (1.0 - alpha)) / n_cal_b)
         q_level = min(1.0, q_level)
         threshold = round(float(np.quantile(nonconformity, q_level)), 4)
-        min_prob_threshold = round(max(0.0, 1.0 - threshold), 4)
 
         # Evaluate on test set using the shared prediction-set function
         p_test = model.predict_proba(X_test)
-        sets = [
-            get_prediction_set(p_test[i], classes=[0, 1, 2], threshold=threshold)
+        sets_with_fb = [
+            get_prediction_set(p_test[i], classes=[0, 1, 2], threshold=threshold, fallback_to_argmax=True)
+            for i in range(len(test_df))
+        ]
+        sets_no_fb = [
+            get_prediction_set(p_test[i], classes=[0, 1, 2], threshold=threshold, fallback_to_argmax=False)
             for i in range(len(test_df))
         ]
 
-        # Guarantee non-empty sets if required (or measure empty share)
-        set_sizes = np.array([len(s) for s in sets])
-        coverages = np.array([y_test[i] in sets[i] for i in range(len(test_df))])
+        set_sizes_fb = np.array([len(s) for s in sets_with_fb])
+        coverages_fb = np.array([y_test[i] in sets_with_fb[i] for i in range(len(test_df))])
+
+        set_sizes_raw = np.array([len(s) for s in sets_no_fb])
+        coverages_raw = np.array([y_test[i] in sets_no_fb[i] for i in range(len(test_df))])
 
         results[key] = {
             "alpha": alpha,
             "threshold": threshold,
-            "min_prob_threshold": min_prob_threshold,
-            "empirical_coverage": round(float(np.mean(coverages)), 4),
-            "avg_set_size": round(float(np.mean(set_sizes)), 3),
-            "single_label_share": round(float(np.mean(set_sizes == 1)), 4),
-            "multi_label_share": round(float(np.mean(set_sizes > 1)), 4),
-            "empty_share": round(float(np.mean(set_sizes == 0)), 4),
+            "empirical_coverage": round(float(np.mean(coverages_fb)), 4),
+            "avg_set_size": round(float(np.mean(set_sizes_fb)), 3),
+            "single_label_share": round(float(np.mean(set_sizes_fb == 1)), 4),
+            "multi_label_share": round(float(np.mean(set_sizes_fb > 1)), 4),
+            "empty_share": round(float(np.mean(set_sizes_raw == 0)), 4),
+            "with_fallback": {
+                "empirical_coverage": round(float(np.mean(coverages_fb)), 4),
+                "avg_set_size": round(float(np.mean(set_sizes_fb)), 3),
+                "empty_share": 0.0,
+            },
+            "without_fallback": {
+                "empirical_coverage": round(float(np.mean(coverages_raw)), 4),
+                "avg_set_size": round(float(np.mean(set_sizes_raw)), 3),
+                "empty_share": round(float(np.mean(set_sizes_raw == 0)), 4),
+            },
         }
 
     return results

@@ -1,4 +1,4 @@
-"""Unit tests for split-conformal prediction sets and tied probabilities handling."""
+"""Unit tests for split-conformal prediction sets, tied probabilities, and fallback handling."""
 import numpy as np
 import pytest
 
@@ -6,49 +6,69 @@ from epk.uncertainty import get_prediction_set, compute_conformal_threshold
 
 
 def test_conformal_tied_probabilities():
-    """Verify that tied probabilities are handled consistently and included/excluded uniformly."""
+    """Verify that tied probabilities are handled consistently with threshold."""
     classes = ["Low", "Medium", "High"]
 
-    # Exactly tied probabilities between two classes
+    # Exactly tied probabilities between two classes (0.50, 0.50, 0.0)
     probs_two_way_tie = np.array([0.5, 0.5, 0.0])
-    pred_set_50 = get_prediction_set(probs_two_way_tie, classes, min_prob_threshold=0.50)
+
+    # threshold = 0.50 => 1 - p <= 0.50 => p >= 0.50
+    pred_set_50 = get_prediction_set(probs_two_way_tie, classes, threshold=0.50)
     assert pred_set_50 == ["Low", "Medium"], "Both tied classes with p >= 0.50 must be included"
 
-    pred_set_51 = get_prediction_set(probs_two_way_tie, classes, min_prob_threshold=0.51)
-    assert pred_set_51 == [], "Neither tied class should be included if threshold > probability"
+    # threshold = 0.49 => 1 - p <= 0.49 => p >= 0.51
+    pred_set_49 = get_prediction_set(probs_two_way_tie, classes, threshold=0.49, fallback_to_argmax=False)
+    assert pred_set_49 == [], "Neither tied class should be included if score > threshold"
 
     # Three-way tie
     probs_three_way_tie = np.array([1 / 3, 1 / 3, 1 / 3])
-    pred_set_three = get_prediction_set(probs_three_way_tie, classes, min_prob_threshold=0.33)
+    # threshold = 0.67 => 1 - p <= 0.67 => p >= 0.33
+    pred_set_three = get_prediction_set(probs_three_way_tie, classes, threshold=0.67)
     assert pred_set_three == ["Low", "Medium", "High"], "All three tied classes must be included"
 
     # Discrete boundary edge case mimicking Decision Tree leaf ties
     probs_dt_tie = np.array([0.1482, 0.1482, 0.7036])
-    pred_set_exact = get_prediction_set(probs_dt_tie, classes, min_prob_threshold=0.1482)
+    # threshold = 0.8518 => 1 - p <= 0.8518 => p >= 0.1482
+    pred_set_exact = get_prediction_set(probs_dt_tie, classes, threshold=0.8518)
     assert pred_set_exact == ["Low", "Medium", "High"]
 
-    pred_set_strict = get_prediction_set(probs_dt_tie, classes, min_prob_threshold=0.1483)
+    # threshold = 0.8517 => p >= 0.1483
+    pred_set_strict = get_prediction_set(probs_dt_tie, classes, threshold=0.8517)
     assert pred_set_strict == ["High"]
 
 
-def test_conformal_threshold_and_min_prob_equivalence():
-    """Verify equivalence between threshold (score <= threshold) and min_prob_threshold (prob >= 1 - threshold)."""
-    probs = np.array([0.10, 0.30, 0.60])
-    threshold = 0.70  # score = 1 - p <= 0.70 <=> p >= 0.30
-    min_prob = 0.30
+def test_conformal_fallback_guarantee():
+    """Verify standard split conformal empty set vs fallback_to_argmax operational guarantee."""
+    classes = ["Low", "Medium", "High"]
+    probs = np.array([0.25, 0.40, 0.35])
 
-    set_via_thresh = get_prediction_set(probs, classes=[0, 1, 2], threshold=threshold)
-    set_via_min_p = get_prediction_set(probs, classes=[0, 1, 2], min_prob_threshold=min_prob)
+    # Very strict threshold: threshold = 0.50 => p >= 0.50. No class satisfies this.
+    empty_set = get_prediction_set(probs, classes, threshold=0.50, fallback_to_argmax=False)
+    assert empty_set == [], "Standard conformal must allow empty set when no class meets threshold"
 
-    assert set_via_thresh == [1, 2]
-    assert set_via_min_p == [1, 2]
-    assert set_via_thresh == set_via_min_p
+    # Fallback to argmax
+    fallback_set = get_prediction_set(probs, classes, threshold=0.50, fallback_to_argmax=True)
+    assert fallback_set == ["Medium"], "Fallback must return top-1 class when set is otherwise empty"
+
+
+def test_conformal_fallback_with_tie():
+    """Verify fallback when two classes share the maximal probability."""
+    classes = ["Low", "Medium", "High"]
+    probs = np.array([0.45, 0.45, 0.10])
+
+    # Strict threshold 0.50 => p >= 0.50 => none pass
+    empty_set = get_prediction_set(probs, classes, threshold=0.50, fallback_to_argmax=False)
+    assert empty_set == []
+
+    # Fallback returns both tied top classes
+    fallback_set = get_prediction_set(probs, classes, threshold=0.50, fallback_to_argmax=True)
+    assert fallback_set == ["Low", "Medium"], "Fallback on tie must include all tied top classes"
 
 
 def test_conformal_default_classes_and_validation():
     """Verify default integer class indices and error on missing threshold."""
     probs = np.array([0.2, 0.8])
-    assert get_prediction_set(probs, min_prob_threshold=0.5) == [1]
+    assert get_prediction_set(probs, threshold=0.5) == [1]
 
-    with pytest.raises(ValueError, match="Must provide either threshold or min_prob_threshold"):
+    with pytest.raises(ValueError, match="Must provide threshold"):
         get_prediction_set(probs)

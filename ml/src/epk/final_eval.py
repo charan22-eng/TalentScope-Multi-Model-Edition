@@ -25,6 +25,7 @@ if str(_SRC_DIR) not in sys.path:
 import joblib
 import numpy as np
 import pandas as pd
+from scipy.special import softmax
 from scipy.stats import spearmanr
 from sklearn.metrics import (
     accuracy_score,
@@ -182,9 +183,34 @@ def run_final_evaluation(
         with open(tuning_path, "r") as f:
             tuning_meta = json.load(f)
 
-        # Predict
+        # Predict (calibrated)
         y_pred = model.predict(X_test)
         probas = model.predict_proba(X_test)
+
+        # Unwrapped raw estimator for dual reporting
+        if hasattr(model, "calibrated_classifiers_"):
+            raw_pipe = model.calibrated_classifiers_[0].estimator
+        elif hasattr(model, "estimator") and not hasattr(model, "named_steps"):
+            raw_pipe = model.estimator
+        else:
+            raw_pipe = model
+
+        raw_pred = raw_pipe.predict(X_test)
+        if hasattr(raw_pipe, "predict_proba"):
+            raw_probas = raw_pipe.predict_proba(X_test)
+        elif hasattr(raw_pipe, "decision_function"):
+            df_dec = raw_pipe.decision_function(X_test)
+            if df_dec.ndim == 1:
+                df_dec = np.vstack([-df_dec, df_dec]).T
+            raw_probas = softmax(df_dec, axis=1)
+        else:
+            raw_probas = probas
+
+        raw_acc = float(accuracy_score(y_test_band, raw_pred))
+        raw_macro_f1 = float(f1_score(y_test_band, raw_pred, average="macro"))
+        raw_ll = float(log_loss(y_test_band, raw_probas, labels=[0, 1, 2]))
+        raw_brier = float(np.mean(np.sum((raw_probas - y_bin) ** 2, axis=1)))
+        raw_ece = compute_ece(y_test_band, raw_probas, n_bins=10)
 
         # G3 invariant assertion: classes_ == [0, 1, 2]
         assert hasattr(model, "classes_"), f"Model {key} lacks classes_"
@@ -209,11 +235,22 @@ def run_final_evaluation(
             for c in range(3)
         }
 
-        # Probabilistic metrics
-        ll = float(log_loss(y_test_band, probas, labels=[0, 1, 2]))
-        brier = float(np.mean(np.sum((probas - y_bin) ** 2, axis=1)))
-        ece = compute_ece(y_test_band, probas, n_bins=10)
-        roc_ovr = float(roc_auc_score(y_bin, probas, multi_class="ovr", average="macro"))
+        # Prepare test_predictions DataFrame with exact precision
+        preds_df = pd.DataFrame({
+            "row_index": test_indices,
+            "y_true": y_test_band,
+            "y_pred": y_pred,
+            "prob_low": np.round(probas[:, 0], 5),
+            "prob_med": np.round(probas[:, 1], 5),
+            "prob_high": np.round(probas[:, 2], 5),
+        })
+        probas_eval = preds_df[["prob_low", "prob_med", "prob_high"]].to_numpy()
+
+        # Probabilistic metrics on exact exported values
+        ll = float(log_loss(y_test_band, probas_eval, labels=[0, 1, 2]))
+        brier = float(np.mean(np.sum((probas_eval - y_bin) ** 2, axis=1)))
+        ece = compute_ece(y_test_band, probas_eval, n_bins=10)
+        roc_ovr = float(roc_auc_score(y_bin, probas_eval, multi_class="ovr", average="macro"))
 
         # Ordinal error breakdown
         diff = np.abs(y_test_band - y_pred)
@@ -286,6 +323,12 @@ def run_final_evaluation(
             "log_loss": round(ll, 4),
             "brier": round(brier, 4),
             "ece": round(ece, 4),
+            "raw_accuracy": round(raw_acc, 4),
+            "raw_macro_f1": round(raw_macro_f1, 4),
+            "raw_log_loss": round(raw_ll, 4),
+            "raw_brier": round(raw_brier, 4),
+            "raw_ece": round(raw_ece, 4),
+            "calibration_temperature": round(getattr(model, "temperature_", 1.0), 4),
             "exact_share": round(exact_err, 4),
             "adjacent_share": round(adj_err, 4),
             "extreme_share": round(ext_err, 4),
@@ -307,14 +350,6 @@ def run_final_evaluation(
             json.dump(metric_data, f, indent=2)
 
         # Save test_predictions.csv
-        preds_df = pd.DataFrame({
-            "row_index": test_indices,
-            "y_true": y_test_band,
-            "y_pred": y_pred,
-            "prob_low": np.round(probas[:, 0], 5),
-            "prob_med": np.round(probas[:, 1], 5),
-            "prob_high": np.round(probas[:, 2], 5),
-        })
         if pred_scores is not None:
             preds_df["pred_score"] = np.round(pred_scores, 2)
 
@@ -387,12 +422,27 @@ def generate_v2_final_report(results: Dict[str, Any], variant: str, n_test: int)
             f"| `{m['key']}` | {m['exact_share']*100:.1f}% | {m['adjacent_share']*100:.1f}% | {m['extreme_share']*100:.2f}% |"
         )
 
+    lines.extend([
+        "",
+        "## 4. Calibration Analysis (ADR-014 Multinomial Temperature Scaling vs Raw)",
+        "",
+        "| Model Key | Temperature (T) | Calibrated ECE | Raw ECE | Calibrated Brier | Raw Brier | Calibrated Log-Loss | Raw Log-Loss |",
+        "|---|---|---|---|---|---|---|---|",
+    ])
+    for m in sorted_models:
+        lines.append(
+            f"| `{m['key']}` | {m.get('calibration_temperature', 1.0):.4f} | "
+            f"**{m['ece']:.4f}** | {m.get('raw_ece', m['ece']):.4f} | "
+            f"**{m['brier']:.4f}** | {m.get('raw_brier', m['brier']):.4f} | "
+            f"**{m['log_loss']:.4f}** | {m.get('raw_log_loss', m['log_loss']):.4f} |"
+        )
+
     # Check for linreg regression track
     if "linreg" in results and results["linreg"].get("regression_track"):
         reg = results["linreg"]["regression_track"]
         lines.extend([
             f"",
-            f"## 4. Regression Track (Continuous Performance Score)",
+            f"## 5. Regression Track (Continuous Performance Score)",
             f"",
             f"| Model | MAE | RMSE | R2 | Spearman rho |",
             f"|---|---|---|---|---|",
@@ -401,7 +451,7 @@ def generate_v2_final_report(results: Dict[str, Any], variant: str, n_test: int)
 
     lines.extend([
         f"",
-        f"## 5. Decision Support & Ethics Disclaimer",
+        f"## 6. Decision Support & Ethics Disclaimer",
         f"",
         f"> **Notice**: Model rankings depend on the synthetic data-generating process and variant parameters.",
         f"> Protected attributes (gender, age_band) are strictly excluded from all training and inference feature sets.",

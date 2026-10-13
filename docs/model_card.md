@@ -4,22 +4,22 @@
 TalentScope evaluates seven diverse machine-learning architectures on a standardized 12,000-row dataset across identical cross-validation folds, tuning budgets, and preprocessing pipelines.
 
 ## 2. Champion Model (Balanced Profile)
-- **Champion**: **Random Forest** (`rf`)
-- **Decision Strength**: `MARGINAL`
-- **Rank-1 Probability (Dirichlet 5,000 draws)**: `64.2%`
-- **Composite MCDA Score**: `0.573`
+- **Champion**: **Gradient boosting (histogram)** (`boost`)
+- **Decision Strength**: `NONE`
+- **Rank-1 Probability (Dirichlet 5,000 draws)**: `55.5%`
+- **Composite MCDA Score**: `0.666`
 - **Selection Rule**: ADR-009 Multi-Criteria Decision Analysis (Balanced profile)
 
 ## 3. Holdout Leaderboard (Test N = 2,381)
 | Rank | Model | Family | Macro-F1 | Accuracy | QWK | ECE | p95 Latency | Explain Tier |
 |---|---|---|---|---|---|---|---|---|
-| 1 | **Support vector machine (RBF)** (`svm`) | Kernel | `0.8164` | `0.8148` | `0.8216` | `0.0270` | `23.5 ms` | `classifier` |
-| 2 | **Gradient boosting (histogram)** (`boost`) | Ensemble | `0.8038` | `0.8013` | `0.8075` | `0.0904` | `105.8 ms` | `classifier` |
-| 3 | **Random forest** (`rf`) | Ensemble | `0.7804` | `0.7770` | `0.7841` | `0.0133` | `99.4 ms` | `classifier` |
-| 4 | **K-nearest neighbours** (`knn`) | Instance | `0.7543` | `0.7518` | `0.7550` | `0.0246` | `16.9 ms` | `classifier` |
-| 5 | **Logistic regression (multinomial)** (`logreg`) | Linear | `0.7189` | `0.7148` | `0.7173` | `0.1246` | `22.6 ms` | `classifier` |
-| 6 | **Decision tree** (`dt`) | Tree | `0.7094` | `0.7085` | `0.6993` | `0.0342` | `16.3 ms` | `classifier` |
-| 7 | **Linear regression (score to band)** (`linreg`) | Linear | `0.7032` | `0.7014` | `0.6955` | `0.0213` | `13.2 ms` | `score_to_band` |
+| 1 | **Support vector machine (RBF)** (`svm`) | Kernel | `0.8164` | `0.8148` | `0.8216` | `0.0025` | `11.3 ms` | `classifier` |
+| 2 | **Gradient boosting (histogram)** (`boost`) | Ensemble | `0.8056` | `0.8026` | `0.8107` | `0.0126` | `100.8 ms` | `classifier` |
+| 3 | **Random forest** (`rf`) | Ensemble | `0.7787` | `0.7757` | `0.7819` | `0.0157` | `60.2 ms` | `classifier` |
+| 4 | **K-nearest neighbours** (`knn`) | Instance | `0.7190` | `0.7278` | `0.7017` | `0.0239` | `12.9 ms` | `classifier` |
+| 5 | **Logistic regression (multinomial)** (`logreg`) | Linear | `0.7150` | `0.7127` | `0.7083` | `0.0273` | `9.7 ms` | `classifier` |
+| 6 | **Decision tree** (`dt`) | Tree | `0.7111` | `0.7102` | `0.7015` | `0.0399` | `10.7 ms` | `classifier` |
+| 7 | **Linear regression (score to band)** (`linreg`) | Linear | `0.7011` | `0.6997` | `0.6920` | `0.0350` | `10.8 ms` | `score_to_band` |
 
 ## 4. Trade-Off Analysis
 - **Accuracy vs Explainability**: SVM achieves the highest raw Macro-F1 (0.8164), but is a black-box margin model requiring post-hoc approximations. Random Forest achieves 0.7804 with native partial tree explainability and near-zero calibration error (ECE 0.0133).

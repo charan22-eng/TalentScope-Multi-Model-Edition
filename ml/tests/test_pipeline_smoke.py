@@ -180,7 +180,7 @@ def test_evidence_packet_inspection():
     with open(packet_path, "r", encoding="utf-8") as f:
         packet = json.load(f)
 
-    assert packet["deterministic_winner"] == "rf"
+    assert packet["deterministic_winner"] == "boost"
     assert "facts" in packet
     assert len(packet["facts"]) >= 10
 
@@ -298,7 +298,7 @@ def test_local_attribution_and_helpers(sample_data):
 def test_artifact_loader_methods():
     """Verify ArtifactLoader loads champion, dataset_meta, and errors on invalid keys."""
     from epk.artifacts import default_loader, ModelKeyError
-    assert default_loader.load_champion()["champion"] == "rf"
+    assert default_loader.load_champion()["champion"] == "boost"
     assert "variants" in default_loader.load_dataset_meta()
     assert "metrics" in default_loader.load_comparison_json("leaderboard")
     meta = default_loader.load_model_metadata("rf")
@@ -324,7 +324,7 @@ def test_build_comparison_suite(tmp_path):
     from epk.evidence import build_comparison_suite
     comp_dir = tmp_path / "comp"
     packet = build_comparison_suite(comparison_dir=str(comp_dir), n_resamples=10)
-    assert packet["deterministic_winner"] == "rf"
+    assert packet["deterministic_winner"] == "boost"
     assert (comp_dir / "leaderboard.json").exists()
     assert (comp_dir / "pairwise.json").exists()
     assert (comp_dir / "conformal.json").exists()

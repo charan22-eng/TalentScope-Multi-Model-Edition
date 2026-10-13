@@ -41,11 +41,14 @@ ACTIONABLE_LEVERS = {
 
 
 def get_underlying_model(pipeline_or_calibrator: Any) -> Tuple[Any, Any]:
-    """Unwrap preprocessor and core estimator from pipeline or CalibratedClassifierCV."""
+    """Unwrap preprocessor and core estimator from pipeline, CalibratedClassifierCV, or TemperatureScalingCalibrator."""
     est = pipeline_or_calibrator
     if hasattr(est, "calibrated_classifiers_"):
         # Scikit-learn CalibratedClassifierCV
         est = est.calibrated_classifiers_[0].estimator
+    elif hasattr(est, "estimator") and not hasattr(est, "named_steps"):
+        # TemperatureScalingCalibrator or custom wrapper
+        est = est.estimator
 
     if hasattr(est, "named_steps"):
         prep = est.named_steps.get("prep")

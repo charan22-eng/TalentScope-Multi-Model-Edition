@@ -5,60 +5,66 @@
   "task": "classifier",
   "variant": "nonlinear",
   "test_samples": 2381,
-  "accuracy": 0.777,
-  "balanced_accuracy": 0.7726,
-  "macro_f1": 0.7804,
-  "qwk": 0.7841,
-  "mcc": 0.6517,
-  "roc_auc_ovr": 0.9139,
-  "log_loss": 0.5368,
-  "brier": 0.3179,
-  "ece": 0.0133,
-  "exact_share": 0.777,
-  "adjacent_share": 0.2213,
+  "accuracy": 0.7757,
+  "balanced_accuracy": 0.7699,
+  "macro_f1": 0.7787,
+  "qwk": 0.7819,
+  "mcc": 0.6495,
+  "roc_auc_ovr": 0.9133,
+  "log_loss": 0.535,
+  "brier": 0.3163,
+  "ece": 0.0157,
+  "raw_accuracy": 0.7757,
+  "raw_macro_f1": 0.7787,
+  "raw_log_loss": 0.547,
+  "raw_brier": 0.3212,
+  "raw_ece": 0.0514,
+  "calibration_temperature": 0.8079,
+  "exact_share": 0.7757,
+  "adjacent_share": 0.2226,
   "extreme_share": 0.0017,
   "per_class": {
     "Low": {
-      "precision": 0.8085,
-      "recall": 0.7678,
-      "f1": 0.7877,
+      "precision": 0.8058,
+      "recall": 0.772,
+      "f1": 0.7886,
       "support": 715
     },
     "Medium": {
-      "precision": 0.7347,
-      "recall": 0.7957,
-      "f1": 0.764,
+      "precision": 0.7316,
+      "recall": 0.7985,
+      "f1": 0.7636,
       "support": 1072
     },
     "High": {
-      "precision": 0.8281,
-      "recall": 0.7542,
-      "f1": 0.7894,
+      "precision": 0.8346,
+      "recall": 0.7391,
+      "f1": 0.7839,
       "support": 594
     }
   },
   "confusion_matrix": [
     [
-      549,
-      165,
+      552,
+      162,
       1
     ],
     [
-      127,
-      853,
-      92
+      130,
+      856,
+      86
     ],
     [
       3,
-      143,
-      448
+      152,
+      439
     ]
   ],
-  "latency_single_p50_ms": 59.346,
-  "latency_single_p95_ms": 99.381,
-  "latency_batch_5000_ms": 131.41,
-  "model_size_bytes": 27356818,
-  "tuning_time_sec": 30.17,
+  "latency_single_p50_ms": 48.93,
+  "latency_single_p95_ms": 60.175,
+  "latency_batch_5000_ms": 92.15,
+  "model_size_bytes": 27360767,
+  "tuning_time_sec": 21.09,
   "stability_std": 0.0055,
   "explain_tier": "partial",
   "explain_score": 0.6,

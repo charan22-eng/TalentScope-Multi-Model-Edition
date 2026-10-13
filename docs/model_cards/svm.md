@@ -12,10 +12,10 @@
 - **Macro-F1**: `0.8164`
 - **Accuracy**: `0.8148`
 - **Quadratic Weighted Kappa (QWK)**: `0.8216`
-- **Expected Calibration Error (ECE)**: `0.0270`
-- **Brier Score**: `0.2918`
-- **Single-Row Latency (p95)**: `23.47 ms`
-- **5,000-Row Batch Latency**: `2013.64 ms`
+- **Expected Calibration Error (ECE)**: `0.0025`
+- **Brier Score**: `0.3030`
+- **Single-Row Latency (p95)**: `11.31 ms`
+- **5,000-Row Batch Latency**: `1761.20 ms`
 - **Serialized Size**: `0.75 MB`
 
 ## 3. Class-Level Performance

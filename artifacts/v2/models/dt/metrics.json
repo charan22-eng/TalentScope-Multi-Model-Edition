@@ -5,29 +5,35 @@
   "task": "classifier",
   "variant": "nonlinear",
   "test_samples": 2381,
-  "accuracy": 0.7085,
-  "balanced_accuracy": 0.6995,
-  "macro_f1": 0.7094,
-  "qwk": 0.6993,
-  "mcc": 0.5431,
-  "roc_auc_ovr": 0.8549,
-  "log_loss": 0.7071,
-  "brier": 0.4188,
-  "ece": 0.0342,
-  "exact_share": 0.7085,
-  "adjacent_share": 0.2843,
+  "accuracy": 0.7102,
+  "balanced_accuracy": 0.7015,
+  "macro_f1": 0.7111,
+  "qwk": 0.7015,
+  "mcc": 0.5459,
+  "roc_auc_ovr": 0.8546,
+  "log_loss": 0.7524,
+  "brier": 0.4154,
+  "ece": 0.0399,
+  "raw_accuracy": 0.7102,
+  "raw_macro_f1": 0.7111,
+  "raw_log_loss": 0.755,
+  "raw_brier": 0.4171,
+  "raw_ece": 0.0492,
+  "calibration_temperature": 1.4026,
+  "exact_share": 0.7102,
+  "adjacent_share": 0.2827,
   "extreme_share": 0.0071,
   "per_class": {
     "Low": {
-      "precision": 0.7395,
-      "recall": 0.7147,
-      "f1": 0.7269,
+      "precision": 0.7403,
+      "recall": 0.7217,
+      "f1": 0.7309,
       "support": 715
     },
     "Medium": {
-      "precision": 0.6655,
-      "recall": 0.7407,
-      "f1": 0.7011,
+      "precision": 0.6681,
+      "recall": 0.7397,
+      "f1": 0.7021,
       "support": 1072
     },
     "High": {
@@ -39,13 +45,13 @@
   },
   "confusion_matrix": [
     [
-      511,
-      195,
+      516,
+      190,
       9
     ],
     [
-      172,
-      794,
+      173,
+      793,
       106
     ],
     [
@@ -54,11 +60,11 @@
       382
     ]
   ],
-  "latency_single_p50_ms": 8.24,
-  "latency_single_p95_ms": 16.269,
-  "latency_batch_5000_ms": 8.95,
-  "model_size_bytes": 20146,
-  "tuning_time_sec": 0.54,
+  "latency_single_p50_ms": 8.427,
+  "latency_single_p95_ms": 10.676,
+  "latency_batch_5000_ms": 16.51,
+  "model_size_bytes": 19695,
+  "tuning_time_sec": 0.45,
   "stability_std": 0.0125,
   "explain_tier": "native",
   "explain_score": 1.0,

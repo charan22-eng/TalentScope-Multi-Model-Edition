@@ -5,60 +5,66 @@
   "task": "classifier",
   "variant": "nonlinear",
   "test_samples": 2381,
-  "accuracy": 0.7148,
-  "balanced_accuracy": 0.7115,
-  "macro_f1": 0.7189,
-  "qwk": 0.7173,
-  "mcc": 0.5542,
+  "accuracy": 0.7127,
+  "balanced_accuracy": 0.7024,
+  "macro_f1": 0.715,
+  "qwk": 0.7083,
+  "mcc": 0.5493,
   "roc_auc_ovr": 0.8678,
-  "log_loss": 0.6943,
-  "brier": 0.4295,
-  "ece": 0.1246,
-  "exact_share": 0.7148,
-  "adjacent_share": 0.2814,
+  "log_loss": 0.6452,
+  "brier": 0.3951,
+  "ece": 0.0273,
+  "raw_accuracy": 0.7127,
+  "raw_macro_f1": 0.715,
+  "raw_log_loss": 0.6457,
+  "raw_brier": 0.3954,
+  "raw_ece": 0.0282,
+  "calibration_temperature": 0.9731,
+  "exact_share": 0.7127,
+  "adjacent_share": 0.2835,
   "extreme_share": 0.0038,
   "per_class": {
     "Low": {
-      "precision": 0.7568,
-      "recall": 0.6573,
-      "f1": 0.7036,
+      "precision": 0.7532,
+      "recall": 0.6615,
+      "f1": 0.7044,
       "support": 715
     },
     "Medium": {
-      "precision": 0.6692,
-      "recall": 0.7416,
-      "f1": 0.7035,
+      "precision": 0.66,
+      "recall": 0.764,
+      "f1": 0.7082,
       "support": 1072
     },
     "High": {
-      "precision": 0.764,
-      "recall": 0.7357,
-      "f1": 0.7496,
+      "precision": 0.791,
+      "recall": 0.6818,
+      "f1": 0.7324,
       "support": 594
     }
   },
   "confusion_matrix": [
     [
-      470,
-      241,
+      473,
+      238,
       4
     ],
     [
-      146,
-      795,
-      131
+      150,
+      819,
+      103
     ],
     [
       5,
-      152,
-      437
+      184,
+      405
     ]
   ],
-  "latency_single_p50_ms": 14.083,
-  "latency_single_p95_ms": 22.6,
-  "latency_batch_5000_ms": 11.97,
-  "model_size_bytes": 7378,
-  "tuning_time_sec": 0.83,
+  "latency_single_p50_ms": 6.807,
+  "latency_single_p95_ms": 9.735,
+  "latency_batch_5000_ms": 14.82,
+  "model_size_bytes": 6927,
+  "tuning_time_sec": 0.62,
   "stability_std": 0.0059,
   "explain_tier": "native",
   "explain_score": 1.0,

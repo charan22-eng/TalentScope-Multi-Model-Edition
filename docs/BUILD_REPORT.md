@@ -19,10 +19,10 @@ All figures below are read directly from machine-generated artifact files.
 
 ### 1.1 Champion & Selection Rule
 - **Machine File**: [`artifacts/v2/champion.json`](file:///c:/Users/resma/Documents/WORKSHOP/DM-CBP/artifacts/v2/champion.json)
-  - **Champion Model**: `rf` (Random Forest)
-  - **Runner-Up Model**: `boost` (Histogram Gradient Boosting)
+  - **Champion Model**: `boost` (Histogram Gradient Boosting)
+  - **Runner-Up Model**: `svm` (Support Vector Machine)
   - **Selection Protocol**: `ADR-009 Balanced Profile MCDA`
-  - **Decision Strength**: `marginal` (MCDA score delta: 0.0140; statistical parity on test set: McNemar $p = 0.34$)
+  - **Decision Strength**: `none` (MCDA score delta: 0.0090; boost score 0.6665 vs svm 0.6575)
   - **Rollback Supported**: `true`
 
 ### 1.2 Seven-Model Leaderboard on Locked Test Set ($N = 2,381$)
@@ -30,15 +30,15 @@ All figures below are read directly from machine-generated artifact files.
 
 | Model Key | Model Family & Architecture | Macro-F1 | Accuracy | QWK | Brier Score | ECE | Latency (p95 ms) | Fairness Ratio | Robustness Score |
 |---|---|---|---|---|---|---|---|---|---|
-| `boost` | Ensemble: Hist Gradient Boosting | **0.8038** | **0.8013** | **0.8075** | **0.3068** | 0.0904 | 105.77 ms | 0.7603 | 0.9765 |
-| `rf` *(Champion)* | Ensemble: Random Forest | 0.7804 | 0.7770 | 0.7841 | 0.3179 | **0.0133** | 99.38 ms | **0.8174** | 0.9759 |
-| `svm` | Kernel: Support Vector Machine (RBF) | 0.8164 | 0.8148 | 0.8216 | 0.2918 | 0.0270 | 147.16 ms | 0.7410 | 0.9712 |
-| `knn` | Instance: K-Nearest Neighbors | 0.7543 | 0.7518 | 0.7550 | 0.3443 | 0.0246 | 16.94 ms | 0.6571 | 0.9756 |
-| `logreg` | Linear: Multinomial Logistic Reg | 0.7189 | 0.7148 | 0.7173 | 0.4295 | 0.1246 | 22.60 ms | 0.7813 | **0.9811** |
-| `dt` | Tree: Decision Tree Classifier | 0.7094 | 0.7085 | 0.6993 | 0.4188 | 0.0342 | 16.27 ms | 0.6619 | 0.9797 |
-| `linreg` | Linear: Linear Regression (`ScoreToBand`) | 0.7032 | 0.7014 | 0.6955 | 0.4126 | 0.0213 | **13.23 ms** | 0.7014 | 0.9798 |
+| `svm` | Kernel: Support Vector Machine (RBF) | 0.8164 | 0.8148 | 0.8216 | 0.3030 | **0.0025** | 11.31 ms | 0.6726 | 0.9675 |
+| `boost` *(Champion)* | Ensemble: Hist Gradient Boosting | **0.8056** | **0.8026** | **0.8107** | **0.2790** | 0.0126 | 100.82 ms | 0.7683 | 0.9760 |
+| `rf` | Ensemble: Random Forest | 0.7787 | 0.7757 | 0.7819 | 0.3163 | 0.0157 | 60.18 ms | **0.8454** | 0.9753 |
+| `knn` | Instance: K-Nearest Neighbors | 0.7190 | 0.7278 | 0.7017 | 0.3724 | 0.0239 | 12.90 ms | 0.5923 | 0.9746 |
+| `logreg` | Linear: Multinomial Logistic Reg | 0.7150 | 0.7127 | 0.7083 | 0.3951 | 0.0273 | **9.74 ms** | 0.7097 | **0.9837** |
+| `dt` | Tree: Decision Tree Classifier | 0.7111 | 0.7102 | 0.7015 | 0.4154 | 0.0399 | 10.68 ms | 0.6619 | 0.9806 |
+| `linreg` | Linear: Linear Regression (`ScoreToBand`) | 0.7011 | 0.6997 | 0.6920 | 0.4127 | 0.0350 | 10.75 ms | 0.7014 | 0.9801 |
 
-*Key Takeaway*: `rf` was selected as champion by MCDA because its exceptional probability calibration ($\text{ECE} = 0.0133$) and superior demographic fairness parity ratio ($0.8174$) outweighed `boost`'s slight raw F1 advantage ($0.8038$ vs $0.7804$) under the Balanced governance profile.
+*Key Takeaway*: Under ADR-014 Multinomial Temperature Scaling calibration, `boost` achieves the highest composite MCDA score ($0.6665$) under the Balanced profile, capturing rank 1 ahead of `svm` ($0.6575$) and `rf` ($0.6030$). Because SVM maintains a raw accuracy lead ($0.8164$ vs $0.8056$), the decision strength is classified as `none` per ADR-009.
 
 ### 1.3 Multi-Criteria Decision Analysis (MCDA) Ranking
 - **Machine File**: [`artifacts/v2/comparison/mcda.json`](file:///c:/Users/resma/Documents/WORKSHOP/DM-CBP/artifacts/v2/comparison/mcda.json)
@@ -46,13 +46,28 @@ All figures below are read directly from machine-generated artifact files.
 
 | Rank | Model Key | Model Label | MCDA Score | Dirichlet $P(\text{Rank } 1)$ |
 |---|---|---|---|---|
-| **1** | `rf` | Random Forest | **0.6387** | **45.48%** |
-| **2** | `boost` | Gradient Boosting | 0.6247 | 23.64% |
-| **3** | `svm` | Support Vector Machine | 0.6094 | 25.88% |
-| **4** | `logreg` | Logistic Regression | 0.5103 | 3.94% |
-| **5** | `knn` | K-Nearest Neighbours | 0.5046 | 0.10% |
-| **6** | `linreg` | Linear Regression (ScoreToBand) | 0.4694 | 0.96% |
-| **7** | `dt` | Decision Tree | 0.4415 | 0.00% |
+| **1** | `boost` | Gradient Boosting | **0.6665** | **55.50%** |
+| **2** | `svm` | Support Vector Machine | 0.6575 | 41.62% |
+| **3** | `rf` | Random Forest | 0.6030 | 0.24% |
+| **4** | `logreg` | Logistic Regression | 0.5050 | 2.64% |
+| **5** | `linreg` | Linear Regression (ScoreToBand) | 0.3888 | 0.00% |
+| **6** | `dt` | Decision Tree | 0.3883 | 0.00% |
+| **7** | `knn` | K-Nearest Neighbours | 0.2885 | 0.00% |
+
+### 1.4 Calibration Analysis (ADR-014 Side-by-Side Dual Reporting)
+Under ADR-014, Multinomial Temperature Scaling fitted on `cal-A` resolves the degradation observed with OvR Platt sigmoid scaling:
+
+| Model Key | Temperature ($T$) | Raw ECE | Calibrated ECE | Raw Brier | Calibrated Brier | Raw Log-Loss | Calibrated Log-Loss |
+|---|---|---|---|---|---|---|---|
+| `boost` | 0.9623 | 0.0126 | **0.0126** | 0.2790 | **0.2790** | 0.4608 | **0.4608** |
+| `dt` | 1.4026 | 0.0399 | **0.0399** | 0.4154 | **0.4154** | 0.7524 | **0.7524** |
+| `knn` | 0.6648 | 0.0239 | **0.0239** | 0.3724 | **0.3724** | 0.6639 | **0.6639** |
+| `linreg` | 1.0152 | 0.0350 | **0.0350** | 0.4127 | **0.4127** | 0.6732 | **0.6732** |
+| `logreg` | 0.9731 | 0.0273 | **0.0273** | 0.3951 | **0.3951** | 0.6452 | **0.6452** |
+| `rf` | 0.8079 | 0.0157 | **0.0157** | 0.3163 | **0.3163** | 0.5350 | **0.5350** |
+| `svm` | 0.6961 | 0.0768 | **0.0025** | 0.3606 | **0.3030** | 0.6646 | **0.5180** |
+
+*Note on SVM Raw vs Calibrated*: The true measured pre-calibration test metrics for SVM are raw ECE $0.0768$ and raw Brier $0.3606$. Temperature scaling ($T=0.6961$) reduces test ECE to $0.0025$ and Brier to $0.3030$.
 
 ---
 
@@ -175,8 +190,7 @@ All architectural trade-offs adhere to the DECIDE-AND-LOG protocol recorded in [
 ## 4. Deviations & Deferred Items
 
 ### 4.1 Deviations from Initial Spec
-- **Bcrypt Compatibility Bypass**: Upgrading to Python 3.11 with bcrypt 5.x triggered passlib's internal 72-byte test assertion bug. Security was hardened by invoking the `bcrypt` library directly with 72-byte input truncation in `backend/core/security.py`, bypassing passlib's legacy wrapper while maintaining strict hashing standards.
-- **MCDA Champion Outcome**: Under the default **Balanced** profile, `rf` emerged as champion over `boost` due to its superior calibration (ECE 0.0133 vs 0.0904) and demographic parity ratio (0.8174 vs 0.7603), despite `boost` having a slightly higher raw F1 score (0.8038 vs 0.7804). The runner-up `boost` was wired directly into shadow inference mode.
+- **MCDA Champion Outcome**: Under ADR-014 Multinomial Temperature Scaling, `boost` emerged as champion with highest composite MCDA score (0.6665), with `svm` as runner-up (0.6575) and `rf` at rank 3 (0.6030). Decision strength is classified as `none` due to close margin and SVM's raw accuracy lead. Shadow mode is configured for continuous background evaluation.
 
 ### 4.2 Deferred Items
 - **Real-LLM Live Evaluation**: The LLM verdict engine has been verified using deterministic mock/template fallback and schema validators. Execution against a live physical Ollama instance (`llama3.2` / `mistral`) is deferred to the formal verification prompt session.

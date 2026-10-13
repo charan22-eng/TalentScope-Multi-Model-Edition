@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, UploadFile, File
 import io
 from fastapi.responses import JSONResponse, StreamingResponse
 from slowapi import Limiter
@@ -30,7 +30,7 @@ from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from backend.core.audit import log_audit_event
-from backend.core.security import get_current_user, require_roles
+from backend.core.security import get_current_user, require_roles, revoke_token, oauth2_scheme, create_access_token
 from backend.db.database import get_db
 from backend.db.models import (
     AuditLog,
@@ -410,6 +410,129 @@ async def predict_all(request: Request, features: EmployeeFeatures):
         champion_prediction=champ_pred,
         latency_ms=latency_ms,
     )
+
+
+@router.post(
+    "/batch",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst"))],
+)
+@limiter.limit("5/minute")
+async def batch_predict_v2(
+    request: Request,
+    file: UploadFile = File(...),
+    model_key: Optional[str] = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Run batch prediction on uploaded CSV file (roles: admin, hr_manager, analyst)."""
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV files allowed")
+
+    content = await file.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large")
+
+    try:
+        text = content.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid encoding")
+
+    # Formula injection guard
+    for line in text.splitlines():
+        if line.strip().startswith(("=", "+", "-", "@")):
+            raise HTTPException(status_code=400, detail="Formula injection detected")
+
+    df = pd.read_csv(io.StringIO(text))
+
+    chosen_key = model_key or default_loader.load_champion().get("champion_key", "rf")
+    if chosen_key not in MODEL_KEYS and chosen_key != "all":
+        raise HTTPException(status_code=400, detail=f"Invalid model_key '{chosen_key}'")
+
+    results = []
+    errors = []
+    t0 = time.time()
+
+    for idx, row in df.iterrows():
+        try:
+            row_dict = row.to_dict()
+            if chosen_key == "all":
+                row_preds = {k: run_single_model_predict(k, row_dict).predicted_band for k in MODEL_KEYS}
+                results.append({"row": idx, "predictions": row_preds})
+            else:
+                pred = run_single_model_predict(chosen_key, row_dict)
+                results.append({
+                    "row": idx,
+                    "model_key": chosen_key,
+                    "predicted_band": pred.predicted_band,
+                    "confidence": pred.confidence,
+                    "stability_score": pred.stability_score,
+                })
+            errors.append(None)
+        except Exception as e:
+            results.append(None)
+            errors.append({"row": idx, "error": str(e)})
+
+    elapsed_ms = (time.time() - t0) * 1000.0
+
+    # Log audit event
+    log_audit_event(
+        db,
+        user.email,
+        "batch_predict",
+        f"/api/v2/batch/{chosen_key}",
+        details={"total_rows": len(df), "error_count": sum(1 for e in errors if e is not None)},
+    )
+
+    return {
+        "model_key": chosen_key,
+        "total_rows": len(df),
+        "results": results,
+        "errors": [e for e in errors if e is not None],
+        "latency_ms": round(elapsed_ms, 2),
+    }
+
+
+@router.post(
+    "/auth/logout",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
+def logout_v2(
+    token: str = Depends(oauth2_scheme),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Revoke JWT token on logout."""
+    revoke_token(token)
+    log_audit_event(
+        db,
+        user.email,
+        "logout",
+        "/api/v2/auth/logout",
+        details={"token_prefix": token[:10]},
+    )
+    return {"status": "success", "message": "Token revoked successfully"}
+ 
+ 
+@router.post(
+    "/auth/refresh",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+)
+def refresh_v2(
+    token: str = Depends(oauth2_scheme),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Rotate JWT token on refresh (revoking the old token)."""
+    revoke_token(token)
+    new_token = create_access_token(data={"sub": user.email, "role": user.role})
+    log_audit_event(
+        db,
+        user.email,
+        "token_refresh",
+        "/api/v2/auth/refresh",
+        details={"token_prefix": new_token[:10]},
+    )
+    return {"access_token": new_token, "token_type": "bearer", "role": user.role}
 
 
 # ==============================================================================
@@ -884,6 +1007,33 @@ def get_audit_logs(
     ]
 
 
+@router.put("/users/{user_id}/role", dependencies=[Depends(require_roles("admin"))])
+def update_user_role(
+    user_id: int,
+    new_role: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update a user's RBAC role with immutable audit trail (Admin only)."""
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        return problem_details(status_code=404, title="User Not Found", detail=f"User ID {user_id} not found")
+    valid_roles = {"admin", "hr_manager", "analyst", "viewer", "reviewer"}
+    if new_role.lower() not in valid_roles:
+        return problem_details(status_code=400, title="Invalid Role", detail=f"Role '{new_role}' is not a valid system role")
+    old_role = target_user.role
+    target_user.role = new_role.lower()
+    db.commit()
+    log_audit_event(
+        db,
+        user.email,
+        "role_change",
+        f"/api/v2/users/{user_id}/role",
+        details={"user_id": user_id, "target_email": target_user.email, "old_role": old_role, "new_role": target_user.role},
+    )
+    return {"status": "success", "user_id": user_id, "old_role": old_role, "new_role": target_user.role}
+
+
 # L3: Review Workflow
 @router.get("/review/queue", dependencies=[Depends(require_roles("admin", "hr_manager", "reviewer"))])
 def get_review_queue(
@@ -894,9 +1044,14 @@ def get_review_queue(
 ):
     """Retrieve items in the uncertainty-first review queue."""
     q = db.query(ReviewItem)
-    if status_filter:
-        q = q.filter(ReviewItem.status == status_filter)
-    items = q.order_by(ReviewItem.created_at.desc()).limit(limit).all()
+    from sqlalchemy import case
+    urgency_order = case(
+        (ReviewItem.urgency == "high", 1),
+        (ReviewItem.urgency == "medium", 2),
+        (ReviewItem.urgency == "low", 3),
+        else_=4,
+    )
+    items = q.order_by(urgency_order, ReviewItem.created_at.desc()).limit(limit).all()
 
     results = []
     for item in items:
@@ -1226,11 +1381,12 @@ def rollback_champion(
 ):
     """One-click rollback of active champion to stable baseline (Admin only)."""
     update_champion_file({
-        "champion": "rf",
+        "champion_key": "boost",
+        "champion": "boost",
         "selection_rule": "ADR-009 Balanced Profile MCDA",
-        "decision_strength": "marginal",
-        "margin": 0.031,
-        "runner_up": "boost",
+        "decision_strength": "none",
+        "margin": 0.009,
+        "runner_up": "svm",
         "rollback": True,
     })
 
@@ -1238,10 +1394,10 @@ def rollback_champion(
         db,
         user.email,
         "champion_rollback",
-        "models/rf",
-        details={"restored": "rf"},
+        "models/boost",
+        details={"restored": "boost"},
     )
-    return {"status": "rolled_back", "active_champion": "rf"}
+    return {"status": "rolled_back", "active_champion": "boost"}
 
 
 @router.get("/models/versions")

@@ -19,7 +19,16 @@ from .schemas import EmployeeFeatures, PredictResponse, ExplainResponse, BatchPr
 from .config import settings
 from backend.db.database import get_db, engine, Base
 from backend.db.models import User, PredictionHistory
-from backend.core.security import authenticate_user, create_access_token, get_current_user_email, get_password_hash
+from backend.core.security import (
+    authenticate_user,
+    create_access_token,
+    get_current_user_email,
+    get_password_hash,
+    get_current_user,
+    require_roles,
+    revoke_token,
+    oauth2_scheme,
+)
 from backend.services.drift import get_current_drift
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
@@ -88,6 +97,14 @@ def create_app():
             "status": response.status_code,
             "process_time_ms": round(process_time * 1000, 2)
         }))
+        
+        # V13.6 Security headers
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        
         return response
 
     # Exception handler for Problem Details format
@@ -164,29 +181,79 @@ def create_app():
         return {"api_version": settings.api_version, "model_version": metadata.get("version", "unknown")}
 
     @app.post("/login")
-    def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    @limiter.limit("10/minute")
+    def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
         user = authenticate_user(db, form_data.username, form_data.password)
         if not user:
             raise HTTPException(status_code=400, detail="Incorrect email or password")
-        access_token = create_access_token(data={"sub": user.email})
-        return {"access_token": access_token, "token_type": "bearer"}
+        access_token = create_access_token(data={"sub": user.email, "role": user.role})
+        # V10.7 Audit log entry for login
+        try:
+            from backend.db.models import AuditLog
+            db.add(AuditLog(
+                user_email=user.email,
+                action="login",
+                resource="/login",
+                details_json=json.dumps({"role": user.role}),
+            ))
+            db.commit()
+        except Exception:
+            pass
+        return {"access_token": access_token, "token_type": "bearer", "role": user.role}
+
+    @app.post("/refresh")
+    def refresh(token: str = Depends(oauth2_scheme), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+        revoke_token(token)
+        new_token = create_access_token(data={"sub": user.email, "role": user.role})
+        try:
+            from backend.db.models import AuditLog
+            db.add(AuditLog(
+                user_email=user.email,
+                action="token_refresh",
+                resource="/refresh",
+                details_json=json.dumps({"role": user.role}),
+            ))
+            db.commit()
+        except Exception:
+            pass
+        return {"access_token": new_token, "token_type": "bearer", "role": user.role}
+
+    @app.post("/logout")
+    def logout(token: str = Depends(oauth2_scheme), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+        revoke_token(token)
+        try:
+            from backend.db.models import AuditLog
+            db.add(AuditLog(
+                user_email=user.email,
+                action="logout",
+                resource="/logout",
+                details_json=json.dumps({"token_prefix": token[:10]}),
+            ))
+            db.commit()
+        except Exception:
+            pass
+        return {"status": "success", "message": "Logged out and token revoked"}
 
     @app.post("/predict", response_model=PredictResponse)
     @limiter.limit("50/minute")
-    async def predict(request: Request, features: EmployeeFeatures, db: Session = Depends(get_db), current_user: str = Depends(get_current_user_email)):
+    async def predict(
+        request: Request,
+        features: EmployeeFeatures,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(require_roles("admin", "hr_manager", "analyst")),
+    ):
         df = pd.DataFrame([features.model_dump()])
         probs = calibrated_knn.predict_proba(df)[0]
         classes = list(calibrated_knn.classes_)
         classes_str = [to_band_str(c) for c in classes]
         
-        raw_pset = get_prediction_set(probs, classes, conformal.get("threshold", 0.8))
+        raw_pset = get_prediction_set(probs, classes, threshold=conformal.get("threshold", 0.8))
         pset = [to_band_str(c) for c in raw_pset]
         conf_dict = {c: float(p) for c, p in zip(classes_str, probs)}
         
-        
         # Save to history
         hist = PredictionHistory(
-            user_email=current_user,
+            user_email=current_user.email,
             input_data=features.model_dump_json(),
             prediction=pset[0] if pset else "Unknown",
             confidence=float(max(probs)),
@@ -203,19 +270,27 @@ def create_app():
         )
 
     @app.get("/analytics/drift")
-    def drift_report(db: Session = Depends(get_db), current_user: str = Depends(get_current_user_email)):
+    def drift_report(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(require_roles("admin", "hr_manager", "analyst")),
+    ):
         history = db.query(PredictionHistory).order_by(PredictionHistory.timestamp.desc()).limit(1000).all()
         drift_result = get_current_drift(history, {})
         return drift_result
 
     @app.post("/explain", response_model=ExplainResponse)
     @limiter.limit("20/minute")
-    async def explain_pred(request: Request, features: EmployeeFeatures, k: int = 5, current_user: str = Depends(get_current_user_email)):
+    async def explain_pred(
+        request: Request,
+        features: EmployeeFeatures,
+        k: int = 5,
+        current_user: User = Depends(require_roles("admin", "hr_manager", "analyst", "reviewer")),
+    ):
         df = pd.DataFrame([features.model_dump()])
         probs = calibrated_knn.predict_proba(df)[0]
         classes = list(calibrated_knn.classes_)
         classes_str = [to_band_str(c) for c in classes]
-        raw_pset = get_prediction_set(probs, classes, conformal.get("threshold", 0.8))
+        raw_pset = get_prediction_set(probs, classes, threshold=conformal.get("threshold", 0.8))
         pset = [to_band_str(c) for c in raw_pset]
         
         nb_df, votes = explain(pipe, X_train, y_train, df)
@@ -249,7 +324,11 @@ def create_app():
 
     @app.post("/batch")
     @limiter.limit("5/minute")
-    async def batch(request: Request, file: UploadFile = File(...), current_user: str = Depends(get_current_user_email)):
+    async def batch(
+        request: Request,
+        file: UploadFile = File(...),
+        current_user: User = Depends(require_roles("admin", "hr_manager", "analyst")),
+    ):
         if not file.filename.endswith(".csv"):
             raise HTTPException(status_code=400, detail="Only CSV files allowed")
         
@@ -281,7 +360,7 @@ def create_app():
                 probs = calibrated_knn.predict_proba(r_df)[0]
                 classes = list(calibrated_knn.classes_)
                 classes_str = [to_band_str(c) for c in classes]
-                raw_pset = get_prediction_set(probs, classes, conformal.get("threshold", 0.8))
+                raw_pset = get_prediction_set(probs, classes, threshold=conformal.get("threshold", 0.8))
                 pset = [to_band_str(c) for c in raw_pset]
                 conf_dict = {c: float(p) for c, p in zip(classes_str, probs)}
                 
@@ -301,7 +380,10 @@ def create_app():
         return {"results": results, "errors": errors, "latency_ms": (t1-t0)*1000}
 
     @app.get("/batch/report/pdf")
-    def export_pdf_report(db: Session = Depends(get_db), current_user: str = Depends(get_current_user_email)):
+    def export_pdf_report(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(require_roles("admin", "hr_manager", "analyst")),
+    ):
         if not HAS_REPORTLAB:
             return Response(content="ReportLab not installed", media_type="text/plain")
         buffer = io.BytesIO()
@@ -321,30 +403,51 @@ def create_app():
         c.save()
         pdf = buffer.getvalue()
         buffer.close()
+
+        # V10.7 Audit log entry for export
+        try:
+            from backend.db.models import AuditLog
+            db.add(AuditLog(
+                user_email=current_user.email,
+                action="export",
+                resource="/batch/report/pdf",
+                details_json=json.dumps({"format": "pdf"}),
+            ))
+            db.commit()
+        except Exception:
+            pass
         
         return Response(content=pdf, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=report.pdf"})
 
     @app.get("/viz/galaxy")
-    def galaxy(current_user: str = Depends(get_current_user_email)):
-        bkg = pd.read_csv(f"{settings.artifact_path}/assets/background_sample.csv")
-        return bkg.to_dict(orient="records")
+    def galaxy(current_user: User = Depends(require_roles("admin", "hr_manager", "analyst"))):
+        for candidate in [
+            f"{settings.artifact_path}/assets/background_sample.csv",
+            "data/processed/assets/background_sample.csv",
+            "artifacts/v1/background_sample.csv",
+            "data/nonlinear/dataset.csv",
+        ]:
+            if Path(candidate).exists():
+                bkg = pd.read_csv(candidate)
+                return bkg.iloc[:2000].replace({np.nan: None}).to_dict(orient="records")
+        return []
 
     @app.get("/viz/surface")
-    def surface(size: int = 40, current_user: str = Depends(get_current_user_email)):
+    def surface(size: int = 40, current_user: User = Depends(require_roles("admin", "hr_manager", "analyst"))):
         if size > 80:
             raise HTTPException(status_code=400, detail="Grid size too large")
         return {"status": "stubbed"}
 
     @app.get("/analytics")
-    def analytics(current_user: str = Depends(get_current_user_email)):
+    def analytics(current_user: User = Depends(require_roles("admin", "hr_manager", "analyst"))):
         return {"status": "stubbed"}
         
     @app.get("/analytics/constellation")
-    def constellation(current_user: str = Depends(get_current_user_email)):
+    def constellation(current_user: User = Depends(require_roles("admin", "hr_manager", "analyst"))):
         return {"status": "stubbed"}
         
     @app.get("/drift/projection")
-    def drift(current_user: str = Depends(get_current_user_email)):
+    def drift(current_user: User = Depends(require_roles("admin", "hr_manager", "analyst"))):
         return {"status": "stubbed"}
 
     from backend.app.api_v2 import router as v2_router

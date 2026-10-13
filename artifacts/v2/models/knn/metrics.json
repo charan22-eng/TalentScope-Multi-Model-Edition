@@ -5,60 +5,66 @@
   "task": "classifier",
   "variant": "nonlinear",
   "test_samples": 2381,
-  "accuracy": 0.7518,
-  "balanced_accuracy": 0.7454,
-  "macro_f1": 0.7543,
-  "qwk": 0.755,
-  "mcc": 0.6122,
-  "roc_auc_ovr": 0.9006,
-  "log_loss": 0.5698,
-  "brier": 0.3443,
-  "ece": 0.0246,
-  "exact_share": 0.7518,
-  "adjacent_share": 0.2457,
-  "extreme_share": 0.0025,
+  "accuracy": 0.7278,
+  "balanced_accuracy": 0.6951,
+  "macro_f1": 0.719,
+  "qwk": 0.7017,
+  "mcc": 0.5843,
+  "roc_auc_ovr": 0.897,
+  "log_loss": 0.6639,
+  "brier": 0.3724,
+  "ece": 0.0239,
+  "raw_accuracy": 0.7278,
+  "raw_macro_f1": 0.719,
+  "raw_log_loss": 0.6994,
+  "raw_brier": 0.3875,
+  "raw_ece": 0.089,
+  "calibration_temperature": 0.6648,
+  "exact_share": 0.7278,
+  "adjacent_share": 0.2713,
+  "extreme_share": 0.0008,
   "per_class": {
     "Low": {
-      "precision": 0.8217,
-      "recall": 0.7091,
-      "f1": 0.7613,
+      "precision": 0.9115,
+      "recall": 0.5329,
+      "f1": 0.6726,
       "support": 715
     },
     "Medium": {
-      "precision": 0.7031,
-      "recall": 0.7864,
-      "f1": 0.7424,
+      "precision": 0.6418,
+      "recall": 0.8993,
+      "f1": 0.749,
       "support": 1072
     },
     "High": {
-      "precision": 0.7788,
-      "recall": 0.7407,
-      "f1": 0.7593,
+      "precision": 0.8416,
+      "recall": 0.6532,
+      "f1": 0.7355,
       "support": 594
     }
   },
   "confusion_matrix": [
     [
-      507,
-      205,
-      3
+      381,
+      332,
+      2
     ],
     [
-      107,
-      843,
-      122
+      37,
+      964,
+      71
     ],
     [
-      3,
-      151,
-      440
+      0,
+      206,
+      388
     ]
   ],
-  "latency_single_p50_ms": 10.33,
-  "latency_single_p95_ms": 16.94,
-  "latency_batch_5000_ms": 198.99,
-  "model_size_bytes": 1063922,
-  "tuning_time_sec": 1.56,
+  "latency_single_p50_ms": 9.019,
+  "latency_single_p95_ms": 12.897,
+  "latency_batch_5000_ms": 126.3,
+  "model_size_bytes": 1063407,
+  "tuning_time_sec": 1.31,
   "stability_std": 0.0098,
   "explain_tier": "partial",
   "explain_score": 0.6,

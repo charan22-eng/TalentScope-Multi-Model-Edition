@@ -1,44 +1,44 @@
 {
   "boost": {
-    "roc_auc_ovr": 0.9282,
-    "brier": 0.3068,
-    "ece": 0.0904,
-    "log_loss": 0.5067
+    "roc_auc_ovr": 0.931,
+    "brier": 0.279,
+    "ece": 0.0126,
+    "log_loss": 0.4608
   },
   "dt": {
-    "roc_auc_ovr": 0.8549,
-    "brier": 0.4188,
-    "ece": 0.0342,
-    "log_loss": 0.7071
+    "roc_auc_ovr": 0.8546,
+    "brier": 0.4154,
+    "ece": 0.0399,
+    "log_loss": 0.7524
   },
   "knn": {
-    "roc_auc_ovr": 0.9006,
-    "brier": 0.3443,
-    "ece": 0.0246,
-    "log_loss": 0.5698
+    "roc_auc_ovr": 0.897,
+    "brier": 0.3724,
+    "ece": 0.0239,
+    "log_loss": 0.6639
   },
   "linreg": {
     "roc_auc_ovr": 0.8585,
-    "brier": 0.4126,
-    "ece": 0.0213,
-    "log_loss": 0.6791
+    "brier": 0.4127,
+    "ece": 0.035,
+    "log_loss": 0.6732
   },
   "logreg": {
     "roc_auc_ovr": 0.8678,
-    "brier": 0.4295,
-    "ece": 0.1246,
-    "log_loss": 0.6943
+    "brier": 0.3951,
+    "ece": 0.0273,
+    "log_loss": 0.6452
   },
   "rf": {
-    "roc_auc_ovr": 0.9139,
-    "brier": 0.3179,
-    "ece": 0.0133,
-    "log_loss": 0.5368
+    "roc_auc_ovr": 0.9133,
+    "brier": 0.3163,
+    "ece": 0.0157,
+    "log_loss": 0.535
   },
   "svm": {
-    "roc_auc_ovr": 0.9266,
-    "brier": 0.2918,
-    "ece": 0.027,
-    "log_loss": 0.4977
+    "roc_auc_ovr": 0.9324,
+    "brier": 0.303,
+    "ece": 0.0025,
+    "log_loss": 0.518
   }
 }

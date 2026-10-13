@@ -54,6 +54,8 @@ scratch/
 backups/
 .coverage
 .coverage.*
+coverage/
+frontend/coverage/
 *~
 *.swp
 reports/*.zip

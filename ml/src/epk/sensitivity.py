@@ -117,6 +117,13 @@ def run_variant_sensitivity(
         ),
     }
 
+    # Embed calibration sensitivity per Prompt A.4
+    mcda_file = Path("artifacts/v2/comparison/mcda.json")
+    if mcda_file.exists():
+        with open(mcda_file, "r", encoding="utf-8") as f:
+            mcda_data = json.load(f)
+            out["calibration_sensitivity"] = mcda_data.get("calibration_sensitivity", {})
+
     out_file = Path(output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
     with open(out_file, "w", encoding="utf-8") as f:

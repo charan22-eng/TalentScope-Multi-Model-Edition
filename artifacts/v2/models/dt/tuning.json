@@ -16,8 +16,9 @@
   "stability_mean": 0.6939,
   "stability_std": 0.0125,
   "tuning_time_sec": 0.45,
-  "calibration_method": "sigmoid",
+  "calibration_method": "temperature_scaling",
   "profile": "fast",
   "seed": 42,
-  "variant": "nonlinear"
+  "variant": "nonlinear",
+  "calibration_temperature": 1.4026
 }

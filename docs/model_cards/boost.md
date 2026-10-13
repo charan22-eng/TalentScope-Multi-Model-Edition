@@ -9,21 +9,21 @@
 - **Dataset Split Hash**: `45a90aaf72c97cca...`
 
 ## 2. Test Performance Metrics (Holdout N = 2,381)
-- **Macro-F1**: `0.8038`
-- **Accuracy**: `0.8013`
-- **Quadratic Weighted Kappa (QWK)**: `0.8075`
-- **Expected Calibration Error (ECE)**: `0.0904`
-- **Brier Score**: `0.3068`
-- **Single-Row Latency (p95)**: `105.77 ms`
-- **5,000-Row Batch Latency**: `128.93 ms`
+- **Macro-F1**: `0.8056`
+- **Accuracy**: `0.8026`
+- **Quadratic Weighted Kappa (QWK)**: `0.8107`
+- **Expected Calibration Error (ECE)**: `0.0126`
+- **Brier Score**: `0.2790`
+- **Single-Row Latency (p95)**: `100.82 ms`
+- **5,000-Row Batch Latency**: `122.41 ms`
 - **Serialized Size**: `1.03 MB`
 
 ## 3. Class-Level Performance
 | Band | Precision | Recall | F1-Score | Support |
 |---|---|---|---|---|
-| **Low** | 0.8346 | 0.7972 | 0.8155 | 715 |
-| **Medium** | 0.7573 | 0.8265 | 0.7904 | 1072 |
-| **High** | 0.8561 | 0.7609 | 0.8057 | 594 |
+| **Low** | 0.8428 | 0.7874 | 0.8142 | 715 |
+| **Medium** | 0.7595 | 0.8246 | 0.7907 | 1072 |
+| **High** | 0.8452 | 0.7811 | 0.8119 | 594 |
 
 ## 4. Hyperparameters & Tuning
 ```json
