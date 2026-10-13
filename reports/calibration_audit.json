@@ -1,0 +1,114 @@
+{
+  "boost": {
+    "cal_b": {
+      "ece_before": 0.0229,
+      "ece_after": 0.0787,
+      "brier_before": 0.3024,
+      "brier_after": 0.3262
+    },
+    "test": {
+      "ece_before": 0.0198,
+      "ece_after": 0.0904,
+      "brier_before": 0.2794,
+      "brier_after": 0.3068
+    },
+    "test_predictions_csv_verified": true,
+    "max_abs_diff_with_csv": 0.0
+  },
+  "dt": {
+    "cal_b": {
+      "ece_before": 0.0555,
+      "ece_after": 0.0358,
+      "brier_before": 0.4262,
+      "brier_after": 0.4285
+    },
+    "test": {
+      "ece_before": 0.0492,
+      "ece_after": 0.0342,
+      "brier_before": 0.4171,
+      "brier_after": 0.4188
+    },
+    "test_predictions_csv_verified": true,
+    "max_abs_diff_with_csv": 0.0
+  },
+  "knn": {
+    "cal_b": {
+      "ece_before": 0.0555,
+      "ece_after": 0.029,
+      "brier_before": 0.4111,
+      "brier_after": 0.3852
+    },
+    "test": {
+      "ece_before": 0.089,
+      "ece_after": 0.0246,
+      "brier_before": 0.3875,
+      "brier_after": 0.3443
+    },
+    "test_predictions_csv_verified": true,
+    "max_abs_diff_with_csv": 0.0
+  },
+  "linreg": {
+    "cal_b": {
+      "ece_before": 0.0153,
+      "ece_after": 0.0415,
+      "brier_before": 0.4417,
+      "brier_after": 0.4463
+    },
+    "test": {
+      "ece_before": 0.0321,
+      "ece_after": 0.0213,
+      "brier_before": 0.4125,
+      "brier_after": 0.4126
+    },
+    "test_predictions_csv_verified": true,
+    "max_abs_diff_with_csv": 0.0
+  },
+  "logreg": {
+    "cal_b": {
+      "ece_before": 0.0157,
+      "ece_after": 0.0974,
+      "brier_before": 0.4205,
+      "brier_after": 0.445
+    },
+    "test": {
+      "ece_before": 0.0282,
+      "ece_after": 0.1246,
+      "brier_before": 0.3954,
+      "brier_after": 0.4295
+    },
+    "test_predictions_csv_verified": true,
+    "max_abs_diff_with_csv": 0.0
+  },
+  "rf": {
+    "cal_b": {
+      "ece_before": 0.0464,
+      "ece_after": 0.0195,
+      "brier_before": 0.3343,
+      "brier_after": 0.3326
+    },
+    "test": {
+      "ece_before": 0.0514,
+      "ece_after": 0.0133,
+      "brier_before": 0.3212,
+      "brier_after": 0.3179
+    },
+    "test_predictions_csv_verified": true,
+    "max_abs_diff_with_csv": 0.0
+  },
+  "svm": {
+    "cal_b": {
+      "ece_before": 0.063,
+      "ece_after": 0.0317,
+      "brier_before": 0.3557,
+      "brier_after": 0.3387
+    },
+    "test": {
+      "ece_before": 0.1014,
+      "ece_after": 0.027,
+      "brier_before": 0.3181,
+      "brier_after": 0.2918
+    },
+    "test_predictions_csv_verified": true,
+    "max_abs_diff_with_csv": 0.0
+  }
+}

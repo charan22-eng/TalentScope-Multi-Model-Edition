@@ -2,6 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 import yaml
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -78,10 +79,19 @@ def test_manifest_hashes_match():
             csv_path = data_dir / variant / filename
             assert csv_path.exists(), f"File {csv_path} not found"
             df = pd.read_csv(csv_path)
-            computed_hash = hash_dataframe(df)
-            assert computed_hash == meta["sha256"], (
-                f"Hash mismatch for {variant}/{filename}: "
-                f"expected {meta['sha256']}, got {computed_hash}"
+            computed_row_hash = hash_dataframe(df)
+            expected_row_hash = meta.get("row_hash_sha256", meta.get("sha256"))
+            assert computed_row_hash == expected_row_hash, (
+                f"Row hash mismatch for {variant}/{filename}: "
+                f"expected {expected_row_hash}, got {computed_row_hash}"
+            )
+            # Verify primary byte-level LF SHA-256
+            with open(csv_path, "rb") as fh:
+                lf_bytes = fh.read().replace(b"\r\n", b"\n")
+            computed_byte_sha = hashlib.sha256(lf_bytes).hexdigest()
+            assert computed_byte_sha == meta["sha256"], (
+                f"Byte SHA-256 mismatch for {variant}/{filename}: "
+                f"expected {meta['sha256']}, got {computed_byte_sha}"
             )
             assert len(df) == meta["rows"], (
                 f"Row count mismatch for {variant}/{filename}: "

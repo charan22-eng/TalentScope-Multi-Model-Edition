@@ -1,0 +1,12 @@
+[run]
+branch = True
+omit =
+    */epk/audit.py
+    */epk/train.py
+    */epk/tune.py
+    */epk/validate.py
+    */epk/compare.py
+    */epk/train_extras.py
+
+[report]
+show_missing = True

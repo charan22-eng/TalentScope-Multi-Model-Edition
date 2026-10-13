@@ -35,6 +35,7 @@ from epk.split import load_split
 
 
 PROFILE_CONFIGS = {
+    "smoke": {"n_iter": 1, "n_repeats": 1},
     "fast": {"n_iter": 10, "n_repeats": 3},
     "standard": {"n_iter": 30, "n_repeats": 5},
     "thorough": {"n_iter": 60, "n_repeats": 10},
@@ -190,7 +191,7 @@ def run_training_pipeline(
                 scoring="f1_macro",
                 cv=skf,
                 random_state=seed,
-                n_jobs=-1,
+                n_jobs=1 if profile == "smoke" else -1,
                 error_score="raise",
             )
             search.fit(X_train, y_train_band)

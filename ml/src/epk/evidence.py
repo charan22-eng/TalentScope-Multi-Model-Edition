@@ -72,6 +72,7 @@ def build_comparison_suite(
     comparison_dir: str = "artifacts/v2/comparison",
     data_path: str = None,
     split_path: str = "data/processed/split.json",
+    n_resamples: int = 2000,
 ) -> Dict[str, Any]:
     """Compute and persist all comparison science artifacts."""
     if data_path is None:
@@ -138,7 +139,7 @@ def build_comparison_suite(
     rank2_key = mcda_res["runner_up"]
 
     # 4. Bootstrap and McNemar
-    boot_data = paired_stratified_bootstrap(y_test, preds_dict, rank1_key, rank2_key, n_resamples=2000)
+    boot_data = paired_stratified_bootstrap(y_test, preds_dict, rank1_key, rank2_key, n_resamples=n_resamples)
     mcnemar_data = pairwise_mcnemar_tests(y_test, preds_dict)
 
     # 5. Conformal Prediction on cal-B
