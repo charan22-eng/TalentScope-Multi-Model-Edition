@@ -23,6 +23,8 @@ export function ArenaSensitivity() {
     linearVsNonlinear: 0.428,
     nonlinearVsNoisy: 0.714,
   });
+  const [calSensitivity, setCalSensitivity] = useState<any>(null);
+  const [activeCalScenario, setActiveCalScenario] = useState<'calibration_removed' | 'raw_calibration'>('calibration_removed');
 
   useEffect(() => {
     async function loadSensitivity() {
@@ -33,6 +35,9 @@ export function ArenaSensitivity() {
         }
         if (data?.kendall_tau) {
           setKendallTau(data.kendall_tau);
+        }
+        if (data?.calibration_sensitivity) {
+          setCalSensitivity(data.calibration_sensitivity);
         }
       } catch (e) {
         console.warn('Using baseline sensitivity rankings', e);
@@ -138,6 +143,131 @@ export function ArenaSensitivity() {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      {/* Calibration Criterion Sensitivity Section */}
+      <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Calibration Criterion Sensitivity (5 Governance Profiles)</h3>
+            <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+              Evaluate decision stability under alternative calibration treatments across all organizational profiles.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={() => setActiveCalScenario('calibration_removed')}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                background: activeCalScenario === 'calibration_removed' ? 'var(--primary-color)' : 'var(--bg-primary)',
+                color: activeCalScenario === 'calibration_removed' ? '#ffffff' : 'var(--text-primary)',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+              }}
+            >
+              (a) Calibration Removed (Weight = 0)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveCalScenario('raw_calibration')}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                background: activeCalScenario === 'raw_calibration' ? 'var(--primary-color)' : 'var(--bg-primary)',
+                color: activeCalScenario === 'raw_calibration' ? '#ffffff' : 'var(--text-primary)',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+              }}
+            >
+              (b) Raw Probabilities (Raw ECE)
+            </button>
+          </div>
+        </div>
+
+        {/* Statistical Tie Disclosure Banner */}
+        <div
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: 'var(--radius)',
+            background: 'rgba(0, 114, 178, 0.08)',
+            border: '1px solid rgba(0, 114, 178, 0.3)',
+            marginBottom: '1rem',
+            fontSize: '0.85rem',
+          }}
+        >
+          <strong>Governance Finding:</strong> boost and svm are statistically tied under default balanced (composite score margin 0.0090, decision strength none); the winner depends on priorities.
+        </div>
+
+        {/* 5-Profile Sensitivity Table */}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-primary)' }}>
+                <th style={{ padding: '0.6rem', textAlign: 'left', borderBottom: '2px solid var(--border-color)' }}>Profile</th>
+                <th style={{ padding: '0.6rem', textAlign: 'left', borderBottom: '2px solid var(--border-color)' }}>Baseline Winner</th>
+                <th style={{ padding: '0.6rem', textAlign: 'left', borderBottom: '2px solid var(--border-color)' }}>Scenario Winner</th>
+                <th style={{ padding: '0.6rem', textAlign: 'left', borderBottom: '2px solid var(--border-color)' }}>Runner-Up</th>
+                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>Rank-1 Probability</th>
+                <th style={{ padding: '0.6rem', textAlign: 'center', borderBottom: '2px solid var(--border-color)' }}>Champion Shift</th>
+              </tr>
+            </thead>
+            <tbody>
+              {calSensitivity?.profiles &&
+                Object.entries(calSensitivity.profiles).map(([profName, pData]: [string, any]) => {
+                  const scenData = pData[activeCalScenario];
+                  const baseData = pData.baseline;
+                  return (
+                    <tr key={profName} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '0.6rem', fontWeight: 600 }}>{profName}</td>
+                      <td style={{ padding: '0.6rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <ModelChip modelKey={baseData.winner} size="sm" />
+                          <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            ({baseData.score.toFixed(4)})
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.6rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <ModelChip modelKey={scenData.winner} size="sm" />
+                          <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600 }}>
+                            ({scenData.score.toFixed(4)})
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.6rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <ModelChip modelKey={scenData.runner_up} size="sm" />
+                          <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            ({scenData.runner_up_score.toFixed(4)})
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                        {(scenData.rank1_probability * 100).toFixed(1)}%
+                      </td>
+                      <td style={{ padding: '0.6rem', textAlign: 'center' }}>
+                        {scenData.champion_changed ? (
+                          <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(213, 94, 0, 0.1)', color: '#D55E00', fontWeight: 600 }}>
+                            Winner Changed
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(40, 167, 69, 0.1)', color: '#28a745', fontWeight: 600 }}>
+                            Unchanged
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

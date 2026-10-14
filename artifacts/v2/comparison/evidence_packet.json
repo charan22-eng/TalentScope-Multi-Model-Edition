@@ -25,35 +25,816 @@
   "decision_strength": "none",
   "synthetic_caveat_fact": "F90",
   "calibration_sensitivity": {
+    "statement": "boost and svm are statistically tied under default balanced (composite margin 0.0090, decision strength none); the winner depends on organizational priorities.",
     "baseline_champion": "boost",
+    "profiles": {
+      "Balanced": {
+        "baseline": {
+          "winner": "boost",
+          "score": 0.6665,
+          "rank1_probability": 0.5322,
+          "ranking": [
+            {
+              "key": "boost",
+              "rank": 1,
+              "mcda_score": 0.6665,
+              "p_rank1": 0.5322
+            },
+            {
+              "key": "svm",
+              "rank": 2,
+              "mcda_score": 0.6575,
+              "p_rank1": 0.4266
+            },
+            {
+              "key": "rf",
+              "rank": 3,
+              "mcda_score": 0.6074,
+              "p_rank1": 0.009
+            },
+            {
+              "key": "logreg",
+              "rank": 4,
+              "mcda_score": 0.5078,
+              "p_rank1": 0.0322
+            },
+            {
+              "key": "linreg",
+              "rank": 5,
+              "mcda_score": 0.392,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 6,
+              "mcda_score": 0.3908,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.3131,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "calibration_removed": {
+          "winner": "boost",
+          "score": 0.6594,
+          "runner_up": "svm",
+          "runner_up_score": 0.6194,
+          "rank1_probability": 0.7046,
+          "champion_changed": false,
+          "ranking": [
+            {
+              "key": "boost",
+              "rank": 1,
+              "mcda_score": 0.6594,
+              "p_rank1": 0.7046
+            },
+            {
+              "key": "svm",
+              "rank": 2,
+              "mcda_score": 0.6194,
+              "p_rank1": 0.2148
+            },
+            {
+              "key": "rf",
+              "rank": 3,
+              "mcda_score": 0.603,
+              "p_rank1": 0.0128
+            },
+            {
+              "key": "logreg",
+              "rank": 4,
+              "mcda_score": 0.5268,
+              "p_rank1": 0.0678
+            },
+            {
+              "key": "dt",
+              "rank": 5,
+              "mcda_score": 0.4342,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "linreg",
+              "rank": 6,
+              "mcda_score": 0.421,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.3004,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "raw_calibration": {
+          "winner": "boost",
+          "score": 0.6935,
+          "runner_up": "rf",
+          "runner_up_score": 0.604,
+          "rank1_probability": 0.9096,
+          "champion_changed": false,
+          "ranking": [
+            {
+              "key": "boost",
+              "rank": 1,
+              "mcda_score": 0.6935,
+              "p_rank1": 0.9096
+            },
+            {
+              "key": "rf",
+              "rank": 2,
+              "mcda_score": 0.604,
+              "p_rank1": 0.0008
+            },
+            {
+              "key": "logreg",
+              "rank": 3,
+              "mcda_score": 0.5638,
+              "p_rank1": 0.0718
+            },
+            {
+              "key": "svm",
+              "rank": 4,
+              "mcda_score": 0.5575,
+              "p_rank1": 0.0178
+            },
+            {
+              "key": "linreg",
+              "rank": 5,
+              "mcda_score": 0.4638,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 6,
+              "mcda_score": 0.4548,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.2855,
+              "p_rank1": 0.0
+            }
+          ]
+        }
+      },
+      "Accuracy-first": {
+        "baseline": {
+          "winner": "svm",
+          "score": 0.8408,
+          "rank1_probability": 0.8366,
+          "ranking": [
+            {
+              "key": "svm",
+              "rank": 1,
+              "mcda_score": 0.8408,
+              "p_rank1": 0.8366
+            },
+            {
+              "key": "boost",
+              "rank": 2,
+              "mcda_score": 0.803,
+              "p_rank1": 0.1634
+            },
+            {
+              "key": "rf",
+              "rank": 3,
+              "mcda_score": 0.6535,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "logreg",
+              "rank": 4,
+              "mcda_score": 0.3156,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 5,
+              "mcda_score": 0.225,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 6,
+              "mcda_score": 0.1987,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "linreg",
+              "rank": 7,
+              "mcda_score": 0.1708,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "calibration_removed": {
+          "winner": "svm",
+          "score": 0.8232,
+          "runner_up": "boost",
+          "runner_up_score": 0.8112,
+          "rank1_probability": 0.634,
+          "champion_changed": false,
+          "ranking": [
+            {
+              "key": "svm",
+              "rank": 1,
+              "mcda_score": 0.8232,
+              "p_rank1": 0.634
+            },
+            {
+              "key": "boost",
+              "rank": 2,
+              "mcda_score": 0.8112,
+              "p_rank1": 0.366
+            },
+            {
+              "key": "rf",
+              "rank": 3,
+              "mcda_score": 0.6542,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "logreg",
+              "rank": 4,
+              "mcda_score": 0.3132,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 5,
+              "mcda_score": 0.2208,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 6,
+              "mcda_score": 0.2025,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "linreg",
+              "rank": 7,
+              "mcda_score": 0.1752,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "raw_calibration": {
+          "winner": "boost",
+          "score": 0.8301,
+          "runner_up": "svm",
+          "runner_up_score": 0.7408,
+          "rank1_probability": 0.9558,
+          "champion_changed": true,
+          "ranking": [
+            {
+              "key": "boost",
+              "rank": 1,
+              "mcda_score": 0.8301,
+              "p_rank1": 0.9558
+            },
+            {
+              "key": "svm",
+              "rank": 2,
+              "mcda_score": 0.7408,
+              "p_rank1": 0.0442
+            },
+            {
+              "key": "rf",
+              "rank": 3,
+              "mcda_score": 0.65,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "logreg",
+              "rank": 4,
+              "mcda_score": 0.3716,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 5,
+              "mcda_score": 0.2627,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "linreg",
+              "rank": 6,
+              "mcda_score": 0.2426,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.1975,
+              "p_rank1": 0.0
+            }
+          ]
+        }
+      },
+      "Explainability-first": {
+        "baseline": {
+          "winner": "logreg",
+          "score": 0.6394,
+          "rank1_probability": 0.7136,
+          "ranking": [
+            {
+              "key": "logreg",
+              "rank": 1,
+              "mcda_score": 0.6394,
+              "p_rank1": 0.7136
+            },
+            {
+              "key": "boost",
+              "rank": 2,
+              "mcda_score": 0.5895,
+              "p_rank1": 0.2426
+            },
+            {
+              "key": "rf",
+              "rank": 3,
+              "mcda_score": 0.5671,
+              "p_rank1": 0.0144
+            },
+            {
+              "key": "linreg",
+              "rank": 4,
+              "mcda_score": 0.5531,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 5,
+              "mcda_score": 0.538,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "svm",
+              "rank": 6,
+              "mcda_score": 0.5075,
+              "p_rank1": 0.0294
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.3577,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "calibration_removed": {
+          "winner": "logreg",
+          "score": 0.673,
+          "runner_up": "linreg",
+          "runner_up_score": 0.6,
+          "rank1_probability": 0.8558,
+          "champion_changed": false,
+          "ranking": [
+            {
+              "key": "logreg",
+              "rank": 1,
+              "mcda_score": 0.673,
+              "p_rank1": 0.8558
+            },
+            {
+              "key": "linreg",
+              "rank": 2,
+              "mcda_score": 0.6,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 3,
+              "mcda_score": 0.5978,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "boost",
+              "rank": 4,
+              "mcda_score": 0.5739,
+              "p_rank1": 0.131
+            },
+            {
+              "key": "rf",
+              "rank": 5,
+              "mcda_score": 0.5582,
+              "p_rank1": 0.0104
+            },
+            {
+              "key": "svm",
+              "rank": 6,
+              "mcda_score": 0.4528,
+              "p_rank1": 0.0028
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.3499,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "raw_calibration": {
+          "winner": "logreg",
+          "score": 0.6954,
+          "runner_up": "linreg",
+          "runner_up_score": 0.6249,
+          "rank1_probability": 0.8242,
+          "champion_changed": false,
+          "ranking": [
+            {
+              "key": "logreg",
+              "rank": 1,
+              "mcda_score": 0.6954,
+              "p_rank1": 0.8242
+            },
+            {
+              "key": "linreg",
+              "rank": 2,
+              "mcda_score": 0.6249,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "boost",
+              "rank": 3,
+              "mcda_score": 0.6165,
+              "p_rank1": 0.1754
+            },
+            {
+              "key": "dt",
+              "rank": 4,
+              "mcda_score": 0.602,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "rf",
+              "rank": 5,
+              "mcda_score": 0.5636,
+              "p_rank1": 0.0004
+            },
+            {
+              "key": "svm",
+              "rank": 6,
+              "mcda_score": 0.4075,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.3301,
+              "p_rank1": 0.0
+            }
+          ]
+        }
+      },
+      "Speed-first": {
+        "baseline": {
+          "winner": "svm",
+          "score": 0.7672,
+          "rank1_probability": 0.7944,
+          "ranking": [
+            {
+              "key": "svm",
+              "rank": 1,
+              "mcda_score": 0.7672,
+              "p_rank1": 0.7944
+            },
+            {
+              "key": "logreg",
+              "rank": 2,
+              "mcda_score": 0.6971,
+              "p_rank1": 0.2056
+            },
+            {
+              "key": "linreg",
+              "rank": 3,
+              "mcda_score": 0.6222,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 4,
+              "mcda_score": 0.6205,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 5,
+              "mcda_score": 0.5922,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "rf",
+              "rank": 6,
+              "mcda_score": 0.4832,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "boost",
+              "rank": 7,
+              "mcda_score": 0.3897,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "calibration_removed": {
+          "winner": "svm",
+          "score": 0.7549,
+          "runner_up": "logreg",
+          "runner_up_score": 0.716,
+          "rank1_probability": 0.6884,
+          "champion_changed": false,
+          "ranking": [
+            {
+              "key": "svm",
+              "rank": 1,
+              "mcda_score": 0.7549,
+              "p_rank1": 0.6884
+            },
+            {
+              "key": "logreg",
+              "rank": 2,
+              "mcda_score": 0.716,
+              "p_rank1": 0.3116
+            },
+            {
+              "key": "dt",
+              "rank": 3,
+              "mcda_score": 0.6531,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "linreg",
+              "rank": 4,
+              "mcda_score": 0.6481,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 5,
+              "mcda_score": 0.6009,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "rf",
+              "rank": 6,
+              "mcda_score": 0.4746,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "boost",
+              "rank": 7,
+              "mcda_score": 0.3718,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "raw_calibration": {
+          "winner": "logreg",
+          "score": 0.7251,
+          "runner_up": "svm",
+          "runner_up_score": 0.7172,
+          "rank1_probability": 0.5328,
+          "champion_changed": true,
+          "ranking": [
+            {
+              "key": "logreg",
+              "rank": 1,
+              "mcda_score": 0.7251,
+              "p_rank1": 0.5328
+            },
+            {
+              "key": "svm",
+              "rank": 2,
+              "mcda_score": 0.7172,
+              "p_rank1": 0.4672
+            },
+            {
+              "key": "linreg",
+              "rank": 3,
+              "mcda_score": 0.6581,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 4,
+              "mcda_score": 0.6524,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 5,
+              "mcda_score": 0.5784,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "rf",
+              "rank": 6,
+              "mcda_score": 0.4815,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "boost",
+              "rank": 7,
+              "mcda_score": 0.4032,
+              "p_rank1": 0.0
+            }
+          ]
+        }
+      },
+      "Fairness-first": {
+        "baseline": {
+          "winner": "rf",
+          "score": 0.7126,
+          "rank1_probability": 0.9084,
+          "ranking": [
+            {
+              "key": "rf",
+              "rank": 1,
+              "mcda_score": 0.7126,
+              "p_rank1": 0.9084
+            },
+            {
+              "key": "boost",
+              "rank": 2,
+              "mcda_score": 0.661,
+              "p_rank1": 0.0558
+            },
+            {
+              "key": "svm",
+              "rank": 3,
+              "mcda_score": 0.5868,
+              "p_rank1": 0.031
+            },
+            {
+              "key": "logreg",
+              "rank": 4,
+              "mcda_score": 0.5054,
+              "p_rank1": 0.0048
+            },
+            {
+              "key": "linreg",
+              "rank": 5,
+              "mcda_score": 0.3997,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 6,
+              "mcda_score": 0.3472,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.251,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "calibration_removed": {
+          "winner": "rf",
+          "score": 0.7199,
+          "runner_up": "boost",
+          "runner_up_score": 0.6534,
+          "rank1_probability": 0.9622,
+          "champion_changed": false,
+          "ranking": [
+            {
+              "key": "rf",
+              "rank": 1,
+              "mcda_score": 0.7199,
+              "p_rank1": 0.9622
+            },
+            {
+              "key": "boost",
+              "rank": 2,
+              "mcda_score": 0.6534,
+              "p_rank1": 0.0268
+            },
+            {
+              "key": "svm",
+              "rank": 3,
+              "mcda_score": 0.5409,
+              "p_rank1": 0.0052
+            },
+            {
+              "key": "logreg",
+              "rank": 4,
+              "mcda_score": 0.5241,
+              "p_rank1": 0.0058
+            },
+            {
+              "key": "linreg",
+              "rank": 5,
+              "mcda_score": 0.4296,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 6,
+              "mcda_score": 0.3858,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.2313,
+              "p_rank1": 0.0
+            }
+          ]
+        },
+        "raw_calibration": {
+          "winner": "rf",
+          "score": 0.7091,
+          "runner_up": "boost",
+          "runner_up_score": 0.688,
+          "rank1_probability": 0.691,
+          "champion_changed": false,
+          "ranking": [
+            {
+              "key": "rf",
+              "rank": 1,
+              "mcda_score": 0.7091,
+              "p_rank1": 0.691
+            },
+            {
+              "key": "boost",
+              "rank": 2,
+              "mcda_score": 0.688,
+              "p_rank1": 0.2866
+            },
+            {
+              "key": "logreg",
+              "rank": 3,
+              "mcda_score": 0.5614,
+              "p_rank1": 0.0222
+            },
+            {
+              "key": "svm",
+              "rank": 4,
+              "mcda_score": 0.4868,
+              "p_rank1": 0.0002
+            },
+            {
+              "key": "linreg",
+              "rank": 5,
+              "mcda_score": 0.4716,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "dt",
+              "rank": 6,
+              "mcda_score": 0.4112,
+              "p_rank1": 0.0
+            },
+            {
+              "key": "knn",
+              "rank": 7,
+              "mcda_score": 0.2234,
+              "p_rank1": 0.0
+            }
+          ]
+        }
+      }
+    },
     "calibration_removed": {
       "winner": "boost",
       "score": 0.6594,
+      "runner_up": "svm",
+      "runner_up_score": 0.6194,
+      "rank1_probability": 0.7046,
       "champion_changed": false,
       "ranking": [
         {
           "key": "boost",
           "rank": 1,
           "mcda_score": 0.6594,
-          "p_rank1": 0.7044
+          "p_rank1": 0.7046
         },
         {
           "key": "svm",
           "rank": 2,
           "mcda_score": 0.6194,
-          "p_rank1": 0.2112
+          "p_rank1": 0.2148
         },
         {
           "key": "rf",
           "rank": 3,
           "mcda_score": 0.603,
-          "p_rank1": 0.0136
+          "p_rank1": 0.0128
         },
         {
           "key": "logreg",
           "rank": 4,
           "mcda_score": 0.5268,
-          "p_rank1": 0.0708
+          "p_rank1": 0.0678
         },
         {
           "key": "dt",
@@ -78,31 +859,34 @@
     "raw_calibration": {
       "winner": "boost",
       "score": 0.6935,
+      "runner_up": "rf",
+      "runner_up_score": 0.604,
+      "rank1_probability": 0.9096,
       "champion_changed": false,
       "ranking": [
         {
           "key": "boost",
           "rank": 1,
           "mcda_score": 0.6935,
-          "p_rank1": 0.911
+          "p_rank1": 0.9096
         },
         {
           "key": "rf",
           "rank": 2,
           "mcda_score": 0.604,
-          "p_rank1": 0.0014
+          "p_rank1": 0.0008
         },
         {
           "key": "logreg",
           "rank": 3,
           "mcda_score": 0.5638,
-          "p_rank1": 0.071
+          "p_rank1": 0.0718
         },
         {
           "key": "svm",
           "rank": 4,
           "mcda_score": 0.5575,
-          "p_rank1": 0.0166
+          "p_rank1": 0.0178
         },
         {
           "key": "linreg",
