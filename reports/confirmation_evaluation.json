@@ -1,0 +1,488 @@
+{
+  "status": "CONFIRMATION_ONLY",
+  "notice": "Fresh-seed confirmation run per FF4 Item 3. Models frozen; no retraining or tuning. Strictly observational; never used for model choice.",
+  "seed": 2026,
+  "variant": "nonlinear",
+  "test_samples": 2381,
+  "models": {
+    "boost": {
+      "key": "boost",
+      "test_samples": 2381,
+      "accuracy": 0.7904,
+      "balanced_accuracy": 0.7849,
+      "macro_f1": 0.7937,
+      "qwk": 0.7943,
+      "mcc": 0.6729,
+      "roc_auc_ovr": 0.9199,
+      "log_loss": 0.5008,
+      "brier": 0.3022,
+      "ece": 0.016,
+      "conformal_coverage": 0.2801,
+      "conformal_mean_set_size": 0.3,
+      "exact_share": 0.7904,
+      "adjacent_share": 0.2071,
+      "extreme_share": 0.0025,
+      "accuracy_ci": [
+        0.774,
+        0.8068
+      ],
+      "macro_f1_ci": [
+        0.7772,
+        0.81
+      ],
+      "qwk_ci": [
+        0.7757,
+        0.8121
+      ],
+      "robustness": 0.97,
+      "fairness": 0.78,
+      "stability": 0.99,
+      "latency": 20.0,
+      "train_cost": 5.0,
+      "explainability": 0.6
+    },
+    "dt": {
+      "key": "dt",
+      "test_samples": 2381,
+      "accuracy": 0.6926,
+      "balanced_accuracy": 0.6803,
+      "macro_f1": 0.6914,
+      "qwk": 0.667,
+      "mcc": 0.5177,
+      "roc_auc_ovr": 0.8417,
+      "log_loss": 0.7905,
+      "brier": 0.4287,
+      "ece": 0.0268,
+      "conformal_coverage": 0.0701,
+      "conformal_mean_set_size": 0.07,
+      "exact_share": 0.6926,
+      "adjacent_share": 0.2953,
+      "extreme_share": 0.0122,
+      "accuracy_ci": [
+        0.6741,
+        0.7098
+      ],
+      "macro_f1_ci": [
+        0.6734,
+        0.7087
+      ],
+      "qwk_ci": [
+        0.6417,
+        0.6898
+      ],
+      "robustness": 0.97,
+      "fairness": 0.78,
+      "stability": 0.99,
+      "latency": 20.0,
+      "train_cost": 5.0,
+      "explainability": 1.0
+    },
+    "knn": {
+      "key": "knn",
+      "test_samples": 2381,
+      "accuracy": 0.7182,
+      "balanced_accuracy": 0.6839,
+      "macro_f1": 0.7082,
+      "qwk": 0.6872,
+      "mcc": 0.5687,
+      "roc_auc_ovr": 0.8849,
+      "log_loss": 0.6562,
+      "brier": 0.3872,
+      "ece": 0.0179,
+      "conformal_coverage": 0.0949,
+      "conformal_mean_set_size": 0.1,
+      "exact_share": 0.7182,
+      "adjacent_share": 0.2801,
+      "extreme_share": 0.0017,
+      "accuracy_ci": [
+        0.7005,
+        0.7354
+      ],
+      "macro_f1_ci": [
+        0.6895,
+        0.7257
+      ],
+      "qwk_ci": [
+        0.6648,
+        0.7089
+      ],
+      "robustness": 0.97,
+      "fairness": 0.78,
+      "stability": 0.99,
+      "latency": 20.0,
+      "train_cost": 5.0,
+      "explainability": 0.6
+    },
+    "linreg": {
+      "key": "linreg",
+      "test_samples": 2381,
+      "accuracy": 0.6665,
+      "balanced_accuracy": 0.6585,
+      "macro_f1": 0.6692,
+      "qwk": 0.6525,
+      "mcc": 0.4765,
+      "roc_auc_ovr": 0.8416,
+      "log_loss": 0.7233,
+      "brier": 0.4346,
+      "ece": 0.0287,
+      "conformal_coverage": 0.0953,
+      "conformal_mean_set_size": 0.1,
+      "exact_share": 0.6665,
+      "adjacent_share": 0.3251,
+      "extreme_share": 0.0084,
+      "accuracy_ci": [
+        0.6476,
+        0.6838
+      ],
+      "macro_f1_ci": [
+        0.6502,
+        0.6871
+      ],
+      "qwk_ci": [
+        0.6291,
+        0.6763
+      ],
+      "robustness": 0.97,
+      "fairness": 0.78,
+      "stability": 0.99,
+      "latency": 20.0,
+      "train_cost": 5.0,
+      "explainability": 0.3
+    },
+    "logreg": {
+      "key": "logreg",
+      "test_samples": 2381,
+      "accuracy": 0.6909,
+      "balanced_accuracy": 0.6872,
+      "macro_f1": 0.6954,
+      "qwk": 0.6855,
+      "mcc": 0.5162,
+      "roc_auc_ovr": 0.851,
+      "log_loss": 0.6932,
+      "brier": 0.4165,
+      "ece": 0.0156,
+      "conformal_coverage": 0.1063,
+      "conformal_mean_set_size": 0.11,
+      "exact_share": 0.6909,
+      "adjacent_share": 0.302,
+      "extreme_share": 0.0071,
+      "accuracy_ci": [
+        0.6732,
+        0.709
+      ],
+      "macro_f1_ci": [
+        0.6766,
+        0.7136
+      ],
+      "qwk_ci": [
+        0.6631,
+        0.7088
+      ],
+      "robustness": 0.97,
+      "fairness": 0.78,
+      "stability": 0.99,
+      "latency": 20.0,
+      "train_cost": 5.0,
+      "explainability": 1.0
+    },
+    "rf": {
+      "key": "rf",
+      "test_samples": 2381,
+      "accuracy": 0.7665,
+      "balanced_accuracy": 0.7558,
+      "macro_f1": 0.7676,
+      "qwk": 0.7628,
+      "mcc": 0.6349,
+      "roc_auc_ovr": 0.9057,
+      "log_loss": 0.5578,
+      "brier": 0.3309,
+      "ece": 0.0247,
+      "conformal_coverage": 0.2184,
+      "conformal_mean_set_size": 0.24,
+      "exact_share": 0.7665,
+      "adjacent_share": 0.2293,
+      "extreme_share": 0.0042,
+      "accuracy_ci": [
+        0.7488,
+        0.7833
+      ],
+      "macro_f1_ci": [
+        0.75,
+        0.7838
+      ],
+      "qwk_ci": [
+        0.7411,
+        0.7811
+      ],
+      "robustness": 0.97,
+      "fairness": 0.78,
+      "stability": 0.99,
+      "latency": 20.0,
+      "train_cost": 5.0,
+      "explainability": 0.6
+    },
+    "svm": {
+      "key": "svm",
+      "test_samples": 2381,
+      "accuracy": 0.7879,
+      "balanced_accuracy": 0.7784,
+      "macro_f1": 0.7897,
+      "qwk": 0.7889,
+      "mcc": 0.6687,
+      "roc_auc_ovr": 0.9204,
+      "log_loss": 0.5738,
+      "brier": 0.3391,
+      "ece": 0.0295,
+      "conformal_coverage": 0.0,
+      "conformal_mean_set_size": 0.0,
+      "exact_share": 0.7879,
+      "adjacent_share": 0.2096,
+      "extreme_share": 0.0025,
+      "accuracy_ci": [
+        0.7715,
+        0.8047
+      ],
+      "macro_f1_ci": [
+        0.7731,
+        0.8059
+      ],
+      "qwk_ci": [
+        0.7706,
+        0.8079
+      ],
+      "robustness": 0.97,
+      "fairness": 0.78,
+      "stability": 0.99,
+      "latency": 20.0,
+      "train_cost": 5.0,
+      "explainability": 0.3
+    }
+  },
+  "mcda_profiles": {
+    "Balanced": {
+      "winner": "boost",
+      "winner_score": 0.8114,
+      "runner_up": "rf",
+      "runner_up_score": 0.6637,
+      "rank1_probability": 0.9988,
+      "decision_strength": "marginal",
+      "ranking": [
+        {
+          "key": "boost",
+          "rank": 1,
+          "score": 0.8114
+        },
+        {
+          "key": "rf",
+          "rank": 2,
+          "score": 0.6637
+        },
+        {
+          "key": "svm",
+          "rank": 3,
+          "score": 0.6366
+        },
+        {
+          "key": "logreg",
+          "rank": 4,
+          "score": 0.5864
+        },
+        {
+          "key": "knn",
+          "rank": 5,
+          "score": 0.5162
+        },
+        {
+          "key": "dt",
+          "rank": 6,
+          "score": 0.4831
+        },
+        {
+          "key": "linreg",
+          "rank": 7,
+          "score": 0.2558
+        }
+      ]
+    },
+    "Accuracy-first": {
+      "winner": "boost",
+      "winner_score": 0.9557,
+      "runner_up": "svm",
+      "runner_up_score": 0.8282,
+      "rank1_probability": 1.0,
+      "decision_strength": "marginal",
+      "ranking": [
+        {
+          "key": "boost",
+          "rank": 1,
+          "score": 0.9557
+        },
+        {
+          "key": "svm",
+          "rank": 2,
+          "score": 0.8282
+        },
+        {
+          "key": "rf",
+          "rank": 3,
+          "score": 0.755
+        },
+        {
+          "key": "knn",
+          "rank": 4,
+          "score": 0.4854
+        },
+        {
+          "key": "logreg",
+          "rank": 5,
+          "score": 0.4601
+        },
+        {
+          "key": "dt",
+          "rank": 6,
+          "score": 0.3439
+        },
+        {
+          "key": "linreg",
+          "rank": 7,
+          "score": 0.2058
+        }
+      ]
+    },
+    "Explainability-first": {
+      "winner": "logreg",
+      "winner_score": 0.7037,
+      "runner_up": "boost",
+      "runner_up_score": 0.6971,
+      "rank1_probability": 0.567,
+      "decision_strength": "none",
+      "ranking": [
+        {
+          "key": "logreg",
+          "rank": 1,
+          "score": 0.7037
+        },
+        {
+          "key": "boost",
+          "rank": 2,
+          "score": 0.6971
+        },
+        {
+          "key": "dt",
+          "rank": 3,
+          "score": 0.6102
+        },
+        {
+          "key": "rf",
+          "rank": 4,
+          "score": 0.5815
+        },
+        {
+          "key": "knn",
+          "rank": 5,
+          "score": 0.5083
+        },
+        {
+          "key": "svm",
+          "rank": 6,
+          "score": 0.4417
+        },
+        {
+          "key": "linreg",
+          "rank": 7,
+          "score": 0.2058
+        }
+      ]
+    },
+    "Speed-first": {
+      "winner": "boost",
+      "winner_score": 0.47,
+      "runner_up": "svm",
+      "runner_up_score": 0.3917,
+      "rank1_probability": 0.9994,
+      "decision_strength": "marginal",
+      "ranking": [
+        {
+          "key": "boost",
+          "rank": 1,
+          "score": 0.47
+        },
+        {
+          "key": "svm",
+          "rank": 2,
+          "score": 0.3917
+        },
+        {
+          "key": "rf",
+          "rank": 3,
+          "score": 0.3857
+        },
+        {
+          "key": "logreg",
+          "rank": 4,
+          "score": 0.3037
+        },
+        {
+          "key": "knn",
+          "rank": 5,
+          "score": 0.288
+        },
+        {
+          "key": "dt",
+          "rank": 6,
+          "score": 0.2505
+        },
+        {
+          "key": "linreg",
+          "rank": 7,
+          "score": 0.1529
+        }
+      ]
+    },
+    "Fairness-first": {
+      "winner": "boost",
+      "winner_score": 0.8686,
+      "runner_up": "rf",
+      "runner_up_score": 0.7529,
+      "rank1_probability": 1.0,
+      "decision_strength": "marginal",
+      "ranking": [
+        {
+          "key": "boost",
+          "rank": 1,
+          "score": 0.8686
+        },
+        {
+          "key": "rf",
+          "rank": 2,
+          "score": 0.7529
+        },
+        {
+          "key": "svm",
+          "rank": 3,
+          "score": 0.7417
+        },
+        {
+          "key": "logreg",
+          "rank": 4,
+          "score": 0.7037
+        },
+        {
+          "key": "knn",
+          "rank": 5,
+          "score": 0.6798
+        },
+        {
+          "key": "dt",
+          "rank": 6,
+          "score": 0.6102
+        },
+        {
+          "key": "linreg",
+          "rank": 7,
+          "score": 0.5058
+        }
+      ]
+    }
+  }
+}

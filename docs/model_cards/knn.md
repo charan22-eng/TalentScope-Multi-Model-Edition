@@ -45,3 +45,13 @@
 ## 6. Intended Use & Ethics
 - **Decision Support Only**: This model is built for human-in-the-loop decision support, not automated termination or promotion.
 - **Zero Protected Inputs**: The model operates strictly on skills, output, and tenure metrics. Protected demographic attributes are excluded from all model training and inference pipelines.
+
+## 7. Fresh-Seed Confirmation Run (Seed = 2026, N = 2,381)
+> [!NOTE]
+> **Strictly Observational**: Evaluated frozen on seed 2026 (variant: non-linear, test N = 2,381) with zero retraining or hyperparameter tuning. Never used for model choice.
+
+- **Accuracy**: `0.7182` (95% CI: [0.7005, 0.7354])
+- **Macro-F1**: `0.7082` (95% CI: [0.6895, 0.7257])
+- **Quadratic Weighted Kappa (QWK)**: `0.6872` (95% CI: [0.6648, 0.7089])
+- **Expected Calibration Error (ECE)**: `0.0179`
+- **Conformal Coverage (α = 0.10)**: `9.5%` (Mean set size: `0.10`)

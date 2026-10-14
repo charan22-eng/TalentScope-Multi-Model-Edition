@@ -92,6 +92,32 @@ export interface LeaderboardResponse {
   metrics: LeaderboardModel[];
   champion_key: string;
   champion_rule: string;
+  confirmation?: {
+    status: string;
+    notice: string;
+    seed: number;
+    variant: string;
+    test_samples: number;
+    models: Record<string, {
+      key: string;
+      accuracy: number;
+      macro_f1: number;
+      qwk: number;
+      ece: number;
+      conformal_coverage: number;
+      accuracy_ci: [number, number];
+      macro_f1_ci: [number, number];
+      qwk_ci: [number, number];
+    }>;
+    mcda_profiles?: Record<string, {
+      winner: string;
+      winner_score: number;
+      runner_up: string;
+      runner_up_score: number;
+      rank1_probability: number;
+      decision_strength: string;
+    }>;
+  };
 }
 
 export interface MCDAResult {

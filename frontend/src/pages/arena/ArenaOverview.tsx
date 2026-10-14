@@ -330,6 +330,66 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
             </tbody>
           </table>
         </div>
+
+        {/* Fresh-Seed Confirmation Section */}
+        {leaderboard?.confirmation && (
+          <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>Fresh-Seed Confirmation Run (Seed = {leaderboard.confirmation.seed}, N = {leaderboard.confirmation.test_samples.toLocaleString()})</span>
+                  <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(0, 114, 178, 0.1)', color: 'var(--primary-color)', fontWeight: 600 }}>
+                    OBSERVATIONAL ONLY
+                  </span>
+                </h4>
+                <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                  {leaderboard.confirmation.notice}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                <thead>
+                  <tr style={{ background: 'var(--bg-primary)' }}>
+                    <th style={{ padding: '0.5rem', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>Model</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Macro-F1 (95% CI)</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Accuracy (95% CI)</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>QWK</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>ECE</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Conformal Coverage (α=0.10)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(leaderboard.confirmation.models)
+                    .sort(([, a], [, b]) => b.macro_f1 - a.macro_f1)
+                    .map(([key, cm]) => (
+                      <tr key={key} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '0.5rem' }}>
+                          <ModelChip modelKey={key} size="sm" />
+                        </td>
+                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                          <strong>{cm.macro_f1.toFixed(4)}</strong> [{cm.macro_f1_ci[0].toFixed(4)}, {cm.macro_f1_ci[1].toFixed(4)}]
+                        </td>
+                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                          {(cm.accuracy * 100).toFixed(2)}% [{cm.accuracy_ci[0].toFixed(4)}, {cm.accuracy_ci[1].toFixed(4)}]
+                        </td>
+                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                          {cm.qwk.toFixed(4)}
+                        </td>
+                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                          {cm.ece.toFixed(4)}
+                        </td>
+                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                          {(cm.conformal_coverage * 100).toFixed(1)}%
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
