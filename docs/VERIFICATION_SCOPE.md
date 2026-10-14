@@ -48,16 +48,16 @@ Under Final Follow-up (FF3), legacy checks are evaluated strictly under their re
 | **V10.14** | frontend guards | `frontend/src/App.tsx` router check | `ProtectedRoute` wraps operational routes; unauthenticated redirected | **PASS** |
 | **V13.2** | model-regression gates have teeth | Adversarial harness | G1–G14 active; path traversal rejected (400); bad keys rejected (400) | **PASS** |
 | **V13.3** | load test | 50 concurrent requests (5 workers) | 10.5 req/s; 0 errors; p95=674.8ms (< 800ms threshold) | **PASS** |
-| **V13.4** | dependency audit | `pip check` & `npm audit` | Zero high/critical CVEs in production dependencies (proposed waiver on global protobuf mismatch) | **PASS** |
+| **V13.4** | dependency audit | `pip check` & `npm audit` | uv pip check (.venv): 81 packages compatible; npm audit: 0 vulnerabilities; global pip check returncode=1 (Proposed Waiver PW-2) | **PROPOSED WAIVER** |
 | **V13.5** | static security (bandit) AND a secret scan over the full git history | Bandit AST + git history regex | 0 leaked AWS/SSH/GitHub tokens in git history; Bandit clean | **PASS** |
 | **V13.6** | security headers (curl -I) | HTTP header probe | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `HSTS` active | **PASS** |
 | **V13.7** | injection tests (SQL, XSS, CSV formula) | SQLi, XSS, CSV formula suite | SQLi safe; XSS stored escaped; CSV formula (=, +, @) rejected 400 | **PASS** |
 | **V13.8** | access-control fuzzing (IDOR across users and roles on every object route) | 5 roles across 10 privileged routes | IDOR blocked; unauthorized operations strictly return 403 | **PASS** |
 | **V14.4** | secrets only in the platform store (history and compose scan) | `docker-compose.yml` env probe | Secrets injected via `${POSTGRES_PASSWORD}`, `${JWT_SECRET_KEY}`; 0 hardcoded | **PASS** |
 
-### Waivers and External Dependencies
-1. **Check V0.1 (Remote Linux CI)**: Requires external GitHub Actions runner environment. All local foundations (V0.2–V0.13) pass on Windows 11 with Python 3.11.9 and Node v20. Remote CI verification is deferred to push time.
-2. **Check V13.4 (Dependency Audit)**: `npm audit --omit=dev` reports 0 vulnerabilities. `pip check` warns of global virtualenv protobuf version mismatches from unrelated packages (`google-cloud-aiplatform` / `protobuf 7.36.2`); TalentScope production dependencies (`fastapi`, `pydantic`, `scikit-learn`, `joblib`, `sqlalchemy`) have zero version conflicts. Non-blocking waiver proposed.
+### Proposed Waivers (Awaiting Human Sign-Off)
+1. **Check V0.1 (Remote Linux CI Workflow)**: Marked **NOT RUN**. Requires human inspection of GitHub Actions runner (`.github/workflows/ci.yml`) on Ubuntu 22.04 following git push (see `docs/HUMAN_CHECK_KIT.md` Check [0]). Proposed Waiver PW-1 submitted for human sign-off; not agent-accepted.
+2. **Check V13.4 (Dependency Audit)**: Project `.venv` environment has 81 compatible packages (0 conflicts) and frontend `npm audit --omit=dev` has 0 vulnerabilities. Global host Python returns exit code 1 due to pre-existing external Google tool conflicts (`google-cloud-aiplatform` / `protobuf 7.36.2`). Proposed Waiver PW-2 submitted for human sign-off; not agent-accepted. Verbatim evidence captured in `reports/evidence/legacy/V13.4.txt`.
 
 ---
 

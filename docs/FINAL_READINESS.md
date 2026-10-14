@@ -27,7 +27,7 @@ Every blocking gate is listed below under its authoritative title from the proje
 
 | Gate ID | Authoritative Blocking Check Title | Execution Harness / Method | Raw Evidence Artifact Path | Status |
 |---|---|---|---|:---:|
-| **V0.1** | Remote Linux CI Workflow | GitHub Actions (`.github/workflows/ci.yml`) | Remote GitHub Actions UI (external infrastructure) | **NOT RUN** (Waiver W1) |
+| **V0.1** | Remote Linux CI Workflow | GitHub Actions (`.github/workflows/ci.yml`) | Remote GitHub Actions UI (see `docs/HUMAN_CHECK_KIT.md` Check [0]) | **NOT RUN** (Human check required; Proposed Waiver PW-1) |
 | **V0.3** | Strict Static Type Checking | `tsc -b && mypy backend ml` | Terminal output / CI log | **PASS** |
 | **V0.4** | Linting Hygiene (Ruff & Oxlint) | `ruff check backend ml && oxlint` | Terminal output / CI log | **PASS** |
 | **V6.7** | Upload Abuse & CSV Formula Sanitization | `backend/tests/test_api.py::test_upload_abuse` | `reports/legacy_gates_verification.json` (V13.7) | **PASS** |
@@ -76,7 +76,7 @@ All 23 checks mandated in Section D were executed directly by `scripts/verify_le
 15. `V10.14` frontend guards: **PASS** (React Router `ProtectedRoute` wraps operational routes; unauthenticated users redirected).
 16. `V13.2` model-regression gates have teeth: **PASS** (Cryptographic invariants G1–G14 active; path traversal and invalid keys rejected 400).
 17. `V13.3` load test: **PASS** (50 concurrent requests over 5 workers; 10.5 req/s; 0 errors; p95: 674.83ms < 800ms limit).
-18. `V13.4` dependency audit: **PASS** (`npm audit --omit=dev` has 0 vulnerabilities; pip check verified with proposed waiver W2).
+18. `V13.4` dependency audit: **PROPOSED WAIVER PW-2** (Project `.venv` passes with 81 compatible packages; `npm audit --omit=dev` has 0 vulnerabilities; global host python returned returncode=1 due to unrelated external google packages; see verbatim evidence in `reports/evidence/legacy/V13.4.txt`).
 19. `V13.5` static security (bandit) AND a secret scan over the full git history: **PASS** (0 leaked AWS/SSH/GitHub tokens; Bandit AST clean).
 20. `V13.6` security headers (curl -I): **PASS** (`X-Content-Type-Options`, `X-Frame-Options: DENY`, `HSTS`, `Referrer-Policy` present).
 21. `V13.7` injection tests (SQL, XSS, CSV formula): **PASS** (SQL injection safe, XSS escaped, formula characters `=, +, @` rejected 400).
@@ -87,17 +87,22 @@ All 23 checks mandated in Section D were executed directly by `scripts/verify_le
 
 ## 4. Status of Checks Marked NOT RUN & Proposed Waivers
 
-Two non-blocking administrative/infrastructure waivers are recorded:
+> [!IMPORTANT]
+> **Integrity Rule**: Per FF4 Item 5, all waivers are classified as **PROPOSED for human sign-off**. Zero waivers are accepted by an automated agent. Every proposed waiver requires explicit human verification, name, date, and rationale prior to production deployment.
 
-### Waiver W1: Remote Linux CI Execution (`V0.1`)
-- **Status**: **NOT RUN** on remote runner during local iteration.
-- **Rationale**: The agent executes on Windows 11 host. All test suites (`pytest backend/tests/`, `pytest ml/tests/`, `npm test`) and guards (G1–G14) run and pass locally with 100% success. Full GitHub Actions workflow `.github/workflows/ci.yml` is configured for Ubuntu 22.04 and will trigger on branch push.
-- **Sign-off Condition**: Non-blocking; external CI passes after git push.
+### Proposed Waiver PW-1: Remote Linux CI Execution (`V0.1`)
+- **Status**: **NOT RUN (PROPOSED WAIVER)**.
+- **Requester**: Automated Build Agent.
+- **Approver**: *Pending Human Sign-Off* (see `docs/HUMAN_CHECK_KIT.md` Check [0]).
+- **Rationale**: Local iteration executes on Windows 11 host. All test suites (`pytest backend/tests/`, `pytest ml/tests/`, `npm test`) and security/data guards (G1–G14) run and pass locally with 100% success. The remote GitHub Actions workflow (`.github/workflows/ci.yml`) is configured for Ubuntu 22.04 and requires an external git push and human verification in the GitHub Actions console.
+- **Sign-off Condition**: Human reviewer inspects GitHub Actions run upon push and records approval.
 
-### Waiver W2: Virtual Environment Dependency Warnings (`V13.4`)
-- **Status**: **PASS WITH WAIVER**.
-- **Rationale**: `pip check` emits warnings regarding package conflicts in the global user Python environment (`google-cloud-aiplatform` / `protobuf 7.36.2` from external Google tools). TalentScope's production application dependencies (`fastapi`, `pydantic`, `scikit-learn`, `joblib`, `sqlalchemy`) have zero version conflicts and zero CVEs (`npm audit --omit=dev` = 0 vulnerabilities).
-- **Sign-off Condition**: Documented and approved; production container builds use clean pinned environments.
+### Proposed Waiver PW-2: Host Python Global Dependency Conflicts (`V13.4`)
+- **Status**: **PROPOSED WAIVER**.
+- **Requester**: Automated Build Agent.
+- **Approver**: *Pending Human Sign-Off*.
+- **Rationale**: The project-isolated virtual environment (`.venv`) is 100% clean and compatible (`uv pip check --python .venv\Scripts\python.exe` verified 81 packages with 0 conflicts; `npm audit --omit=dev` verified 0 vulnerabilities). However, invoking `python -m pip check` against the global host Python returns exit code 1 due to pre-existing conflicts between external Google tools (`google-cloud-aiplatform 1.165.1` requires `protobuf<7.0.0,>=3.20.2`, but global environment has `protobuf 7.36.2`). TalentScope's production dependencies (`fastapi`, `pydantic`, `scikit-learn`, `joblib`, `sqlalchemy`) do not depend on `google-cloud-aiplatform`. Production container builds (`Dockerfile`) construct fresh, clean environments. Verbatim output recorded in `reports/evidence/legacy/V13.4.txt`.
+- **Sign-off Condition**: Human reviewer verifies that production Docker container builds from clean base without host package bleed.
 
 ---
 

@@ -69,7 +69,27 @@ Log in with each seeded user and verify access permissions:
 
 ---
 
-## 2. Top 15 Priority Checks (Blocking & Core Science Replications)
+## 2. Top Priority Checks (Blocking & Core Science Replications)
+
+### [0] V0.1 (BLOCKING) — Remote Linux CI Workflow (GitHub Actions)
+- **What to check**: Verify that the GitHub Actions CI workflow runs on Ubuntu Linux 22.04 and passes all steps (linting, backend tests, ml tests, frontend tests, and verification checks).
+- **Execution Steps**:
+  1. Push the current branch or open a pull request to the GitHub repository.
+  2. Open the GitHub repository in browser: `https://github.com/<owner>/<repo>/actions`.
+  3. Locate the workflow run for `.github/workflows/ci.yml`.
+  4. Inspect the workflow jobs: `test-backend`, `test-ml`, `test-frontend`, `lint`, and `verify-gates`.
+  5. Verify that all jobs complete with green checkmarks (exit code 0).
+- **Alternative Local Container Simulation (Docker)**:
+  ```bash
+  docker run --rm -v $(pwd):/app -w /app ubuntu:22.04 bash -c "apt update && apt install -y python3 python3-pip nodejs npm && pytest backend/tests ml/tests"
+  ```
+- **Expected Result**: All CI pipeline stages pass on remote Linux host.
+- **Human Sign-off**:
+  - Reviewer: ____________________
+  - Date: ________________________
+  - GitHub Actions Run ID / URL: ____________________
+
+---
 
 ### [1] VM3.2 (BLOCKING) — Test Set Used Once & Lock Integrity
 - **What to check**: Verify that `reports/test_eval.lock` contains configuration hash and cannot be re-executed without `--new-config`. Verify no leakage of test indices in training code.

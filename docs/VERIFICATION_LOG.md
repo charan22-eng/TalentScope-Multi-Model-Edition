@@ -503,7 +503,7 @@ All 23 legacy checks executed under their exact authoritative titles from `docs/
 | **V10.14** | frontend guards | `frontend/src/App.tsx` router check | React Router guards verified in App.tsx: ProtectedRoute checks localStorage token; all operational routes wrapped; unauthorized fallback presented | **PASS** |
 | **V13.2** | model-regression gates have teeth | Adversarial harness | Regression gates have teeth: G1-G14 cryptographic invariants active; path traversal rejected (400); unregistered model keys rejected (400) | **PASS** |
 | **V13.3** | load test | 50 concurrent requests (5 workers) | 50 concurrent requests (5 workers): 10.5 req/s, 0 errors, p95=674.83ms | **PASS** |
-| **V13.4** | dependency audit | `pip check` & `npm audit` | npm audit --omit=dev: 0 vulnerabilities; pip check verified (proposed waiver on global protobuf version mismatch) | **PASS** |
+| **V13.4** | dependency audit | `pip check` & `npm audit` | uv pip check (.venv): 81 packages compatible; npm audit: 0 vulnerabilities; global pip check returncode=1 (Proposed Waiver PW-2; see reports/evidence/legacy/V13.4.txt) | **PROPOSED WAIVER** |
 | **V13.5** | static security (bandit) AND a secret scan over the full git history | Bandit AST + git history regex | Full git history secret scan: 0 leaked AWS/SSH/GitHub keys found; Bandit check passed (safe standard library AST patterns) | **PASS** |
 | **V13.6** | security headers (curl -I) | HTTP header probe | Security headers verified: x-content-type-options: nosniff, x-frame-options: DENY, x-xss-protection: 1; mode=block, strict-transport-security: max-age=31536000; includeSubDomains, referrer-policy: strict-origin-when-cross-origin | **PASS** |
 | **V13.7** | injection tests (SQL, XSS, CSV formula) | SQLi, XSS, CSV formula suite | Injection tests passed: SQLi safely rejected without 500s; XSS safely stored/escaped as string; CSV formula injection (=, +, @) rejected with 400 | **PASS** |
@@ -514,9 +514,11 @@ All 23 legacy checks executed under their exact authoritative titles from `docs/
 ```json
 {
   "suite": "scripts/verify_legacy_gates.py",
+  "evidence_dir": "reports/evidence/legacy",
   "evidence_file": "reports/legacy_gates_verification.json",
   "total_executed": 23,
-  "passed": 23,
+  "passed": 22,
+  "proposed_waivers": 1,
   "failed": 0
 }
 ```
