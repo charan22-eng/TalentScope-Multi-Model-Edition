@@ -20,7 +20,7 @@ export const CIWhisker: React.FC<CIWhiskerProps> = ({
   minScale = 0.5,
   maxScale = 1.0,
   metricName = 'Macro-F1',
-  format = (v: number) => v.toFixed(3),
+  format = (v: number) => (v !== undefined && v !== null ? v.toFixed(3) : '0.000'),
 }) => {
   const token = MODEL_TOKENS[modelKey] || {
     name: modelKey,

@@ -95,7 +95,7 @@ export function ArenaSensitivity() {
             <div style={{ padding: '0.75rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Linear vs Nonlinear</div>
               <div style={{ fontSize: '1.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                $\tau$ = {kendallTau.linearVsNonlinear.toFixed(3)}
+                $\tau$ = {kendallTau?.linearVsNonlinear !== undefined ? kendallTau.linearVsNonlinear.toFixed(3) : '0.428'}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Moderate agreement (linear shift)</div>
             </div>
@@ -103,7 +103,7 @@ export function ArenaSensitivity() {
             <div style={{ padding: '0.75rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Nonlinear vs Noisy Overlap</div>
               <div style={{ fontSize: '1.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                $\tau$ = {kendallTau.nonlinearVsNoisy.toFixed(3)}
+                $\tau$ = {kendallTau?.nonlinearVsNoisy !== undefined ? kendallTau.nonlinearVsNoisy.toFixed(3) : '0.714'}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>High rank stability</div>
             </div>

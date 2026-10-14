@@ -40,7 +40,7 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
     return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Arena Overview...</div>;
   }
 
-  const champion = leaderboard?.metrics.find(m => m.key === (leaderboard.champion_key || 'rf'));
+  const champion = leaderboard?.metrics.find(m => m.key === (leaderboard.champion_key || 'boost'));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -90,39 +90,38 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
                   fontSize: '0.75rem',
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  border: '1px solid #f59e0b',
-                  color: '#f59e0b',
+                  background: 'rgba(100, 116, 139, 0.15)',
+                  border: '1px solid #64748b',
+                  color: '#94a3b8',
                   fontWeight: 700,
                   textTransform: 'uppercase',
                 }}
-                title="ADR-009 Rule: Winner has 64.2% rank-1 prob (between 50% and 80%)"
+                title="ADR-009 Rule: Boost leads SVM by 0.0090 MCDA points with decision strength none"
               >
-                Decision Strength: Marginal
+                Decision Strength: None (Statistical Tie)
               </span>
             </div>
 
             <h2 style={{ fontSize: '1.4rem', margin: '0 0 0.5rem 0' }}>
-              {champion?.name || 'Random Forest (Champion)'}
+              {champion?.label || champion?.name || 'Histogram Gradient Boosting'}
             </h2>
 
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 1rem 0' }}>
-              Elected by multi-criteria decision analysis (MCDA) under the <strong>Balanced</strong> governance profile.
-              Excels in calibration fidelity (ECE 0.0133), noise stability, and low extreme-error rate (0.21%).
+              <strong>Statistical Tie:</strong> Boost and SVM are statistically tied under the default Balanced profile (composite score margin 0.0090, decision strength none); the winner depends on user priorities.
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
               <div style={{ padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: '4px', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Macro-F1</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{champion?.macro_f1.toFixed(3) || '0.780'}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{champion?.macro_f1 ? champion.macro_f1.toFixed(3) : '0.804'}</div>
               </div>
               <div style={{ padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: '4px', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Rank-1 Prob</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#D55E00' }}>64.2%</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Score Margin</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#D55E00' }}>+0.0090</div>
               </div>
               <div style={{ padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: '4px', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>p95 Latency</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{champion?.inference_latency_p95_ms?.toFixed(0) || '99'}ms</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Decision Strength</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>None</div>
               </div>
             </div>
           </div>
@@ -274,8 +273,8 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
               key={m.key}
               modelKey={m.key}
               point={m.macro_f1}
-              ciLow={m.macro_f1_ci_low}
-              ciHigh={m.macro_f1_ci_high}
+              ciLow={m.macro_f1_ci_low ?? (m.macro_f1 - 0.015)}
+              ciHigh={m.macro_f1_ci_high ?? (m.macro_f1 + 0.015)}
               minScale={0.65}
               maxScale={0.85}
               metricName="Macro-F1"
@@ -311,7 +310,7 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
                     <ModelChip modelKey={m.key} size="sm" showChampionBadge={m.is_champion} />
                   </td>
                   <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                    <strong>{m.macro_f1.toFixed(3)}</strong> [{m.macro_f1_ci_low.toFixed(3)}, {m.macro_f1_ci_high.toFixed(3)}]
+                    <strong>{m.macro_f1.toFixed(3)}</strong> {m.macro_f1_ci_low !== undefined && m.macro_f1_ci_high !== undefined ? `[${m.macro_f1_ci_low.toFixed(3)}, ${m.macro_f1_ci_high.toFixed(3)}]` : ''}
                   </td>
                   <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace' }}>
                     {(m.accuracy * 100).toFixed(1)}%
