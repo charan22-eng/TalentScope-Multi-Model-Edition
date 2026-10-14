@@ -54,3 +54,11 @@ Candidate methods evaluated across all seven models:
 - Mean ECE across models drops from 0.0683 (sigmoid) to 0.0472 (temperature scaling), a 31% reduction in calibration error.
 - Multiclass probabilities naturally sum to 1.0 without heuristic re-normalization.
 - Preserves multiclass rank order: $\text{argmax}_c P_T(y=c|x) = \text{argmax}_c P(y=c|x)$.
+
+## Holdout Integrity & Dual Evaluation Disclosure
+1. **Dual Test Set Evaluation**: The holdout test split ($N = 2,381$) was evaluated twice during project development:
+   - First evaluation under ADR-008 (One-vs-Rest Platt scaling via `CalibratedClassifierCV(method="sigmoid", cv="prefit")`), logged in `reports/test_eval_log.csv` at `2026-10-12T13:41:03Z`.
+   - Second evaluation under ADR-014 (Multinomial Temperature Scaling fitted on `cal-A`), logged in `reports/test_eval_log.csv` at `2026-10-13T19:37:16Z`.
+2. **Audit Prompt & Holdout Non-Pristineness**: The decision to revisit calibration was prompted by test-set audit findings in earlier review rounds indicating that Platt OvR degraded ensemble and linear model calibration (e.g. `boost` ECE increased from 0.0198 to 0.0904, `logreg` from 0.0282 to 0.1246).
+3. **Partition Isolation**: Although candidate calibration methods were compared strictly via 5-fold cross-validation on `cal-A` ($N = 1,190$) without test peeking, the test partition cannot be claimed as an untouched single-look holdout. Both test evaluations, the full log trail in `reports/test_eval_log.csv`, and all raw vs calibrated metrics are permanently disclosed.
+

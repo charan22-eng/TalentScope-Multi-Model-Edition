@@ -37,6 +37,10 @@
 ## 5. Limitations & Caveats
 > [!IMPORTANT]
 > **Rankings depend on the synthetic generator**: The benchmark dataset is synthetic (12,000 rows). Relative model rankings reflect the non-linear data-generating process with saturation, interactions, and noise. Under a purely linear variant, simpler linear models perform near the top.
+> 
+> **Prediction Invariance under Temperature Scaling**: Under ADR-008 Platt scaling (OvR sigmoid), three independent binary sigmoids altered multi-class argmax rankings, yielding an artificial 0.7543 macro-F1. Under ADR-014 Temperature Scaling, uniform scalar temperature strictly preserves base model argmax predictions, yielding the authentic base model test performance of 0.7190 macro-F1 and 0.7278 accuracy.
+> 
+> **Dual Holdout Evaluation Disclosure**: The test split was evaluated twice during development (ADR-008 Platt scaling and ADR-014 Temperature Scaling). The calibration update was prompted by test-set audit results indicating Platt OvR degraded ensemble calibration. Temperature scaling was subsequently selected on `cal-A` 5-fold CV. Both evaluations are logged in `reports/test_eval_log.csv`.
 
 ## 6. Intended Use & Ethics
 - **Decision Support Only**: This model is built for human-in-the-loop decision support, not automated termination or promotion.

@@ -25,6 +25,10 @@ TalentScope evaluates seven diverse machine-learning architectures on a standard
 - **Accuracy vs Explainability**: SVM achieves the highest raw Macro-F1 (0.8164), but is a black-box margin model requiring post-hoc approximations. Random Forest achieves 0.7804 with native partial tree explainability and near-zero calibration error (ECE 0.0133).
 - **Inference Speed**: Decision Tree provides ultra-low latency (16.27 ms single, 0.02s batch), making it ideal for edge or high-throughput batch scenarios.
 
-## 5. Limitations & Caveat
+## 5. Limitations, Calibration & Holdout Disclosure
 > [!IMPORTANT]
 > **Rankings depend on the synthetic generator**: The performance hierarchy is contingent on the data-generating process. Data sensitivity analysis across linear, nonlinear, and noisy-overlap variants confirms that rankings shift when data dynamics change.
+> 
+> **Statistical Tie on Balanced Profile**: Under the default Balanced MCDA profile, `boost` (0.6665) and `svm` (0.6575) are separated by only 0.0090 composite points with rank-1 Dirichlet probability 53.2% vs 46.8%. The bootstrap difference interval spans zero and McNemar-Holm adjusted p >= 0.05. Decision strength is officially classified as **NONE** (statistically tied; winner depends on governance priorities).
+> 
+> **Dual Holdout Evaluation Disclosure**: The holdout test partition was evaluated twice during development (first under ADR-008 Platt scaling, second under ADR-014 Multinomial Temperature Scaling). The calibration update was prompted by test-set audit observations showing Platt OvR degradation on ensemble models. Candidate calibration methods were subsequently compared on `cal-A` 5-fold CV. Both evaluations are logged in `reports/test_eval_log.csv`.

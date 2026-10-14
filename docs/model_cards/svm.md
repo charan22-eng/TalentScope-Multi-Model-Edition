@@ -36,6 +36,10 @@
 ## 5. Limitations & Caveats
 > [!IMPORTANT]
 > **Rankings depend on the synthetic generator**: The benchmark dataset is synthetic (12,000 rows). Relative model rankings reflect the non-linear data-generating process with saturation, interactions, and noise. Under a purely linear variant, simpler linear models perform near the top.
+> 
+> **Statistical Tie with Boost**: Under the Balanced MCDA profile, `svm` is statistically tied with `boost` (margin 0.0090, decision strength NONE).
+> 
+> **Calibration & Dual Holdout Disclosure**: Calibrated test ECE is 0.0025 (temperature $T=0.6961$ on cal-A; raw ECE is 0.1014). The null ECE simulation across 500 draws yields a 1st percentile of 0.0009 and median of 0.0080 for SVM's bimodal confidence distribution. The test split was evaluated twice during development (ADR-008 Platt scaling and ADR-014 Temperature Scaling), prompted by audit observations on holdout calibration.
 
 ## 6. Intended Use & Ethics
 - **Decision Support Only**: This model is built for human-in-the-loop decision support, not automated termination or promotion.
