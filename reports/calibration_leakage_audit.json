@@ -1,0 +1,72 @@
+{
+  "boost": {
+    "cal_a_ece": 0.0211,
+    "cal_b_ece": 0.0183,
+    "test_ece": 0.0125,
+    "null_1pct": 0.0051,
+    "null_5pct": 0.0072,
+    "null_median": 0.0142,
+    "null_95pct": 0.0225,
+    "note": "Within 90% CI"
+  },
+  "dt": {
+    "cal_a_ece": 0.0505,
+    "cal_b_ece": 0.0378,
+    "test_ece": 0.0399,
+    "null_1pct": 0.0058,
+    "null_5pct": 0.0079,
+    "null_median": 0.0156,
+    "null_95pct": 0.0269,
+    "note": "ABOVE 95%"
+  },
+  "knn": {
+    "cal_a_ece": 0.0316,
+    "cal_b_ece": 0.0352,
+    "test_ece": 0.0239,
+    "null_1pct": 0.0064,
+    "null_5pct": 0.0086,
+    "null_median": 0.016,
+    "null_95pct": 0.026,
+    "note": "Within 90% CI"
+  },
+  "linreg": {
+    "cal_a_ece": 0.0256,
+    "cal_b_ece": 0.0145,
+    "test_ece": 0.035,
+    "null_1pct": 0.005,
+    "null_5pct": 0.0067,
+    "null_median": 0.015,
+    "null_95pct": 0.025,
+    "note": "ABOVE 95%"
+  },
+  "logreg": {
+    "cal_a_ece": 0.0313,
+    "cal_b_ece": 0.0215,
+    "test_ece": 0.0273,
+    "null_1pct": 0.0059,
+    "null_5pct": 0.0083,
+    "null_median": 0.0156,
+    "null_95pct": 0.0261,
+    "note": "ABOVE 95%"
+  },
+  "rf": {
+    "cal_a_ece": 0.0248,
+    "cal_b_ece": 0.0296,
+    "test_ece": 0.0157,
+    "null_1pct": 0.006,
+    "null_5pct": 0.0074,
+    "null_median": 0.015,
+    "null_95pct": 0.0237,
+    "note": "Within 90% CI"
+  },
+  "svm": {
+    "cal_a_ece": 0.0112,
+    "cal_b_ece": 0.0408,
+    "test_ece": 0.0025,
+    "null_1pct": 0.0009,
+    "null_5pct": 0.0021,
+    "null_median": 0.008,
+    "null_95pct": 0.0176,
+    "note": "Within 90% CI"
+  }
+}
