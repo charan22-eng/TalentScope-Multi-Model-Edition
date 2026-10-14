@@ -1,6 +1,18 @@
 {
-  "champion_key": "rf",
-  "rule": "MCDA Balanced Profile score >= 0.60 with paired bootstrap validation",
-  "score": 0.6387,
-  "selection_timestamp": "2026-10-12T00:00:00Z"
+  "champion_key": "boost",
+  "champion": "boost",
+  "champion_label": "Gradient boosting (histogram)",
+  "runner_up_key": "svm",
+  "runner_up_label": "Support vector machine (RBF)",
+  "rule": "ADR-009 Multi-Criteria Decision Analysis (Balanced profile)",
+  "selection_rule": "ADR-009 Multi-Criteria Decision Analysis (Balanced profile)",
+  "profile": "Balanced",
+  "score": 0.6665,
+  "composite_mcda_score": 0.6665,
+  "rank1_probability": 0.555,
+  "decision_strength": "none",
+  "decision_rationale": "Gradient boosting (histogram) achieves the highest composite MCDA score (0.6665) under the Balanced profile. Runner-up is Support vector machine (RBF) (0.6575). Decision strength is none.",
+  "evidence_packet_sha256": "9eb3ed198dd772f19d27c709dc20158a37e4b54dbc7003c204c1fbcf0fe4b7ed",
+  "selection_timestamp": "2026-10-14T16:53:43Z",
+  "created_at": "2026-10-14T16:53:43Z"
 }
