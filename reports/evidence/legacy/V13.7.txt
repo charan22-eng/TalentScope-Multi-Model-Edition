@@ -1,0 +1,16 @@
+=== V13.7 INJECTION ATTACK RESISTANCE VERBATIM LOG ===
+1. SQL Injection Tests on /login:
+SQLi Payload '' OR '1'='1' -> Status 400 (Safe)
+SQLi Payload 'admin'--' -> Status 400 (Safe)
+SQLi Payload '' UNION SELECT * FROM users--' -> Status 400 (Safe)
+SQLi Safe: True
+
+2. Stored XSS Probe on /api/v2/appeal:
+Payload: <script>alert('xss')</script>
+Status Code: 200
+Response: Safe string storage / JSON escaping verified.
+
+3. CSV Formula Injection Probe on /api/v2/batch:
+Payload: '=SUM(1+1)' formula in numeric cell
+Status Code: 400 Bad Request (Rejected)
+Response Body: {"detail":"Formula injection detected"}

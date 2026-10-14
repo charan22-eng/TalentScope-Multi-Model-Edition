@@ -1,0 +1,20 @@
+=== V10.7 APPEND-ONLY AUDIT LOG DUMP ===
+Total Records Examined: 15
+Required Actions: login=True, export=True, role_change=True
+
+SQL Query: SELECT id, timestamp, user_email, action, resource, details_json FROM audit_logs ORDER BY id DESC LIMIT 15;
+Log ID: 224 | Timestamp: 2026-10-14 16:25:21.346140 | User: admin@test.com   | Action: role_change  | Resource: /api/v2/users/4/role | Details: {"user_id": 4, "target_email": "analyst@test.com", "old_role": "viewer", "new_role": "analyst"}
+Log ID: 223 | Timestamp: 2026-10-14 16:25:21.311645 | User: admin@test.com   | Action: role_change  | Resource: /api/v2/users/4/role | Details: {"user_id": 4, "target_email": "analyst@test.com", "old_role": "analyst", "new_role": "viewer"}
+Log ID: 222 | Timestamp: 2026-10-14 16:25:21.274687 | User: admin@test.com   | Action: export       | Resource: /batch/report/pdf    | Details: {"format": "pdf"}
+Log ID: 221 | Timestamp: 2026-10-14 16:25:21.234786 | User: admin@test.com   | Action: login        | Resource: /login               | Details: {"role": "admin"}
+Log ID: 220 | Timestamp: 2026-10-14 16:25:18.327559 | User: admin@test.com   | Action: login        | Resource: /login               | Details: {"role": "admin"}
+Log ID: 219 | Timestamp: 2026-10-14 16:25:17.960306 | User: admin@test.com   | Action: login        | Resource: /login               | Details: {"role": "admin"}
+Log ID: 218 | Timestamp: 2026-10-14 16:25:09.232829 | User: system@talentscope.local | Action: database_migration | Resource: all_tables           | Details: {"status": "success", "tables_created": 17}
+Log ID: 217 | Timestamp: 2026-10-14 16:23:14.068011 | User: admin@test.com   | Action: employee_appeal_submitted | Resource: employee/EMP-LEGACY-01 | Details: {"reason": "<script>alert('xss')</script>"}
+Log ID: 216 | Timestamp: 2026-10-14 16:22:48.256589 | User: analyst@test.com | Action: logout       | Resource: /logout              | Details: {"token_prefix": "eyJhbGciOi"}
+Log ID: 215 | Timestamp: 2026-10-14 16:22:48.221393 | User: analyst@test.com | Action: token_refresh | Resource: /refresh             | Details: {"role": "analyst"}
+Log ID: 214 | Timestamp: 2026-10-14 16:22:48.176720 | User: analyst@test.com | Action: login        | Resource: /login               | Details: {"role": "analyst"}
+Log ID: 213 | Timestamp: 2026-10-14 16:22:47.914298 | User: admin@test.com   | Action: privacy_deletion_processed | Resource: employee/EMP-LEGACY-01 | Details: {"reason": "GDPR Article 17 Right to Erasure statutory request"}
+Log ID: 212 | Timestamp: 2026-10-14 16:22:47.871908 | User: admin@test.com   | Action: employee_appeal_submitted | Resource: employee/EMP-LEGACY-01 | Details: {"reason": "Promoted to tech lead with exemplary output"}
+Log ID: 211 | Timestamp: 2026-10-14 16:22:47.797101 | User: hrmanager@test.com | Action: review_decision | Resource: review_item/test-v109-item-499c8776-390b-4133-b993-d62cd9566839 | Details: {"decision_band": 2, "override": true}
+Log ID: 210 | Timestamp: 2026-10-14 16:22:47.603238 | User: admin@test.com   | Action: role_change  | Resource: /api/v2/users/4/role | Details: {"user_id": 4, "target_email": "analyst@test.com", "old_role": "viewer", "new_role": "analyst"}

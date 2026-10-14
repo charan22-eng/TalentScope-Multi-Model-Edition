@@ -1,0 +1,45 @@
+=== V10.12 VERBATIM TOKEN REFRESH & REVOCATION HTTP TRANSCRIPT ===
+
+--- STEP 1: INITIAL LOGIN ---
+POST /login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=analyst@test.com&password=AnalystPassword123!
+HTTP/1.1 200 OK
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0QHRlc3QuY29tIiwicm9sZSI6ImFuYWx5c3QiLCJqdGkiOiI2NGRjZWFmNS02YjFlLTQwMTQtYmNmYi0yYmVkMjRjOWU1YTQiLCJleHAiOjE3OTE5OTY5MjF9.5KnrnEXrgwB1_zJbeV_fNdBOC96qfzos5tUexxq-ehA","token_type":"bearer","role":"analyst"}
+
+--- STEP 2: PROTECTED ACCESS WITH TOKEN 1 ---
+GET /api/v2/models HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c...
+HTTP/1.1 200 OK
+Response: 7 Models Returned
+
+--- STEP 3: REFRESH TOKEN (ROTATION) ---
+POST /refresh HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c...
+HTTP/1.1 200 OK
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0QHRlc3QuY29tIiwicm9sZSI6ImFuYWx5c3QiLCJqdGkiOiI0NGJlODYwNC03Y2FhLTQ2NWMtOWUwNC02ZjQ2MjhjMjliMzUiLCJleHAiOjE3OTE5OTY5MjF9.6SYaUGmMlIVkK9bVWvUZf81v9Cf_AOSdKW828s1zpqI","token_type":"bearer","role":"analyst"}
+
+--- STEP 4: ACCESS ATTEMPT WITH REVOKED TOKEN 1 (MUST BE 401) ---
+GET /api/v2/models HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c...
+HTTP/1.1 401 Unauthorized
+{"detail":"Token has been revoked"}
+
+--- STEP 5: ACCESS ATTEMPT WITH NEW ROTATED TOKEN 2 ---
+GET /api/v2/models HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c...
+HTTP/1.1 200 OK
+Response: 7 Models Returned
+
+--- STEP 6: EXPLICIT LOGOUT WITH TOKEN 2 ---
+POST /logout HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c...
+HTTP/1.1 200 OK
+{"status":"success","message":"Logged out and token revoked"}
+
+--- STEP 7: ACCESS ATTEMPT WITH LOGGED-OUT TOKEN 2 (MUST BE 401) ---
+GET /api/v2/models HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c...
+HTTP/1.1 401 Unauthorized
+{"detail":"Token has been revoked"}

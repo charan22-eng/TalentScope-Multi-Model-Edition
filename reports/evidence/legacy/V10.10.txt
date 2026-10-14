@@ -1,0 +1,81 @@
+=== V10.10 UNCERTAINTY-FIRST QUEUE ORDERING PROOF ===
+GET /api/v2/review/queue?status_filter=pending
+Status Code: 200
+Total Queue Items: 50
+
+Queue Items Ordered By Uncertainty/Urgency:
+[
+  {
+    "id": "test-v109-item-78f7c445-049e-4d8d-b250-7b3c9145420c",
+    "urgency": "high",
+    "flags": [
+      "low_stability",
+      "split_decision"
+    ]
+  },
+  {
+    "id": "11b9c57b-8ac8-4e37-a9bd-7834240bbac0",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  },
+  {
+    "id": "544656b6-106c-4733-9c0a-61240d090572",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  },
+  {
+    "id": "336708cc-c7e4-4547-ad3b-f7f62c361f6d",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  },
+  {
+    "id": "a12275af-68e1-4e92-9dac-b87fd2c14263",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  },
+  {
+    "id": "83764fff-a0cf-42ca-a6a7-62e72caca27f",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  },
+  {
+    "id": "db9a5b26-25de-41b9-a6e9-e7a5ac9c336f",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  },
+  {
+    "id": "6cb1e7c6-a95e-4b06-8db6-3be967d60fc5",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  },
+  {
+    "id": "6961c05b-d7b8-4527-b376-21f0782210d4",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  },
+  {
+    "id": "8d67c7d1-3a57-4241-b894-5422ece7d575",
+    "urgency": "high",
+    "flags": [
+      "low_stability"
+    ]
+  }
+]
+
+Result: High urgency items strictly prioritized before medium/low.

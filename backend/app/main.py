@@ -28,6 +28,7 @@ from backend.core.security import (
     require_roles,
     revoke_token,
     oauth2_scheme,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
 )
 from backend.services.drift import get_current_drift
 from sqlalchemy.orm import Session
@@ -182,11 +183,18 @@ def create_app():
 
     @app.post("/login")
     @limiter.limit("10/minute")
-    def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    def login(request: Request, response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
         user = authenticate_user(db, form_data.username, form_data.password)
         if not user:
             raise HTTPException(status_code=400, detail="Incorrect email or password")
         access_token = create_access_token(data={"sub": user.email, "role": user.role})
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            samesite="lax",
+            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        )
         # V10.7 Audit log entry for login
         try:
             from backend.db.models import AuditLog

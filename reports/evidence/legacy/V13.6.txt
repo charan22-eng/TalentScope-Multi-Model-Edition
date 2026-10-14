@@ -1,0 +1,12 @@
+=== V13.6 RAW SECURITY HEADERS PROOF ===
+GET /health HTTP/1.1
+HTTP/1.1 200 OK
+
+Headers Received:
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=31536000; includeSubDomains
+referrer-policy: strict-origin-when-cross-origin
+
+Missing Headers: None (All 5 Present)

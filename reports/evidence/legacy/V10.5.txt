@@ -1,0 +1,8 @@
+=== V10.5 UNAUTHENTICATED 401 VERIFICATION TRANSCRIPT ===
+GET  /api/v2/models            -> HTTP 401 | Body: {"detail":"Not authenticated"}
+POST /api/v2/predict           -> HTTP 401 | Body: {"detail":"Not authenticated"}
+GET  /api/v2/audit/logs        -> HTTP 401 | Body: {"detail":"Not authenticated"}
+GET  /api/v2/review/queue      -> HTTP 401 | Body: {"detail":"Not authenticated"}
+POST /api/v2/retrain           -> HTTP 401 | Body: {"detail":"Not authenticated"}
+GET  /viz/galaxy               -> HTTP 401 | Body: {"detail":"Not authenticated"}
+POST /batch                    -> HTTP 401 | Body: {"detail":"Not authenticated"}

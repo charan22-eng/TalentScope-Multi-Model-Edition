@@ -1,0 +1,30 @@
+=== V10.3 RAW TOKEN AND COOKIE SETTINGS PROOF ===
+
+1. HTTP Response Headers from POST /login:
+Set-Cookie: access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInJvbGUiOiJhZG1pbiIsImp0aSI6ImU2M2M5MzFkLTNiYzUtNDY4My04ZDE3LWNkM2Q3MDhjYzliMCIsImV4cCI6MTc5MTk5NjkxOH0.8XQZT6LvDTxvtnAuIGe91bQSQazT-0O2VBh7VeUHK9Y; HttpOnly; Max-Age=1800; Path=/; SameSite=lax
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+2. Raw Access Token:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInJvbGUiOiJhZG1pbiIsImp0aSI6ImU2M2M5MzFkLTNiYzUtNDY4My04ZDE3LWNkM2Q3MDhjYzliMCIsImV4cCI6MTc5MTk5NjkxOH0.8XQZT6LvDTxvtnAuIGe91bQSQazT-0O2VBh7VeUHK9Y
+
+3. Decoded JWT Header:
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+
+4. Decoded JWT Payload:
+{
+  "sub": "admin@test.com",
+  "role": "admin",
+  "jti": "e63c931d-3bc5-4683-8d17-cd3d708cc9b0",
+  "exp": 1791996918
+}
+
+5. Verification Parameters:
+Algorithm: HS256 (Strictly Enforced)
+Secret Key Entropy: 344 bits (43 characters)
+Configured Expiry: 30 minutes
+Computed Token Lifetime: 30.0 minutes
+Cookie Attributes: HttpOnly=True, SameSite=lax

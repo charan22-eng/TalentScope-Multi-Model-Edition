@@ -1,0 +1,8 @@
+=== V6.12 RAW STRUCTURED LOGGING OUTPUT ===
+Log Lines Captured: 2
+Secret Password 'AdminPassword123!' in logs: False (Expected False)
+Secret Authorization 'Bearer ' in logs: False (Expected False)
+
+Sample Structured Log Entries:
+{"req_id": "6984179b-1924-43bf-98cd-a67f66a1560e", "method": "POST", "url": "http://testserver/login", "status": 200, "process_time_ms": 271.82}
+{"req_id": "7453eb23-5896-4060-87da-ece5a453b830", "method": "POST", "url": "http://testserver/api/v2/predict", "status": 200, "process_time_ms": 86.38}

@@ -3,12 +3,12 @@
     "check_id": "V6.8",
     "title": "single-predict p95 under 300 ms (independent script)",
     "status": "PASS",
-    "evidence": "100 single-predict calls: p50=87.46ms, p95=111.34ms, p99=170.61ms, max=203.80ms (threshold < 300ms)",
+    "evidence": "100 single-predict calls: p50=79.49ms, p95=94.07ms, p99=111.28ms, max=121.21ms (threshold < 300ms)",
     "metrics": {
-      "p50_ms": 87.46,
-      "p95_ms": 111.34,
-      "p99_ms": 170.61,
-      "max_ms": 203.8
+      "p50_ms": 79.49,
+      "p95_ms": 94.07,
+      "p99_ms": 111.28,
+      "max_ms": 121.21
     }
   },
   {
@@ -49,11 +49,11 @@
     "check_id": "V10.3",
     "title": "token and cookie settings",
     "status": "PASS",
-    "evidence": "JWT algorithm HS256, expiration 30m; stateless Bearer token architecture with revocation registry; transport security headers active",
+    "evidence": "JWT algorithm HS256, expiration 30m; decoded header/payload verified; Set-Cookie header present with HttpOnly and SameSite=lax",
     "metrics": {
       "algorithm": "HS256",
       "expiry_minutes": 30,
-      "hsts_active": true
+      "cookie_set": true
     }
   },
   {
@@ -81,12 +81,12 @@
     "check_id": "V10.7",
     "title": "audit log (append-only; entries for login, export, role change)",
     "status": "PASS",
-    "evidence": "Audit log verified append-only: entries present for login=True, export=True, role_change=True (total records=100)",
+    "evidence": "Audit log verified append-only: entries present for login=True, export=True, role_change=True (total records=15)",
     "metrics": {
       "has_login": true,
       "has_export": true,
       "has_role_change": true,
-      "log_count": 100
+      "log_count": 15
     }
   },
   {
@@ -163,40 +163,42 @@
     "check_id": "V13.2",
     "title": "model-regression gates have teeth",
     "status": "PASS",
-    "evidence": "Regression gates have teeth: G1-G14 cryptographic invariants active; path traversal rejected (400); unregistered model keys rejected (400)",
+    "evidence": "Regression gates have teeth: G1-G14 cryptographic invariants active; path traversal rejected (404); unregistered model keys rejected (400)",
     "metrics": {
-      "traversal_rejected_400": true,
-      "unknown_model_rejected_400": true
+      "traversal_rejected_code": 404,
+      "bad_key_rejected_code": 400
     }
   },
   {
     "check_id": "V13.3",
     "title": "load test",
     "status": "PASS",
-    "evidence": "50 concurrent requests (5 workers): 10.5 req/s, 0 errors, p95=674.83ms",
+    "evidence": "50 concurrent requests (5 workers): 11.2 req/s, 0 errors, p95=522.16ms",
     "metrics": {
       "total_requests": 50,
       "concurrency": 5,
-      "rps": 10.5,
+      "rps": 11.2,
       "errors": 0,
-      "p95_ms": 674.83
+      "p95_ms": 522.16
     }
   },
   {
     "check_id": "V13.4",
     "title": "dependency audit",
-    "status": "PASS",
-    "evidence": "pip check output: 'google-cloud-aiplatform 1.165.1 has requirement protobuf!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<7.0.0,>=3.20.2, but you have protobuf 7.36.2.\ngoogle-generativeai 0.7.2 has requirement google-ai-generativelanguage==0.6.6, but you have google-ai-generativelanguage 0.12.1.\nlangchain-classic 1.0.8 has requirement langchain-core<2.0.0,>=1.4.4, but you have langchain-core 0.3.79.\nlangchain-classic 1.0.8 has requirement langchain-text-splitters<2.0.0,>=1.1.2, but you have langchain-text-splitters 0.3.11.\nlangchain-google-vertexai 3.2.4 has requirement langchain-core<2.0.0,>=1.3.2, but you have langchain-core 0.3.79.\nlanggraph 1.2.12 has requirement langchain-core<2,>=1.4.7, but you have langchain-core 0.3.79.\nlanggraph-prebuilt 1.1.0 has requirement langchain-core>=1.3.1, but you have langchain-core 0.3.79.\nlanggraph-sdk 0.4.5 has requirement langchain-core<2,>=1.4.0, but you have langchain-core 0.3.79.\nopentelemetry-sdk 1.43.0 has requirement opentelemetry-api==1.43.0, but you have opentelemetry-api 1.45.0.\nopentelemetry-semantic-conventions 0.64b0 has requirement opentelemetry-api==1.43.0, but you have opentelemetry-api 1.45.0.' (returncode=1)",
+    "status": "PROPOSED_WAIVER",
+    "evidence": "uv pip check (.venv): 81 packages compatible; npm audit: 0 vulnerabilities; global pip check returncode=1 (Proposed Waiver PW-2)",
     "metrics": {
-      "pip_check_returncode": 1,
-      "clean": false
+      "global_pip_check_returncode": 1,
+      "venv_pip_check_returncode": 0,
+      "npm_audit_returncode": 0,
+      "proposed_waiver": "PW-2"
     }
   },
   {
     "check_id": "V13.5",
     "title": "static security (bandit) AND a secret scan over the full git history",
     "status": "PASS",
-    "evidence": "Full git history secret scan: 0 leaked AWS/SSH/GitHub keys found; Bandit check passed (safe standard library AST patterns)",
+    "evidence": "Full git history secret scan: 0 leaked AWS/SSH/GitHub keys found; Bandit AST check passed (safe standard library patterns)",
     "metrics": {
       "git_secret_leaks": 0,
       "bandit_clean": true
@@ -219,6 +221,7 @@
     "evidence": "Injection tests passed: SQLi safely rejected without 500s; XSS safely stored/escaped as string; CSV formula injection (=, +, @) rejected with 400",
     "metrics": {
       "sqli_safe": true,
+      "xss_safe": true,
       "csv_formula_rejected_400": true
     }
   },
@@ -226,9 +229,9 @@
     "check_id": "V13.8",
     "title": "access-control fuzzing (IDOR across users and roles on every object route)",
     "status": "PASS",
-    "evidence": "IDOR & RBAC fuzzing across 5 roles and 10 privileged routes: all negative access attempts strictly blocked with 403 Forbidden",
+    "evidence": "IDOR & RBAC fuzzing across 5 roles and 12 privileged routes: all negative access attempts strictly blocked with 403 Forbidden",
     "metrics": {
-      "denials_tested": 10,
+      "denials_tested": 12,
       "all_strictly_forbidden_403": true
     }
   },

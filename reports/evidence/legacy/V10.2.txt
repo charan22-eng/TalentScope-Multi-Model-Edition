@@ -1,0 +1,13 @@
+=== V10.2 RAW DATABASE USERS TABLE INSPECTION ===
+Total Users In Database: 6
+Algorithm: Bcrypt (prefix $2b$, cost factor 12)
+
+SQL Query: SELECT id, email, role, substr(hashed_password, 1, 25) FROM users;
+User ID:  1 | Email: admin@hr.local       | Role: admin      | Hash: $2b$12$945zEJ8.z9d8z... [Cost 12]
+User ID:  2 | Email: admin@test.com       | Role: admin      | Hash: $2b$12$0Wg9oLeil0xuG... [Cost 12]
+User ID:  3 | Email: hrmanager@test.com   | Role: hr_manager | Hash: $2b$12$RLYa.ztkrO7Ox... [Cost 12]
+User ID:  4 | Email: analyst@test.com     | Role: analyst    | Hash: $2b$12$8nrb840XdrTPe... [Cost 12]
+User ID:  5 | Email: viewer@test.com      | Role: viewer     | Hash: $2b$12$wbIFXqpJtBaDw... [Cost 12]
+User ID:  6 | Email: reviewer@test.com    | Role: reviewer   | Hash: $2b$12$kjpmg.Twj57xr... [Cost 12]
+
+Result: 100% of user records hashed with bcrypt ($2b$). Zero plaintext credentials detected.

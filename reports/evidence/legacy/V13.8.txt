@@ -1,0 +1,13 @@
+=== V13.8 ACCESS-CONTROL FUZZING COMPLETE TRANSCRIPT ===
+[FUZZ] Role: viewer     | Method: GET  | Endpoint: /api/v2/audit/logs                  | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'viewer' not permitted for this r
+[FUZZ] Role: viewer     | Method: POST | Endpoint: /api/v2/retrain                     | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'viewer' not permitted for this r
+[FUZZ] Role: viewer     | Method: POST | Endpoint: /batch                              | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'viewer' not permitted for this r
+[FUZZ] Role: viewer     | Method: POST | Endpoint: /api/v2/batch                       | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'viewer' not permitted for this r
+[FUZZ] Role: viewer     | Method: POST | Endpoint: /api/v2/models/approve-champion     | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'viewer' not permitted for this r
+[FUZZ] Role: analyst    | Method: GET  | Endpoint: /api/v2/transparency/employee/EMP-001 | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'analyst' not permitted for this 
+[FUZZ] Role: analyst    | Method: POST | Endpoint: /api/v2/retrain                     | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'analyst' not permitted for this 
+[FUZZ] Role: analyst    | Method: POST | Endpoint: /api/v2/models/approve-champion     | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'analyst' not permitted for this 
+[FUZZ] Role: hr_manager | Method: POST | Endpoint: /api/v2/models/approve-champion     | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'hr_manager' not permitted for th
+[FUZZ] Role: hr_manager | Method: GET  | Endpoint: /api/v2/audit/logs                  | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'hr_manager' not permitted for th
+[FUZZ] Role: reviewer   | Method: POST | Endpoint: /api/v2/retrain                     | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'reviewer' not permitted for this
+[FUZZ] Role: reviewer   | Method: GET  | Endpoint: /api/v2/audit/logs                  | Got: 403 | Expected: 403 | Result: MATCH | Body: {"detail":"Forbidden: role 'reviewer' not permitted for this

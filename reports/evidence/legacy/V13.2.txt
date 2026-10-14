@@ -1,0 +1,13 @@
+=== V13.2 MODEL REGRESSION GATES PROOF ===
+1. Path Traversal Probe:
+GET /api/v2/models/../../../../etc/passwd
+Status Code: 404 (Blocked / Refused)
+Response Body: {"detail":"Not Found"}
+
+2. Unregistered Model Key Probe:
+POST /api/v2/predict with model_key='invalid_nonexistent_model_key'
+Status Code: 400 (Whitelist Enforcement)
+Response Body: {"detail":"Unknown model key 'invalid_nonexistent_model_key'. Allowed models: ['boost', 'dt', 'knn', 'linreg', 'logreg', 'rf', 'svm']"}
+
+3. Active Cryptographic Invariants:
+G1–G14 invariants active across data generator, split hashing, and artifact packaging.

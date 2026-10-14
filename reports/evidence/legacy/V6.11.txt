@@ -1,0 +1,16 @@
+=== V6.11 RAW GALAXY AND DECISION SURFACE PROOF ===
+1. GET /viz/galaxy
+Status Code: 200
+Response Points Count: 2000 (Must be <= 2000 -> PASS)
+
+2. GET /viz/surface?size=80
+Status Code: 200 OK (Allowed)
+Response Body Sample: {"status":"stubbed"}...
+
+3. GET /viz/surface?size=81
+Status Code: 400 Bad Request (Rejected)
+Response Body: {"detail":"Grid size too large"}
+
+4. GET /api/v2/viz/surface?grid_size=81
+Status Code: 400 Bad Request (Rejected)
+Response Body: {"type":"about:blank","title":"Grid Size Exceeded","status":400,"detail":"Grid size 81 exceeds maximum allowed size of 80x80"}
