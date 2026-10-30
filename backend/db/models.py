@@ -1,7 +1,7 @@
 """TalentScope Unified Database Models (Stage L1).
 
 Supports SQLite (dev) and PostgreSQL (production/compose).
-Covers all 17 governed entities:
+Covers all governed entities:
 1. users
 2. employees
 3. protected_attributes
@@ -19,24 +19,20 @@ Covers all 17 governed entities:
 15. audit_logs
 16. consent_records
 17. deletion_requests
+18. appeals
 """
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
 
 from sqlalchemy import (
-    Boolean,
     Column,
     DateTime,
     Float,
     ForeignKey,
-    Index,
     Integer,
     String,
-    Table,
     Text,
 )
-from sqlalchemy.orm import relationship
 
 from backend.db.database import Base
 
@@ -83,7 +79,13 @@ class ProtectedAttribute(Base):
     __tablename__ = "protected_attributes"
 
     id = Column(Integer, primary_key=True, index=True)
-    employee_id = Column(String(64), ForeignKey("employees.id", ondelete="CASCADE"), unique=True, index=True, nullable=False)
+    employee_id = Column(
+        String(64),
+        ForeignKey("employees.id", ondelete="CASCADE"),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
     gender = Column(String(32), nullable=False)
     age_band = Column(String(32), nullable=False)
     ethnicity = Column(String(64), nullable=True)
@@ -120,7 +122,9 @@ class Prediction(Base):
     stability_score = Column(Float, nullable=False)
     conformal_set_json = Column(Text, nullable=False)  # JSON list of bands
     is_split_decision = Column(Integer, default=0, nullable=False)
-    is_shadow = Column(Integer, default=0, nullable=False)  # 1 if runner-up shadow inference
+    is_shadow = Column(
+        Integer, default=0, nullable=False
+    )  # 1 if runner-up shadow inference
     input_data = Column(Text, nullable=False)  # JSON serialized features
 
 
@@ -142,13 +146,20 @@ class ReviewItem(Base):
     __tablename__ = "review_items"
 
     id = Column(String(64), primary_key=True, index=True)
-    prediction_id = Column(String(64), ForeignKey("predictions.id", ondelete="CASCADE"), index=True, nullable=False)
+    prediction_id = Column(
+        String(64),
+        ForeignKey("predictions.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
     employee_id = Column(String(64), index=True, nullable=True)
     created_at = Column(DateTime, default=utcnow, nullable=False)
     # Status: pending, reviewed, appealed, closed
     status = Column(String(32), default="pending", index=True, nullable=False)
     urgency = Column(String(16), default="medium", nullable=False)  # high, medium, low
-    flags_json = Column(Text, nullable=False)  # JSON: ["low_stability", "conformal_multi_band", "split_decision"]
+    flags_json = Column(
+        Text, nullable=False
+    )  # JSON: ["low_stability", "conformal_multi_band", "split_decision"]
 
 
 # 7. Review Decisions
@@ -156,10 +167,17 @@ class ReviewDecision(Base):
     __tablename__ = "review_decisions"
 
     id = Column(String(64), primary_key=True, index=True)
-    review_item_id = Column(String(64), ForeignKey("review_items.id", ondelete="CASCADE"), index=True, nullable=False)
+    review_item_id = Column(
+        String(64),
+        ForeignKey("review_items.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
     reviewer_email = Column(String(255), index=True, nullable=False)
     decision_band = Column(Integer, nullable=False)
-    override_reason = Column(Text, nullable=True)  # Mandatory if decision_band != predicted_band
+    override_reason = Column(
+        Text, nullable=True
+    )  # Mandatory if decision_band != predicted_band
     comments = Column(Text, nullable=True)
     created_at = Column(DateTime, default=utcnow, nullable=False)
 
@@ -170,7 +188,9 @@ class BatchJob(Base):
 
     id = Column(String(64), primary_key=True, index=True)
     user_email = Column(String(255), index=True, nullable=False)
-    status = Column(String(32), default="queued", index=True, nullable=False)  # queued, running, completed, failed
+    status = Column(
+        String(32), default="queued", index=True, nullable=False
+    )  # queued, running, completed, failed
     row_count = Column(Integer, default=0, nullable=False)
     disagreement_count = Column(Integer, default=0, nullable=False)
     result_path = Column(String(255), nullable=True)
@@ -186,7 +206,9 @@ class ModelVersion(Base):
     model_key = Column(String(32), index=True, nullable=False)
     version = Column(String(32), nullable=False)
     is_champion = Column(Integer, default=0, nullable=False)
-    status = Column(String(32), default="active", nullable=False)  # active, candidate, deprecated, rolled_back
+    status = Column(
+        String(32), default="active", nullable=False
+    )  # active, candidate, deprecated, rolled_back
     metrics_json = Column(Text, nullable=False)
     trained_at = Column(DateTime, default=utcnow, nullable=False)
     approved_by = Column(String(255), nullable=True)
@@ -233,7 +255,9 @@ class DriftReport(Base):
     sample_size = Column(Integer, nullable=False)
     psi_score = Column(Float, nullable=False)
     ks_pvalue = Column(Float, nullable=False)
-    status = Column(String(32), nullable=False)  # stable, moderate_drift, significant_drift
+    status = Column(
+        String(32), nullable=False
+    )  # stable, moderate_drift, significant_drift
     feature_drifts_json = Column(Text, nullable=False)
 
 
@@ -272,7 +296,9 @@ class AuditLog(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     timestamp = Column(DateTime, default=utcnow, index=True, nullable=False)
     user_email = Column(String(255), index=True, nullable=False)
-    action = Column(String(64), index=True, nullable=False)  # predict, review_decision, model_approve, etc.
+    action = Column(
+        String(64), index=True, nullable=False
+    )  # predict, review_decision, model_approve, etc.
     resource = Column(String(128), nullable=False)
     details_json = Column(Text, nullable=True)
     ip_address = Column(String(64), nullable=True)
@@ -285,7 +311,9 @@ class ConsentRecord(Base):
     id = Column(String(64), primary_key=True, index=True)
     employee_id = Column(String(64), index=True, nullable=False)
     user_email = Column(String(255), index=True, nullable=False)
-    consent_type = Column(String(64), nullable=False)  # automated_decision_support, data_processing
+    consent_type = Column(
+        String(64), nullable=False
+    )  # automated_decision_support, data_processing
     granted = Column(Integer, default=1, nullable=False)
     timestamp = Column(DateTime, default=utcnow, nullable=False)
 
@@ -298,7 +326,24 @@ class DeletionRequest(Base):
     employee_id = Column(String(64), index=True, nullable=False)
     user_email = Column(String(255), index=True, nullable=False)
     reason = Column(Text, nullable=True)
-    status = Column(String(32), default="submitted", index=True, nullable=False)  # submitted, approved, processed, rejected
+    status = Column(
+        String(32), default="submitted", index=True, nullable=False
+    )  # submitted, approved, processed, rejected
     requested_at = Column(DateTime, default=utcnow, nullable=False)
     processed_at = Column(DateTime, nullable=True)
     processed_by = Column(String(255), nullable=True)
+
+
+# 18. Employee Appeals
+class AppealRecord(Base):
+    """Human-review appeal record independent of model review items."""
+
+    __tablename__ = "appeals"
+
+    id = Column(String(64), primary_key=True, index=True)
+    employee_id = Column(String(64), index=True, nullable=False)
+    user_email = Column(String(255), index=True, nullable=False)
+    reason = Column(Text, nullable=False)
+    supporting_info = Column(Text, nullable=True)
+    status = Column(String(32), default="submitted", index=True, nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)

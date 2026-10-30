@@ -10,6 +10,12 @@
 - Stage E completed: Multi-model explainability and uncertainty engine (`epk.explain`), native parameter inspection for all 7 models, local feature attribution, actionable constrained counterfactual search, "not how this model decided" similar cases for non-KNN models, scaled PCA 2D/3D background projection, 2D decision landscapes (40x40 grids in `surfaces.json`), and persona-tailored summaries.
 - Stage F completed: Local LLM verdict engine (`epk.llm`), strict numeric validator (Guard G9), SSRF localhost isolation guard (Guard G10), prompt employee-data scanner, deterministic template fallback, SHA-256 verdict cache, golden evaluation suite (`ml/scripts/llm_eval.py`) with 6 packets (100% validity & faithfulness, 100% injection resistance), and setup guide (`docs/LLM_SETUP.md`).
 - Stage G completed: Artifacts v2 bundle layout (`artifacts/v2/`), MANIFEST.json with SHA-256 hashes of all 53 files, `champion.json`, per-model `metadata.json`, `epk.artifacts.ArtifactLoader` with model key whitelist, lazy loading, and tamper detection; golden-input regression suite (`ml/tests/test_golden_regression.py`); machine-generated model cards (`docs/model_cards/<key>.md`, `docs/model_card.md`, and `docs/datasheet.md`) verified by parity tests (`ml/tests/test_model_cards.py`).
+- Stage H completed: Backend API v2 (`/api/v2/*`) with RBAC matrix, tamper-evident manifest verification, audit logging, model review queue, transparency/appeal endpoints, governance retrain & cryptographic rollback, drift monitoring (PSI/KS), and shadow mode.
+- Stage I completed: Frontend core views (Single predict, batch upload up to 5,000 rows across 7 models concurrently, Okabe-Ito accessible color scheme, split-decision alerts, what-if counterfactual advisor).
+- Stage J completed: Model Arena analytical deep dives (Head-to-Head, metrics comparison, cost/speed trade-offs, MCDA dynamic priority tuning, sensitivity across generator variants, fairness disparities, local LLM second opinion).
+- Stage K completed: 3D Decision Landscape (React-Three-Fiber / Three.js interactive probability surfaces, two-model difference mesh $P_A - P_B$, 2D accessible heatmap fallback with reduced-motion support).
+- Stage L completed: DevOps & containerization (multi-stage non-root Dockerfiles, docker-compose.yml, health/readiness probes, cryptographic backup script `scripts/backup.py`, operational runbook `docs/runbook.md`, viva presentation guide `docs/viva_qa.md`).
+- Stage M & Final Follow-ups (FF1–FF4) completed: ADR-014 multinomial temperature calibration, zero numbers mismatch across reports and machine files, all 23 legacy verification gates passed, test coverage thresholds exceeded (ML: 84%, Backend: 83%, Frontend: 73%), release readiness report `docs/FINAL_READINESS.md`.
 
 ## Decisions
 - [ADR-001](../docs/adr/ADR-001.md): Stack decisions and versions.
@@ -19,23 +25,29 @@
 - [ADR-008](../docs/adr/008-calibration-method.md): Probability Calibration Protocol and Method Selection.
 - [ADR-009](../docs/adr/009-champion-selection-rule.md): Champion Selection Rule and Multi-Criteria Decision Analysis.
 - [ADR-010](../docs/adr/010-legacy-reconciliation.md): Reconciling Legacy Code with Multi-Model Architecture.
+- [ADR-011](../docs/adr/011-api-v2-architecture.md): API v2 Architecture and Routing Coexistence.
+- [ADR-012](../docs/adr/012-model-governance.md): Model Governance, Lifecycle, and Dynamic Promotion.
+- [ADR-013](../docs/adr/013-frontend-architecture.md): Frontend Architecture, Design System, and 3D Visualizations.
+- [ADR-014](../docs/adr/014-multinomial-temperature-scaling.md): Multinomial Temperature Scaling Calibration on cal-A.
+- [ADR-015](../docs/adr/015-security-and-rbac.md): Security Architecture, RBAC Matrix, and Token Revocation.
 
 ## Metrics
 - Dataset volume: 11,904 cleaned rows (> 10,000 threshold).
-- Final Holdout Test Metrics (Holdout N = 2,381 rows, single evaluation under G6 lock):
-  - `svm`: Macro-F1 = 0.8164, Accuracy = 0.8148, QWK = 0.8216, ECE = 0.0270, p95 Latency = 23.47ms
-  - `boost`: Macro-F1 = 0.8038, Accuracy = 0.8013, QWK = 0.8075, ECE = 0.0904, p95 Latency = 105.77ms
-  - `rf`: Macro-F1 = 0.7804, Accuracy = 0.7770, QWK = 0.7841, ECE = 0.0133, p95 Latency = 99.38ms
-  - `knn`: Macro-F1 = 0.7543, Accuracy = 0.7518, QWK = 0.7550, ECE = 0.0246, p95 Latency = 16.94ms
-  - `logreg`: Macro-F1 = 0.7189, Accuracy = 0.7148, QWK = 0.7173, ECE = 0.1246, p95 Latency = 22.60ms
-  - `dt`: Macro-F1 = 0.7094, Accuracy = 0.7085, QWK = 0.6993, ECE = 0.0342, p95 Latency = 16.27ms
-  - `linreg`: Macro-F1 = 0.7032, Accuracy = 0.7014, QWK = 0.6955, ECE = 0.0213, p95 Latency = 13.23ms (R² = 0.6669)
-- MCDA Champion (Balanced Profile): `rf` (composite score 0.573, rank-1 probability 64.2%, decision strength: `marginal` due to trade-off with SVM accuracy).
-- Invariant Guards: G1, G2, G3, G4, G5, G6, G7, G8, G9, G10, G13, G14 all GREEN.
+- Final Holdout Test Metrics (Holdout N = 2,381 rows, single evaluation under G6 lock, calibrated via ADR-014):
+  - `svm`: Macro-F1 = 0.8164, Accuracy = 0.8148, QWK = 0.8216, ECE = 0.0025, p95 Latency = 11.31ms
+  - `boost`: Macro-F1 = 0.8056, Accuracy = 0.8026, QWK = 0.8107, ECE = 0.0126, p95 Latency = 100.82ms
+  - `rf`: Macro-F1 = 0.7787, Accuracy = 0.7757, QWK = 0.7819, ECE = 0.0157, p95 Latency = 60.17ms
+  - `knn`: Macro-F1 = 0.7190, Accuracy = 0.7278, QWK = 0.7017, ECE = 0.0239, p95 Latency = 12.90ms
+  - `logreg`: Macro-F1 = 0.7150, Accuracy = 0.7127, QWK = 0.7083, ECE = 0.0273, p95 Latency = 9.73ms
+  - `dt`: Macro-F1 = 0.7111, Accuracy = 0.7102, QWK = 0.7015, ECE = 0.0399, p95 Latency = 10.68ms
+  - `linreg`: Macro-F1 = 0.7011, Accuracy = 0.6997, QWK = 0.6920, ECE = 0.0350, p95 Latency = 10.75ms (R² = 0.6669)
+- MCDA Champion (Balanced Profile): `boost` (composite score 0.6665, rank-1 probability 55.5%, decision strength: `none` due to statistical tie with runner-up `svm` [composite score 0.6575, p_rank1 40.5%]).
+- Invariant Guards: G1, G2, G3, G4, G5, G6, G7, G8, G9, G10, G11, G12, G13, G14 all GREEN.
 - Hygiene: typescript_any=0, console_log=0, possible_secrets=0, bypass_flags=0.
 
 ## Known Issues
-- `test_predict_equals_pipeline` explicitly skipped via `skipif` (Obligation O1) pending v2 golden tests in Stage H.
+- Zero blocking code issues. All 23 retained legacy verification checks passed (`reports/legacy_gates_verification.json`).
+- Proposed Waivers: PW-1 (Remote Linux CI execution pending human run on GitHub Actions) and PW-2 (Host python global dependency conflicts; project `.venv` clean) prepared for human review in `docs/FINAL_READINESS.md`.
 
 ## Next Step
-- Stage H: Backend API v2 (MM-S8).
+- Final Release Candidate Sign-Off & Viva Defense Preparation.

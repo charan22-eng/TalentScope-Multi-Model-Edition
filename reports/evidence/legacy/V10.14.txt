@@ -3,10 +3,17 @@ Target File: frontend/src/App.tsx
 ProtectedRoute Component Defined: True
 Token Checked from LocalStorage: True
 Unauthorized Redirect Logic: True
+Routes Discovered: 11 (public: ['/login'])
 Guarded Operational Routes:
-- HomePage: Protected
-- ArenaPage: Protected
-- PredictPage: Protected
-- BatchPage: Protected
-- ModelLabPage: Protected
-- TransparencyPage: Protected
+- /: Protected
+- /arena/*: Protected
+- /predict: Protected
+- /batch: Protected
+- /dashboard: Protected
+- /model-lab: Protected
+- /data-explorer: Protected
+- /methodology: Protected
+- /3d: Protected
+- /components: Protected
+Unguarded Operational Routes:
+- none

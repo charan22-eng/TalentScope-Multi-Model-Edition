@@ -3,15 +3,17 @@
 ### Headline Metrics Register
 (Filled from artifacts/v2 machine files at the end of verification)
 
-- Primary Model (Champion): Random Forest (`rf`)
-- CV macro-F1: 0.8091
-- Test macro-F1: 0.8124
-- Test Accuracy: 0.8197
-- Test QWK: 0.8142
-- Conformal test coverage (alpha=0.1): 0.8988 (avg set size: 1.324)
-- MCDA Balanced Profile Score: 0.6387 (Rank #1)
+- Primary Model (Champion): Gradient Boosting (`boost`) — ADR-009 MCDA Balanced Profile Winner
+- Test macro-F1: 0.8056
+- Test Accuracy: 0.8026
+- Test QWK: 0.8107
+- Test ECE (calibrated): 0.0126
+- Runner-up: Support Vector Machine (`svm`) — Test macro-F1: 0.8164, Accuracy: 0.8148
+- MCDA Balanced Profile Score: 0.6665 (Rank #1); Runner-up `svm`: 0.6575
+- Rank-1 Probability: 0.555; Decision Strength: `none`
+- Champion Narrative: boost and svm are statistically tied under default balanced (composite score margin 0.0090, decision strength none); the winner depends on priorities.
 - Generator Freeze Hash: `72248D00A23714FAC157E7E5438F4CA75FEA24D041425FE8CC0EE59FDC468305`
-- Test Evaluation Lock: `reports/test_eval.lock` (LOCKED, config `01ba89823e26...`)
+- Test Evaluation Lock: `reports/test_eval.lock` (LOCKED, config `212cfecc7ea1...`)
 
 ---
 

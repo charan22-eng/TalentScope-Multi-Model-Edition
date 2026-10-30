@@ -6,7 +6,7 @@ Content-Type: application/x-www-form-urlencoded
 
 username=analyst@test.com&password=AnalystPassword123!
 HTTP/1.1 200 OK
-{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0QHRlc3QuY29tIiwicm9sZSI6ImFuYWx5c3QiLCJqdGkiOiI2NGRjZWFmNS02YjFlLTQwMTQtYmNmYi0yYmVkMjRjOWU1YTQiLCJleHAiOjE3OTE5OTY5MjF9.5KnrnEXrgwB1_zJbeV_fNdBOC96qfzos5tUexxq-ehA","token_type":"bearer","role":"analyst"}
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0QHRlc3QuY29tIiwicm9sZSI6ImFuYWx5c3QiLCJqdGkiOiIxYmY5MWNhZi1kMDNiLTRiZWEtOGVlNi00MjRiMWUzNjk4OWIiLCJleHAiOjE3OTMxMTYyNjR9.Me-Q8r45wOzdXouxyzOCVenOoPmZ1tbe0TKt5sSxeuo","token_type":"bearer","role":"analyst"}
 
 --- STEP 2: PROTECTED ACCESS WITH TOKEN 1 ---
 GET /api/v2/models HTTP/1.1
@@ -18,7 +18,7 @@ Response: 7 Models Returned
 POST /refresh HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c...
 HTTP/1.1 200 OK
-{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0QHRlc3QuY29tIiwicm9sZSI6ImFuYWx5c3QiLCJqdGkiOiI0NGJlODYwNC03Y2FhLTQ2NWMtOWUwNC02ZjQ2MjhjMjliMzUiLCJleHAiOjE3OTE5OTY5MjF9.6SYaUGmMlIVkK9bVWvUZf81v9Cf_AOSdKW828s1zpqI","token_type":"bearer","role":"analyst"}
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0QHRlc3QuY29tIiwicm9sZSI6ImFuYWx5c3QiLCJqdGkiOiIzNGQ1MGE0Mi1jYTliLTQ2NGYtOWE1MS0wN2QxMDgwOGQxZmUiLCJleHAiOjE3OTMxMTYyNjR9.WV1MhJiOuKFw8snJc7prcocnSoosKRKMV0K-gweihD8","token_type":"bearer","role":"analyst"}
 
 --- STEP 4: ACCESS ATTEMPT WITH REVOKED TOKEN 1 (MUST BE 401) ---
 GET /api/v2/models HTTP/1.1

@@ -16,33 +16,18 @@ const MODEL_KEYS = ['rf', 'boost', 'svm', 'knn', 'dt', 'logreg', 'linreg'];
 
 export function ArenaExplainability() {
   const [selectedPreviewModel, setSelectedPreviewModel] = useState<string>('rf');
-  const [importanceMatrix, setImportanceMatrix] = useState<Record<string, Record<string, number>>>({
-    rf: { attendance: 0.28, experience_years: 0.12, training_hours: 0.15, projects_completed: 0.22, weekly_hours: 0.08, prev_score: 0.15 },
-    boost: { attendance: 0.31, experience_years: 0.10, training_hours: 0.14, projects_completed: 0.24, weekly_hours: 0.07, prev_score: 0.14 },
-    svm: { attendance: 0.26, experience_years: 0.14, training_hours: 0.16, projects_completed: 0.20, weekly_hours: 0.09, prev_score: 0.15 },
-    knn: { attendance: 0.25, experience_years: 0.15, training_hours: 0.15, projects_completed: 0.21, weekly_hours: 0.10, prev_score: 0.14 },
-    dt: { attendance: 0.35, experience_years: 0.05, training_hours: 0.10, projects_completed: 0.30, weekly_hours: 0.05, prev_score: 0.15 },
-    logreg: { attendance: 0.30, experience_years: 0.12, training_hours: 0.12, projects_completed: 0.22, weekly_hours: 0.08, prev_score: 0.16 },
-    linreg: { attendance: 0.29, experience_years: 0.13, training_hours: 0.13, projects_completed: 0.21, weekly_hours: 0.09, prev_score: 0.15 },
-  });
+  const [importanceMatrix, setImportanceMatrix] = useState<Record<string, Record<string, number>>>({});
 
-  const [spearmanMatrix] = useState<Record<string, Record<string, number>>>({
-    rf: { rf: 1.0, boost: 0.94, svm: 0.89, knn: 0.85, dt: 0.81, logreg: 0.88, linreg: 0.87 },
-    boost: { rf: 0.94, boost: 1.0, svm: 0.86, knn: 0.82, dt: 0.83, logreg: 0.85, linreg: 0.84 },
-    svm: { rf: 0.89, boost: 0.86, svm: 1.0, knn: 0.91, dt: 0.77, logreg: 0.92, linreg: 0.91 },
-    knn: { rf: 0.85, boost: 0.82, svm: 0.91, knn: 1.0, dt: 0.74, logreg: 0.89, linreg: 0.88 },
-    dt: { rf: 0.81, boost: 0.83, svm: 0.77, knn: 0.74, dt: 1.0, logreg: 0.79, linreg: 0.78 },
-    logreg: { rf: 0.88, boost: 0.85, svm: 0.92, knn: 0.89, dt: 0.79, logreg: 1.0, linreg: 0.99 },
-    linreg: { rf: 0.87, boost: 0.84, svm: 0.91, knn: 0.88, dt: 0.78, logreg: 0.99, linreg: 1.0 },
-  });
+  const [spearmanMatrix, setSpearmanMatrix] = useState<Record<string, Record<string, number>>>({});
 
   useEffect(() => {
     async function fetchImportance() {
       try {
-        const imp = await apiV2.getCompare('importance');
+        const imp = await apiV2.getCompare('importance') as unknown as { importance_matrix?: Record<string, Record<string, number>>; spearman_matrix?: Record<string, Record<string, number>> };
         if (imp?.importance_matrix) {
           setImportanceMatrix(imp.importance_matrix);
         }
+        if (imp?.spearman_matrix) setSpearmanMatrix(imp.spearman_matrix);
       } catch (e) {
         console.warn('Using baseline importance matrix', e);
       }
@@ -88,10 +73,10 @@ export function ArenaExplainability() {
                 return (
                   <tr key={k} style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.6rem' }}>
-                      <ModelChip modelKey={k} size="sm" showChampionBadge={k === 'rf'} />
+                      <ModelChip modelKey={k} size="sm" showChampionBadge={k === 'boost'} />
                     </td>
                     {FEATURES.map(f => {
-                      const val = imp[f] ?? 0.1;
+                      const val = imp[f] ?? 0;
                       const alpha = Math.min(val * 3, 0.9);
                       return (
                         <td
@@ -165,7 +150,7 @@ export function ArenaExplainability() {
         <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Native Architecture Explainers</h3>
-            <ModelChip modelKey={selectedPreviewModel} size="sm" showChampionBadge={selectedPreviewModel === 'rf'} />
+            <ModelChip modelKey={selectedPreviewModel} size="sm" showChampionBadge={selectedPreviewModel === 'boost'} />
           </div>
 
           <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginBottom: '1rem' }}>

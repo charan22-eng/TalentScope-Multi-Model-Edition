@@ -2,9 +2,9 @@
 1. POST /api/v2/transparency/appeal
 Status Code: 200 OK
 Request: {"employee_id": "EMP-LEGACY-01", "reason": "Promoted to tech lead...", "supporting_info": "Patent filed US-2026-0988"}
-Response: {"status":"success","appeal_id":"4094de8f-3abc-479e-95f6-1e6e9ef05934","message":"Appeal registered for priority HR leadership review within 5 business days."}
+Response: {"status":"success","appeal_id":"d90ba513-b0e5-40b1-b577-61b31ade9980","message":"Appeal registered for priority HR leadership review within 5 business days."}
 
 2. POST /api/v2/privacy/delete-request
 Status Code: 200 OK
 Request: {"employee_id": "EMP-LEGACY-01", "reason": "GDPR Article 17 Right to Erasure..."}
-Response: {"status":"success","deletion_id":"3084754f-2d78-46c9-a6d6-f6074aa2e445","message":"Records purged for employee EMP-LEGACY-01"}
+Response: {"status":"success","deletion_id":"1e74084a-e340-429e-b906-b66c22ffb86c","message":"Records purged for employee EMP-LEGACY-01"}

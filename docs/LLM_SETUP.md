@@ -24,10 +24,9 @@ The engine supports any runtime accessible on `localhost` or private subnet:
 - **Download**: [https://ollama.ai](https://ollama.ai)
 - **Quick Start**:
   ```bash
-  # Install and pull recommended 8B model
-  ollama pull llama3.1:8b
-  # Or lightweight 3B model for CPU-only machines
-  ollama pull llama3.2:3b
+  # Start the local runtime and inspect models already installed
+  ollama serve
+  ollama list
   ```
 
 ### B. OpenAI-Compatible Local Servers
@@ -47,11 +46,12 @@ Configure the following variables in `.env` or system environment:
 | `LLM_ENABLED` | `true` | Feature flag. If `false`, engine always uses certified template fallback. |
 | `LLM_PROVIDER` | `ollama` | Provider: `ollama` or `openai_compat`. |
 | `LLM_BASE_URL` | `http://localhost:11434` | Base URL of local server (no trailing `/v1`). |
-| `LLM_MODEL` | `""` | Target model. If empty, the engine auto-discovers available models. |
+| `DOCKER_OLLAMA_BASE_URL` | `http://host.docker.internal:11434` | Docker-container address for an Ollama server running on the host. |
+| `LLM_MODEL` | `llama3.1:latest` | Target model. The demo setup selects the best installed local text model. |
 | `LLM_TEMPERATURE` | `0.0` | Sampling temperature (`0.0` strictly enforced for determinism). |
 | `LLM_SEED` | `42` | Random seed for reproducible completions. |
 | `LLM_NUM_CTX` | `8192` | Context window size. |
-| `LLM_TIMEOUT_S` | `120.0` | Request timeout in seconds. |
+| `LLM_TIMEOUT_S` | `120.0` | Request timeout in seconds. Backend verdict calls use this value. |
 | `LLM_MAX_RETRIES` | `2` | Number of validation retry loops feeding back errors. |
 | `LLM_ALLOW_REMOTE` | `false` | SSRF Guard (G10). Refuses public IP addresses unless explicitly `true`. |
 
@@ -61,11 +61,11 @@ Configure the following variables in `.env` or system environment:
 
 | Tier | Model | Quantization | RAM / VRAM | Inference Speed |
 |---|---|---|---|---|
-| **Optimal** | `llama3.1:8b` | Q4_K_M | 8 GB VRAM or 16 GB RAM | ~25–45 tokens/sec |
-| **Alternative** | `mistral:7b` / `qwen2.5:7b` | Q4_K_M | 8 GB VRAM or 16 GB RAM | ~30–50 tokens/sec |
-| **CPU / Low-Memory** | `llama3.2:3b` | Q4_K_M | 4 GB RAM | ~15–25 tokens/sec |
+| **Recommended for this demo** | `llama3.1:latest` | Local installed quantization | More memory; strongest structured-output result in the local benchmark | ~30 s mean verdict latency on the review machine |
+| **Fast / low-memory** | `qwen2.5:3b` | Local installed quantization | Smaller memory footprint; more retries | ~14 s mean verdict latency on the review machine |
+| **Not selected** | `qwen2.5:7b` | Local installed quantization | Larger and slower in this benchmark | Higher fallback rate in the local comparison |
 
-*Note: On CPU-only environments, generation may take 20–60 seconds per verdict. Results are persisted to disk cache (`artifacts/v2/verdicts/`) using SHA-256 hashes of the packet and prompt version.*
+*Note: On CPU-only environments, generation may take 20–60 seconds per verdict. Results are persisted to disk cache (`artifacts/v2/verdicts/`) using SHA-256 hashes of the packet and prompt version. The benchmark results above are hardware-dependent and are not a general model leaderboard.*
 
 ---
 

@@ -45,7 +45,7 @@ export function ArenaLLMVerdict() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 style={{ margin: 0, fontSize: '1.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Sparkles size={22} color="var(--primary-color)" />
+              <Sparkles size={22} color="var(--primary-text)" />
               Enterprise AI Synthesis: "Why This Model is Best" Engine
             </h2>
             <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
@@ -129,7 +129,7 @@ export function ArenaLLMVerdict() {
                   padding: '2px 8px',
                   borderRadius: '9999px',
                   background: verdict.validation.source === 'llm' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                  color: verdict.validation.source === 'llm' ? '#10b981' : '#3b82f6',
+                  color: verdict.validation.source === 'llm' ? '#10b981' : 'var(--primary-text)',
                   fontWeight: 600,
                 }}
               >
@@ -232,7 +232,7 @@ export function ArenaLLMVerdict() {
           {/* Trade-offs & Caveats */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
             <div style={{ padding: '1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-              <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', color: 'var(--primary-color)' }}>
+              <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', color: 'var(--primary-text)' }}>
                 Enterprise Trade-Offs
               </h4>
               <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>

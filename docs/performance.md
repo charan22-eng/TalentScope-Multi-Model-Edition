@@ -12,8 +12,8 @@ The service SLA limit is **p95 latency < 800 ms** for multi-model consensus pred
 | `knn` | K-Nearest Neighbours ($k=15$) | 5.8 | **16.9** | 2.45 | 1,420 | ~48 MB |
 | `logreg` | Multinomial Logistic Regression | 5.2 | **22.6** | 0.14 | 52 | ~15 MB |
 | `svm` | Support Vector Machine (RBF) | 8.5 | **23.5** | 3.12 | 890 | ~62 MB |
-| `rf` | Random Forest (Champion) | 24.1 | **99.4** | 1.85 | 2,450 | ~95 MB |
-| `boost` | Histogram Gradient Boosting | 28.5 | **105.8** | 1.20 | 680 | ~45 MB |
+| `rf` | Random Forest | 24.1 | **99.4** | 1.85 | 2,450 | ~95 MB |
+| `boost` | Histogram Gradient Boosting (Champion) | 28.5 | **105.8** | 1.20 | 680 | ~45 MB |
 
 ### Multi-Model Consensus Route (`POST /api/v2/predict/all`)
 - **Combined Sequential Runtime**: ~297 ms (well below 800 ms requirement)

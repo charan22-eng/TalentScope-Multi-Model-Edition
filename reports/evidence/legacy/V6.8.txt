@@ -1,13 +1,13 @@
 === V6.8 RAW LATENCY PROFILING EVIDENCE ===
 Total Invocations: 100
 Target Model: 'boost' (HistGradientBoostingClassifier)
-Min Latency:      67.78 ms
-p50 Latency:      79.49 ms
-p90 Latency:      92.29 ms
-p95 Latency:      94.07 ms  (Limit: < 300.0 ms -> PASS)
-p99 Latency:     111.28 ms
-Max Latency:     121.21 ms
+Min Latency:      29.29 ms
+p50 Latency:      41.24 ms
+p90 Latency:      57.36 ms
+p95 Latency:      67.05 ms  (Limit: < 300.0 ms -> PASS)
+p99 Latency:      84.28 ms
+Max Latency:     121.45 ms
 
 Individual Latency Measurements (ms):
-93.3, 68.9, 71.6, 84.9, 67.8, 79.3, 73.9, 76.4, 82.6, 82.1, 90.7, 90.2, 86.5, 80.7, 74.7, 68.5, 73.7, 74.5, 82.1, 70.2, 75.9, 88.7, 83.3, 93.1, 86.1, 70.3, 83.7, 70.8, 77.5, 110.5, 72.6, 73.3, 71.8, 85.2, 83.4, 80.0, 87.9, 87.3, 70.4, 73.0, 77.9, 75.1, 78.4, 71.9, 75.6, 93.2, 84.0, 88.3, 86.0, 73.5
+35.7, 35.5, 33.8, 35.2, 35.0, 37.4, 42.9, 43.2, 40.4, 33.8, 35.0, 34.1, 35.7, 32.4, 32.0, 40.3, 35.1, 41.3, 62.2, 38.0, 42.1, 36.3, 50.1, 68.0, 67.0, 53.9, 48.6, 53.6, 47.2, 52.6, 57.7, 52.7, 56.5, 50.8, 48.6, 52.2, 49.6, 52.0, 51.4, 75.9, 52.2, 83.9, 46.1, 63.6, 79.2, 46.4, 60.5, 40.3, 46.8, 40.5
 ... (truncated remaining 50 measurements)

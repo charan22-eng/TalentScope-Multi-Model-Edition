@@ -6,71 +6,71 @@ import { Sliders, RotateCcw } from 'lucide-react';
 const PRESETS: Record<string, Record<string, number>> = {
   Balanced: {
     macro_f1: 0.25,
-    accuracy: 0.15,
-    qwk: 0.15,
-    ece: 0.10,
-    extreme_error: 0.10,
-    disparity_ratio: 0.05,
-    noise_drop: 0.05,
-    p95_latency: 0.05,
-    explain_score: 0.10,
+    qwk: 0.10,
+    calibration: 0.10,
+    robustness: 0.10,
+    fairness: 0.10,
+    stability: 0.05,
+    latency: 0.05,
+    train_cost: 0.05,
+    explainability: 0.20,
   },
   'High Accuracy': {
     macro_f1: 0.40,
-    accuracy: 0.30,
     qwk: 0.20,
-    ece: 0.02,
-    extreme_error: 0.03,
-    disparity_ratio: 0.01,
-    noise_drop: 0.01,
-    p95_latency: 0.01,
-    explain_score: 0.02,
+    calibration: 0.10,
+    robustness: 0.10,
+    fairness: 0.05,
+    stability: 0.05,
+    latency: 0.02,
+    train_cost: 0.01,
+    explainability: 0.07,
   },
   'Interpretability First': {
     macro_f1: 0.15,
-    accuracy: 0.10,
-    qwk: 0.10,
-    ece: 0.05,
-    extreme_error: 0.05,
-    disparity_ratio: 0.05,
-    noise_drop: 0.05,
-    p95_latency: 0.05,
-    explain_score: 0.40,
+    qwk: 0.05,
+    calibration: 0.10,
+    robustness: 0.05,
+    fairness: 0.10,
+    stability: 0.05,
+    latency: 0.05,
+    train_cost: 0.05,
+    explainability: 0.40,
   },
   'Low Latency': {
     macro_f1: 0.15,
-    accuracy: 0.15,
     qwk: 0.10,
-    ece: 0.05,
-    extreme_error: 0.05,
-    disparity_ratio: 0.05,
-    noise_drop: 0.05,
-    p95_latency: 0.35,
-    explain_score: 0.05,
+    calibration: 0.05,
+    robustness: 0.05,
+    fairness: 0.05,
+    stability: 0.05,
+    latency: 0.35,
+    train_cost: 0.15,
+    explainability: 0.05,
   },
   'Fair & Robust': {
     macro_f1: 0.15,
-    accuracy: 0.10,
     qwk: 0.10,
-    ece: 0.10,
-    extreme_error: 0.10,
-    disparity_ratio: 0.25,
-    noise_drop: 0.15,
-    p95_latency: 0.02,
-    explain_score: 0.03,
+    calibration: 0.10,
+    robustness: 0.20,
+    fairness: 0.25,
+    stability: 0.05,
+    latency: 0.02,
+    train_cost: 0.03,
+    explainability: 0.10,
   },
 };
 
 const CRITERIA_LABELS: Record<string, string> = {
   macro_f1: 'Macro-F1 Score',
-  accuracy: 'Holdout Accuracy',
   qwk: 'Quadratic Weighted Kappa',
-  ece: 'Calibration Fidelity (Low ECE)',
-  extreme_error: 'Safety (Low Extreme Errors)',
-  disparity_ratio: 'Fairness (Audit Disparity Ratio)',
-  noise_drop: 'Noise Robustness (5% Perturbation)',
-  p95_latency: 'Inference Speed (Low Latency)',
-  explain_score: 'Explainability Architecture Tier',
+  calibration: 'Calibration Fidelity',
+  robustness: 'Noise Robustness',
+  fairness: 'Fairness Audit Ratio',
+  stability: 'Prediction Stability',
+  latency: 'Inference Speed (Low Latency)',
+  train_cost: 'Training Cost',
+  explainability: 'Explainability Architecture Tier',
 };
 
 export function ArenaPriorities() {
@@ -142,7 +142,7 @@ export function ArenaPriorities() {
                   gap: '4px',
                   background: 'none',
                   border: 'none',
-                  color: 'var(--primary-color)',
+                  color: 'var(--primary-text)',
                   fontSize: '0.8rem',
                   cursor: 'pointer',
                 }}
@@ -230,7 +230,7 @@ export function ArenaPriorities() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.2rem' }}>
-                Winner: {result?.winner.toUpperCase()}
+                Winner: {result?.winner ? result.winner.toUpperCase() : '—'}
               </h3>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                 Rule: {result?.decision_rule || 'ADR-009 Multi-Criteria Decision Analysis'}
@@ -282,7 +282,7 @@ export function ArenaPriorities() {
                     >
                       <td style={{ padding: '0.6rem', fontWeight: 600 }}>#{m.rank}</td>
                       <td style={{ padding: '0.6rem' }}>
-                        <ModelChip modelKey={m.key} size="sm" showChampionBadge={m.key === 'rf'} />
+                        <ModelChip modelKey={m.key} size="sm" showChampionBadge={m.key === 'boost'} />
                       </td>
                       <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
                         {m.composite_score.toFixed(3)}
@@ -294,7 +294,7 @@ export function ArenaPriorities() {
                               style={{
                                 width: `${probPct}%`,
                                 height: '100%',
-                                background: m.key === result?.winner ? '#D55E00' : 'var(--primary-color)',
+                                background: m.key === result?.winner ? 'var(--accent-warm-action)' : 'var(--primary-action)',
                                 transition: 'width 0.3s ease',
                               }}
                             />

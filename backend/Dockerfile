@@ -16,14 +16,15 @@ COPY backend/requirements.txt .
 RUN uv pip install --system -r requirements.txt
 RUN uv pip install --system sqlalchemy alembic passlib bcrypt pyjwt python-multipart "python-jose[cryptography]" scikit-learn pandas scipy reportlab slowapi
 
-COPY backend /app/backend
-COPY ml /app/ml
-COPY artifacts /app/artifacts
-COPY data/processed /app/data/processed
-
 # Non-root user for security hardening
-RUN useradd -u 1000 -m -s /bin/bash appuser && \
-    chown -R appuser:appuser /app
+RUN useradd -u 1000 -m -s /bin/bash appuser
+
+COPY --chown=appuser:appuser backend /app/backend
+COPY --chown=appuser:appuser ml /app/ml
+COPY --chown=appuser:appuser artifacts /app/artifacts
+COPY --chown=appuser:appuser data/processed /app/data/processed
+COPY --chown=appuser:appuser data/nonlinear /app/data/nonlinear
+
 USER appuser
 
 EXPOSE 8000

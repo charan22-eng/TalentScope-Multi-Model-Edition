@@ -37,7 +37,7 @@ Response JSON Payload:
     "Medium": 0.48906730955200367,
     "High": 0.5052109436216216
   },
-  "stability_score": 0.0161,
+  "stability_score": 1.61,
   "performance_index": 67.48
 }
 

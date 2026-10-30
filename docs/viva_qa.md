@@ -11,7 +11,7 @@ This document compiles the foundational theoretical, statistical, architectural,
 1. Every resample draws the exact same index set $S_b$ for both Model A and Model B.
 2. For each replicate $b$, we compute the paired difference: $\Delta_b = \text{MacroF1}(A, S_b) - \text{MacroF1}(B, S_b)$.
 3. Stratification ensures that the exact class proportions (Low/Medium/High) are preserved in every resample.
-4. If the 95% bootstrap confidence interval of $\Delta_b$ contains zero, we cannot assert that Model A is statistically superior to Model B at $\alpha=0.05$. In our benchmark, the 95% difference CI between Random Forest and Boost is $[-0.012, +0.024]$, establishing that the champion's lead is **marginal** rather than statistically dominant.
+4. If the 95% bootstrap confidence interval of $\Delta_b$ contains zero, we cannot assert that Model A is statistically superior to Model B at $\alpha=0.05$. In our benchmark, the 95% difference CI between Gradient Boosting and SVM is $[-0.0232, +0.0012]$, establishing that the difference spans zero and the two top models are in statistical parity on macro-F1.
 
 ### Q2: What is the McNemar test, and why was the Holm-Bonferroni correction necessary across 21 pairs?
 **Answer**: 
@@ -33,13 +33,12 @@ $$P(Y_{n+1} \in C(X_{n+1})) \ge 1 - \alpha$$
 
 ## 2. Multi-Criteria Champion Selection (ADR-009)
 
-### Q4: SVM achieved the highest raw accuracy (81.6%). Why was Random Forest selected as the Champion over SVM?
+### Q4: SVM achieved the highest raw accuracy (81.48%) and macro-F1 (0.8164). Why was Gradient Boosting selected as the Champion over SVM under the Balanced Profile?
 **Answer**:
-Under Multi-Criteria Decision Analysis (ADR-009), champion selection is governed by total composite utility across five standardized dimensions, rather than raw accuracy alone:
-1. **Calibration (ECE)**: Random Forest achieved an Expected Calibration Error of $0.0133$, compared to SVM's $0.0270$. In HR decision support, well-calibrated probabilities are critical to prevent overconfident erroneous band placements.
-2. **Explainability**: Random Forest provides native tree paths, Gini feature importances, and partial tree attributions. SVM with RBF kernel is a "black box" requiring surrogate kernel approximations.
-3. **Inference Latency & Cost**: Random Forest single-row latency is $12.4\text{ ms}$, whereas RBF SVM dual-evaluation scales with support vectors.
-4. Composite MCDA score under the **Balanced Profile** ranks Random Forest #1 with composite utility $0.842$, while SVM ranks #3 ($0.781$).
+Under Multi-Criteria Decision Analysis (ADR-009 / ADR-014), champion selection is governed by total composite utility across five standardized dimensions, rather than raw accuracy alone:
+1. **Calibration (ECE)**: Calibrated Gradient Boosting achieved an Expected Calibration Error of $0.0126$ under multinomial temperature scaling, providing highly reliable probability distributions.
+2. **Explainability & Latency**: Gradient Boosting supports partial native feature attributions and monotonic constraints, whereas SVM with RBF kernel is a post-hoc black box (`explain_score` 0.3 vs 0.6).
+3. **MCDA Balanced Profile Score**: Gradient Boosting achieved composite utility $0.6665$ (Rank #1, rank-1 probability $0.555$), narrowly edging out SVM ($0.6575$). Under the "Accuracy-first" profile, SVM wins, illustrating that optimal model choice depends on organizational trade-offs (decision strength is classified as `none`).
 
 ### Q5: What does the "Sensitivity Finding: No Model Dominates Everywhere" mean?
 **Answer**:
@@ -82,7 +81,7 @@ $$\text{PSI} = \sum_{k=1}^{B} \left( \text{Actual}_k - \text{Expected}_k \right)
 
 ### Q9: What is "Shadow Mode" in TalentScope?
 **Answer**:
-When an inference request is processed by the active champion (`rf`), the system concurrently executes runner-up model `boost` in background shadow mode:
-- Both predictions are recorded in `predictions` table (`is_shadow=1` for boost).
+When an inference request is processed by the active champion (`boost`), the system concurrently executes runner-up model `svm` in background shadow mode:
+- Both predictions are recorded in `predictions` table (`is_shadow=1` for svm).
 - Disagreements between champion and shadow model are tracked in real-time.
 - If shadow disagreement exceeds acceptable operational thresholds or champion stability degrades, the system surfaces candidate replacement telemetry for human administrator review.

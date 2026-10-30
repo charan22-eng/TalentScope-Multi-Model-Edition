@@ -282,7 +282,10 @@ def test_l4_retrain_and_champion_lifecycle():
         if orig_manifest is not None:
             manifest_path.write_bytes(orig_manifest)
         from backend.app.api_v2 import default_loader
-        default_loader._manifest = None
+        if hasattr(default_loader, "reset_cache"):
+            default_loader.reset_cache()
+        else:
+            default_loader._manifest = None
 
 
 # ==============================================================================

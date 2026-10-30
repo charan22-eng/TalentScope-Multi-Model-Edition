@@ -7,10 +7,14 @@
 - PostgreSQL (or use SQLite/fallback)
 
 ## Installation
-Run a single setup command:
+For a review demo, run the setup command from the repository root:
 ```bash
-make setup
+uv run python scripts/demo_setup.py
 ```
+
+This creates a local `.env`, chooses an installed Ollama model when available,
+checks the governed V2 artifacts, and seeds the SQLite database. It does not
+download models.
 
 ## Running Locally
 **Terminal 1 (Backend API)**
@@ -21,9 +25,15 @@ API runs on `http://localhost:8000`
 
 **Terminal 2 (Frontend Web App)**
 ```bash
-make web
+cd frontend
+npm run dev
 ```
 Web app runs on `http://localhost:5173`
+
+**Terminal 3 (review smoke test)**
+```bash
+uv run python scripts/demo_smoke.py
+```
 
 ## Testing
 ```bash
@@ -38,5 +48,7 @@ make lint
 
 ## Troubleshooting
 - If `uv` fails to resolve, make sure it is updated.
-- Verify environment variables using `verify-env` (to be added).
-- Check `project/qa-evidence/` for failed playwright screenshots.
+- If Ollama is offline, the core prediction flow still works and LLM verdicts
+  use the deterministic template fallback.
+- Check `GET http://localhost:8000/ready` before opening the frontend.
+- Check `project/qa-evidence/` for failed Playwright screenshots.

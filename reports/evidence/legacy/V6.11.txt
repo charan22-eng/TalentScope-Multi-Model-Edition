@@ -5,7 +5,7 @@ Response Points Count: 2000 (Must be <= 2000 -> PASS)
 
 2. GET /viz/surface?size=80
 Status Code: 200 OK (Allowed)
-Response Body Sample: {"status":"stubbed"}...
+Response Body Sample: {"feature_x":"attendance","feature_y":"projects_completed","grid_size":40,"x_range":[69.4,100.0],"y_range":[0.0,20.0],"g...
 
 3. GET /viz/surface?size=81
 Status Code: 400 Bad Request (Rejected)

@@ -3,7 +3,7 @@ import { apiV2, type EmployeeFeatures, type PredictAllResponse, type ModelPredic
 import { MODEL_TOKENS } from '../lib/tokens';
 import { ModelChip } from '../components/ui/ModelChip';
 import { ClassChip } from '../components/ui/ClassChip';
-import { AlertTriangle, CheckCircle, Info, Sliders, Sparkles, User, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle, Cpu, Info, Sliders, Sparkles, Target, User, Users, Trophy } from 'lucide-react';
 
 const DEPARTMENTS = ['Sales', 'Engineering', 'HR', 'Marketing', 'Finance'];
 const LEVELS = ['Junior', 'Mid', 'Senior', 'Lead'];
@@ -130,7 +130,7 @@ export default function PredictPage() {
                 modelKey={k}
                 active={selectedModel === k}
                 onClick={() => setSelectedModel(k)}
-                showChampionBadge={true}
+                showChampionBadge={k === 'boost'}
               />
             ))}
           </div>
@@ -284,7 +284,7 @@ export default function PredictPage() {
                 min={1}
                 max={5}
                 disabled={advisorMode}
-                value={form.prev_score}
+                value={form.prev_score ?? ''}
                 onChange={e => handleInputChange('prev_score', parseInt(e.target.value))}
                 required
                 style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
@@ -406,7 +406,7 @@ export default function PredictPage() {
               )}
 
               {/* Model Prediction Grid */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {allResult.models_evaluated.map((key) => {
                   const pred = allResult.predictions[key];
                   const token = MODEL_TOKENS[key];
@@ -415,34 +415,40 @@ export default function PredictPage() {
                   return (
                     <div
                       key={key}
+                      className="glass-card"
                       style={{
-                        padding: '0.75rem 1rem',
-                        background: 'var(--bg-primary)',
-                        borderRadius: 'var(--radius)',
-                        border: pred.is_champion ? '2px solid #D55E00' : '1px solid var(--border-color)',
+                        padding: '0.85rem 1.15rem',
+                        border: pred.is_champion ? '2px solid var(--champion-gold)' : '1px solid var(--border-color)',
+                        boxShadow: pred.is_champion ? '0 0 16px var(--champion-glow)' : 'var(--shadow-sm)',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '0.4rem',
+                        gap: '0.5rem',
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ color: token?.color, fontWeight: 'bold' }}>{token?.marker}</span>
-                          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{token?.name}</span>
+                          <span style={{ color: token?.color, fontWeight: 'bold', fontSize: '1rem' }}>{token?.marker}</span>
+                          <span style={{ fontWeight: pred.is_champion ? 800 : 600, fontSize: '0.925rem' }}>{token?.name}</span>
+                          {pred.is_champion && (
+                            <span className="badge-pill badge-champion" style={{ fontSize: '0.65rem', padding: '0.1rem 0.5rem' }}>
+                              <Trophy size={11} />
+                              CHAMPION
+                            </span>
+                          )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                           <ClassChip status={pred.top_class} />
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          <span style={{ fontSize: '0.825rem', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-secondary)' }}>
                             ({(pred.probabilities[pred.top_class] * 100).toFixed(0)}%)
                           </span>
                         </div>
                       </div>
 
                       {/* Small probability bar */}
-                      <div style={{ display: 'flex', height: '6px', borderRadius: '3px', overflow: 'hidden', background: 'var(--border-color)' }}>
-                        <div style={{ width: `${pred.probabilities.Low * 100}%`, background: '#ef4444' }} title={`Low: ${(pred.probabilities.Low * 100).toFixed(1)}%`} />
-                        <div style={{ width: `${pred.probabilities.Medium * 100}%`, background: '#f59e0b' }} title={`Medium: ${(pred.probabilities.Medium * 100).toFixed(1)}%`} />
-                        <div style={{ width: `${pred.probabilities.High * 100}%`, background: '#10b981' }} title={`High: ${(pred.probabilities.High * 100).toFixed(1)}%`} />
+                      <div style={{ display: 'flex', height: '7px', borderRadius: '4px', overflow: 'hidden', background: 'var(--border-color)' }}>
+                        <div style={{ width: `${pred.probabilities.Low * 100}%`, background: '#ef4444', transition: 'width 0.3s ease' }} title={`Low: ${(pred.probabilities.Low * 100).toFixed(1)}%`} />
+                        <div style={{ width: `${pred.probabilities.Medium * 100}%`, background: '#f59e0b', transition: 'width 0.3s ease' }} title={`Medium: ${(pred.probabilities.Medium * 100).toFixed(1)}%`} />
+                        <div style={{ width: `${pred.probabilities.High * 100}%`, background: '#10b981', transition: 'width 0.3s ease' }} title={`High: ${(pred.probabilities.High * 100).toFixed(1)}%`} />
                       </div>
                     </div>
                   );
@@ -511,17 +517,60 @@ export default function PredictPage() {
 
           {/* Explanation Section following chosen model */}
           {explanation && (
-            <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h4 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Sparkles size={16} />
-                  Model Explainability
-                </h4>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginTop: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-color)' }}>
+                    <Sparkles size={18} />
+                  </div>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>Model Explainability</h4>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      Contextual AI rationale & local feature attributions
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {explanation.llm_metadata?.source === 'ollama' ? (
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        padding: '3px 9px',
+                        borderRadius: '9999px',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                        color: '#10b981',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        fontWeight: 600,
+                      }}
+                      title={`Processed by local Ollama model: ${explanation.llm_metadata.model} in ${explanation.llm_metadata.latency_ms}ms`}
+                    >
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                      Ollama: {explanation.llm_metadata.model}
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        padding: '3px 9px',
+                        borderRadius: '9999px',
+                        background: 'var(--bg-primary)',
+                        border: '1px solid var(--border-color)',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Heuristic Engine
+                    </span>
+                  )}
+
                   <span
                     style={{
                       fontSize: '0.7rem',
-                      padding: '2px 8px',
+                      padding: '3px 8px',
                       borderRadius: '9999px',
                       background: 'var(--primary-color)',
                       color: '#ffffff',
@@ -531,62 +580,198 @@ export default function PredictPage() {
                   >
                     Tier: {explanation.explanation_type}
                   </span>
-                  {/* Audience Toggle */}
-                  <button
-                    type="button"
-                    onClick={() => setAudience(audience === 'hr' ? 'ds' : 'hr')}
-                    style={{
-                      fontSize: '0.75rem',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Audience: {audience.toUpperCase()}
-                  </button>
+
+                  {/* Audience Segmented Control */}
+                  <div style={{ display: 'inline-flex', background: 'var(--bg-primary)', borderRadius: '6px', padding: '2px', border: '1px solid var(--border-color)' }}>
+                    <button
+                      type="button"
+                      onClick={() => setAudience('hr')}
+                      style={{
+                        fontSize: '0.75rem',
+                        padding: '3px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        background: audience === 'hr' ? 'var(--primary-color)' : 'transparent',
+                        color: audience === 'hr' ? '#ffffff' : 'var(--text-secondary)',
+                        fontWeight: audience === 'hr' ? 600 : 400,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      HR Persona
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAudience('ds')}
+                      style={{
+                        fontSize: '0.75rem',
+                        padding: '3px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        background: audience === 'ds' ? 'var(--primary-color)' : 'transparent',
+                        color: audience === 'ds' ? '#ffffff' : 'var(--text-secondary)',
+                        fontWeight: audience === 'ds' ? 600 : 400,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      Data Science
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Natural language summary */}
-              <p style={{ fontSize: '0.9rem', lineHeight: 1.5, color: 'var(--text-primary)', margin: '0 0 1rem 0' }}>
-                {audience === 'hr' ? explanation.summary_hr : explanation.summary_ds}
-              </p>
+              {/* Natural language summary card */}
+              <div
+                style={{
+                  background: 'var(--bg-primary)',
+                  padding: '1.1rem 1.25rem',
+                  borderRadius: 'var(--radius)',
+                  border: '1px solid var(--border-color)',
+                  marginBottom: '1rem',
+                  fontSize: '0.92rem',
+                  lineHeight: 1.6,
+                  color: 'var(--text-primary)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary-color)' }}>
+                  {audience === 'hr' ? <Users size={14} /> : <Cpu size={14} />}
+                  <span>{audience === 'hr' ? 'Executive & Talent Management Rationale' : 'Algorithmic Decision & Calibration Review'}</span>
+                </div>
+                <div style={{ whiteSpace: 'pre-line' }}>
+                  {audience === 'hr' ? explanation.summary_hr : explanation.summary_ds}
+                </div>
+              </div>
+
+              {/* Key Decision Drivers Chips */}
+              {explanation.key_drivers && explanation.key_drivers.length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Key Decision Drivers
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {explanation.key_drivers.map((drv, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          fontSize: '0.78rem',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          background: 'rgba(59, 130, 246, 0.08)',
+                          border: '1px solid rgba(59, 130, 246, 0.25)',
+                          color: 'var(--text-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                        }}
+                      >
+                        <Target size={13} style={{ color: 'var(--primary-color)' }} />
+                        {drv}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actionable Guidance Coaching Callout */}
+              {explanation.actionable_guidance && (
+                <div
+                  style={{
+                    padding: '0.85rem 1rem',
+                    borderRadius: 'var(--radius)',
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                    marginBottom: '1rem',
+                    fontSize: '0.85rem',
+                    lineHeight: 1.5,
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  <strong style={{ color: '#f59e0b', display: 'block', marginBottom: '0.2rem' }}>
+                    Actionable Guidance:
+                  </strong>
+                  {explanation.actionable_guidance}
+                </div>
+              )}
 
               {/* Counterfactual actionable recommendations */}
               {explanation.counterfactuals && explanation.counterfactuals.length > 0 && (
-                <div style={{ marginTop: '1rem' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem', color: 'var(--primary-color)' }}>
+                <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
                     Actionable Improvement Pathways:
                   </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.5rem' }}>
                     {explanation.counterfactuals.map((cf, idx) => (
-                      <li key={idx} style={{ marginBottom: '0.25rem' }}>
-                        Increase <strong>{cf.feature}</strong> from {cf.original_value} to {cf.proposed_value} (+{cf.delta}) to reach band <strong>{cf.target_class}</strong>.
-                      </li>
+                      <div
+                        key={idx}
+                        style={{
+                          padding: '0.6rem 0.8rem',
+                          background: 'var(--bg-primary)',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-color)',
+                          fontSize: '0.8rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                        }}
+                      >
+                        <ArrowRight size={14} style={{ color: 'var(--primary-color)', flexShrink: 0 }} />
+                        <div>
+                          Increase <strong>{cf.feature.replace('_', ' ')}</strong> from {cf.original_value} to{' '}
+                          <strong>{cf.proposed_value}</strong> to reach band{' '}
+                          <ClassChip status={cf.target_class as 'High' | 'Medium' | 'Low'} />
+                        </div>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               )}
 
               {/* Similar cases view (labelled appropriately) */}
               {explanation.similar_cases && explanation.similar_cases.length > 0 && (
                 <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                    <Info size={14} />
-                    <span>Similar Historical Cases</span>
-                    {explanation.model_key !== 'knn' && (
-                      <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontStyle: 'italic' }}>
-                        (Note: not how this model decided)
-                      </span>
-                    )}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      <Info size={14} />
+                      <span>Similar Historical Cases</span>
+                      {explanation.model_key !== 'knn' && (
+                        <span style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 'normal', fontStyle: 'italic' }}>
+                          (Note: not how this model decided)
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                      k = {explanation.similar_cases.length} nearest training neighbors
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.5rem' }}>
                     {explanation.similar_cases.map(c => (
-                      <div key={c.id} style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-primary)', borderRadius: '4px', fontSize: '0.75rem' }}>
-                        Case #{c.id} (dist: {c.distance.toFixed(2)}) → <ClassChip status={c.predicted_band as 'High'|'Medium'|'Low'|'Unknown'} />
+                      <div
+                        key={c.id}
+                        style={{
+                          padding: '0.6rem 0.75rem',
+                          background: 'var(--bg-primary)',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-color)',
+                          fontSize: '0.78rem',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Case #{c.id}</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                            dist: {c.distance.toFixed(2)}
+                          </span>
+                        </div>
+                        {c.department && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                            {c.department} &bull; {c.job_level}
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Band:</span>
+                          <ClassChip status={c.predicted_band as 'High'|'Medium'|'Low'|'Unknown'} />
+                        </div>
                       </div>
                     ))}
                   </div>

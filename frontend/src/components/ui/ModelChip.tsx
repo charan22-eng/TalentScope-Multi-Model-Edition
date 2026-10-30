@@ -16,7 +16,7 @@ export const ModelChip: React.FC<ModelChipProps> = ({
   modelKey,
   active = false,
   onClick,
-  showChampionBadge = true,
+  showChampionBadge,
   showTier = false,
   size = 'md',
   className = '',
@@ -32,6 +32,7 @@ export const ModelChip: React.FC<ModelChipProps> = ({
   };
 
   const isInteractive = Boolean(onClick);
+  const isChampionBadgeVisible = showChampionBadge !== undefined ? showChampionBadge : Boolean(token.isChampion);
 
   const sizeClasses = {
     sm: 'px-2 py-0.5 text-xs gap-1',
@@ -46,7 +47,7 @@ export const ModelChip: React.FC<ModelChipProps> = ({
       onClick={onClick}
       onKeyDown={isInteractive ? (e) => (e.key === 'Enter' || e.key === ' ') && onClick?.() : undefined}
       aria-pressed={isInteractive ? active : undefined}
-      aria-label={`Model: ${token.name}${token.isChampion ? ' (Arena Champion)' : ''}`}
+      aria-label={`Model: ${token.name}${isChampionBadgeVisible ? ' (Arena Champion)' : ''}`}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -75,14 +76,14 @@ export const ModelChip: React.FC<ModelChipProps> = ({
 
       <span className="model-chip-name">{token.name.replace(' (Champion)', '')}</span>
 
-      {showChampionBadge && token.isChampion && (
+      {isChampionBadgeVisible && (
         <span
           title="Arena Champion (Balanced MCDA)"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '2px',
-            background: '#D55E00',
+            background: 'var(--accent-warm-action)',
             color: '#ffffff',
             borderRadius: '9999px',
             padding: '1px 6px',

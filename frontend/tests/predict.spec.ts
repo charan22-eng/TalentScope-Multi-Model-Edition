@@ -1,54 +1,33 @@
 import { test, expect } from '@playwright/test';
+import { loginAsAdmin } from './auth';
 
 test.describe('Predict Flow', () => {
   test('User can run a prediction and advisor locks non-actionable features', async ({ page }) => {
-    // We mock the API to ensure stability, but the prompt says "e2e tests that mock the API entirely" is a red flag.
-    // However, for the pipeline logic, we might need the actual API running. We'll assume the API is up.
-    // If not, we will just intercept it for safety.
-    
-    // Intercept to avoid actually requiring the backend if it's not running
-    
-    await page.route('http://localhost:8000/predict', async route => {
-      if (route.request().method() === 'POST') {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            prediction: ['High'],
-            confidence: 0.95,
-            probabilities: { 'High': 0.95, 'Low': 0.05 },
-            stability_index: 85.0
-          })
-        });
-      } else {
-        await route.continue();
-      }
-    });
-
+    await loginAsAdmin(page);
     await page.goto('http://localhost:5173/predict');
     
-    await expect(page.getByRole('heading', { name: 'Predict Performance' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'TalentScope Prediction Suite' })).toBeVisible({ timeout: 5000 });
     
     // Default mode, Experience is enabled
-    const expInput = page.getByLabel('Experience Years');
+    const expInput = page.locator('#experience_years');
     await expect(expInput).toBeEnabled();
     
     // Check advisor mode
-    const advisorToggle = page.getByLabel('What-If Advisor Mode');
-    await advisorToggle.check();
+    const advisorToggle = page.getByRole('button', { name: /What-If Advisor: OFF/ });
+    await advisorToggle.click();
     
     // Experience should now be disabled (non-actionable)
     await expect(expInput).toBeDisabled();
     
     // Attendance should still be actionable
-    const attInput = page.getByLabel('Attendance (%)');
+    const attInput = page.locator('#attendance');
     await expect(attInput).toBeEnabled();
     
     // Submit
-    await page.getByRole('button', { name: 'Predict' }).click();
+    await page.getByRole('button', { name: 'Run All 7 Models' }).click();
     
     // Verify result
-    await expect(page.getByText('Confidence: 95.0%')).toBeVisible();
-    await expect(page.getByText('Stability Index: 85.0 / 100')).toBeVisible();
+    await expect(page.getByRole('heading', { name: '7-Model Consensus Arena' })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Model Agreement Meter')).toBeVisible();
   });
 });

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/v1';
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN || 'http://localhost:8000';
+const API_URL = `${API_ORIGIN.replace(/\/$/, '')}/api/v1`;
 
 export interface PredictionRequest {
   attendance: number;
@@ -29,9 +30,14 @@ export interface LoginResponse {
   token_type: string;
 }
 
+import { ensureAuthToken } from './lib/auth-bootstrap';
+
 // Interceptor to add auth token
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+axios.interceptors.request.use(async (config) => {
+  let token = localStorage.getItem('token');
+  if (!token) {
+    token = await ensureAuthToken();
+  }
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }

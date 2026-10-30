@@ -30,6 +30,18 @@ class ArtifactLoader:
         self._manifest: Optional[Dict[str, Any]] = None
         self._loaded_models: Dict[str, Any] = {}
         self._loaded_metadata: Dict[str, Any] = {}
+        self._loaded_comparisons: Dict[str, Dict[str, Any]] = {}
+        self._loaded_champion: Optional[Dict[str, Any]] = None
+        self._loaded_dataset_meta: Optional[Dict[str, Any]] = None
+
+    def reset_cache(self) -> None:
+        """Clear cached in-memory manifests, models, and JSON payloads."""
+        self._manifest = None
+        self._loaded_models.clear()
+        self._loaded_metadata.clear()
+        self._loaded_comparisons.clear()
+        self._loaded_champion = None
+        self._loaded_dataset_meta = None
 
     @property
     def manifest(self) -> Dict[str, Any]:
@@ -108,22 +120,33 @@ class ArtifactLoader:
 
     def load_comparison_json(self, name: str) -> Dict[str, Any]:
         """Load comparison JSON (leaderboard, pairwise, mcda, etc.) with hash verification."""
+        if not hasattr(self, "_loaded_comparisons"):
+            self._loaded_comparisons = {}
+        if name in self._loaded_comparisons:
+            return self._loaded_comparisons[name]
+
         rel_path = f"comparison/{name}.json" if not name.endswith(".json") else f"comparison/{name}"
         self.verify_file(rel_path)
         with open(self.root_dir / rel_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        self._loaded_comparisons[name] = data
+        return data
 
     def load_champion(self) -> Dict[str, Any]:
         """Load champion.json with hash verification."""
-        self.verify_file("champion.json")
-        with open(self.root_dir / "champion.json", "r", encoding="utf-8") as f:
-            return json.load(f)
+        if not hasattr(self, "_loaded_champion") or self._loaded_champion is None:
+            self.verify_file("champion.json")
+            with open(self.root_dir / "champion.json", "r", encoding="utf-8") as f:
+                self._loaded_champion = json.load(f)
+        return self._loaded_champion
 
     def load_dataset_meta(self) -> Dict[str, Any]:
         """Load dataset_meta.json with hash verification."""
-        self.verify_file("dataset_meta.json")
-        with open(self.root_dir / "dataset_meta.json", "r", encoding="utf-8") as f:
-            return json.load(f)
+        if not hasattr(self, "_loaded_dataset_meta") or self._loaded_dataset_meta is None:
+            self.verify_file("dataset_meta.json")
+            with open(self.root_dir / "dataset_meta.json", "r", encoding="utf-8") as f:
+                self._loaded_dataset_meta = json.load(f)
+        return self._loaded_dataset_meta
 
 
 # Global default instance

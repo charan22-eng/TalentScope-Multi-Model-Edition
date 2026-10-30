@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ModelChip } from '../components/ui/ModelChip';
 import { AlertTriangle, Play, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { apiV2 } from '../lib/api-client-v2';
 
 const MODEL_KEYS = ['rf', 'boost', 'dt', 'knn', 'svm', 'logreg', 'linreg'];
 
@@ -9,6 +10,7 @@ export default function ModelLabPage() {
   const [profile, setProfile] = useState<'fast' | 'standard'>('fast');
   const [hyperparamTuning, setHyperparamTuning] = useState<boolean>(true);
   const [training, setTraining] = useState<boolean>(false);
+  const [trainingError, setTrainingError] = useState<string | null>(null);
   const [tunedResult, setTunedResult] = useState<{
     model: string;
     macroF1: number;
@@ -17,57 +19,41 @@ export default function ModelLabPage() {
     trainTime: number;
   } | null>(null);
 
-  const handleSimulateRetrain = () => {
+  const handleSimulateRetrain = async () => {
     setTraining(true);
     setTunedResult(null);
-    setTimeout(() => {
-      // Simulate server-side fast tuning run adhering to inner CV protocol
-      const baselineF1: Record<string, number> = {
-        rf: 0.655,
-        boost: 0.651,
-        dt: 0.612,
-        knn: 0.601,
-        svm: 0.628,
-        logreg: 0.589,
-        linreg: 0.582,
-      };
-
-      const base = baselineF1[targetModel] || 0.600;
-      // Slight delta representing candidate exploration
-      const delta = (Math.random() * 0.008) - 0.003;
+    setTrainingError(null);
+    try {
+      const result = await apiV2.triggerRetrain(profile);
       setTunedResult({
-        model: targetModel,
-        macroF1: Number((base + delta).toFixed(3)),
-        accuracy: Number((0.68 + delta).toFixed(3)),
-        cvStd: 0.012,
-        trainTime: profile === 'fast' ? 1.4 : 8.5,
+        model: result.proposed_champion || targetModel,
+        macroF1: 0,
+        accuracy: 0,
+        cvStd: 0,
+        trainTime: 0,
       });
+    } catch (error) {
+      setTrainingError(error instanceof Error ? error.message : 'Retrain request failed');
+    } finally {
       setTraining(false);
-    }, 1200);
+    }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem 0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem 0' }}>
       {/* Header Banner */}
-      <div style={{ background: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Model Lab: Architecture Tuning Sandbox</h1>
-            <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800 }}>Model Lab: Architecture Tuning Sandbox</h1>
+            <p style={{ margin: '0.35rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
               Experiment with hyperparameters, scaling pipelines, and tuning budgets without modifying locked production weights.
             </p>
           </div>
           <span
+            className="badge-pill badge-danger"
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.35rem 0.75rem',
-              borderRadius: '9999px',
-              background: 'rgba(239, 68, 68, 0.15)',
-              border: '1px solid var(--danger-color)',
-              color: 'var(--danger-color)',
-              fontSize: '0.75rem',
+              padding: '0.4rem 0.85rem',
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
@@ -191,10 +177,10 @@ export default function ModelLabPage() {
 
           {tunedResult ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontWeight: 600 }}>
-                <CheckCircle2 size={18} />
-                Experimental Run Complete ({tunedResult.trainTime}s runtime)
-              </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontWeight: 600 }}>
+                  <CheckCircle2 size={18} />
+                  Governed retrain candidate ready; metrics remain in the backend evidence registry.
+                </div>
 
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                 <thead>
@@ -208,29 +194,29 @@ export default function ModelLabPage() {
                 <tbody>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.5rem', fontWeight: 600 }}>Macro-F1 (CV)</td>
-                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>0.655</td>
+                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>—</td>
                     <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>
-                      {tunedResult.macroF1.toFixed(3)}
+                      —
                     </td>
                     <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace', color: tunedResult.macroF1 >= 0.655 ? '#10b981' : '#ef4444' }}>
-                      {(tunedResult.macroF1 - 0.655) >= 0 ? `+${(tunedResult.macroF1 - 0.655).toFixed(3)}` : (tunedResult.macroF1 - 0.655).toFixed(3)}
+                      —
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.5rem', fontWeight: 600 }}>Accuracy</td>
-                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>68.2%</td>
+                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>—</td>
                     <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                      {(tunedResult.accuracy * 100).toFixed(1)}%
+                      —
                     </td>
                     <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                      {((tunedResult.accuracy - 0.682) * 100).toFixed(1)}%
+                      —
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.5rem', fontWeight: 600 }}>Inner CV Std</td>
-                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>±0.014</td>
-                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>±0.012</td>
-                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>-0.002</td>
+                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>—</td>
+                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>—</td>
+                    <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>—</td>
                   </tr>
                 </tbody>
               </table>
@@ -244,6 +230,7 @@ export default function ModelLabPage() {
               Select a target architecture and click "Launch Experimental Tuning" to evaluate performance.
             </div>
           )}
+          {trainingError && <div style={{ marginTop: '1rem', padding: '0.75rem', color: 'var(--danger-color)', border: '1px solid var(--danger-color)', borderRadius: 'var(--radius)' }}>{trainingError}</div>}
         </div>
       </div>
     </div>

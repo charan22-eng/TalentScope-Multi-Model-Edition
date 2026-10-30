@@ -1,8 +1,8 @@
 === V13.3 LOAD TEST EXECUTION LOG ===
 Concurrency: 5 worker threads
 Total Requests: 50
-Total Elapsed Time: 4.48 seconds
-Throughput: 11.17 requests/second
+Total Elapsed Time: 3.20 seconds
+Throughput: 15.63 requests/second
 Errors / Non-200 Responses: 0
-p50 Latency: 443.50 ms
-p95 Latency: 522.16 ms (Target threshold < 800.0 ms -> PASS)
+p50 Latency: 323.25 ms
+p95 Latency: 515.64 ms (Target threshold < 800.0 ms -> PASS)

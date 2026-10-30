@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Dict, Any, Optional
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class EmployeeFeatures(BaseModel):
     attendance: float = Field(..., ge=0.0, le=100.0)
@@ -7,40 +9,44 @@ class EmployeeFeatures(BaseModel):
     training_hours: float = Field(..., ge=0.0, le=1000.0)
     projects_completed: float = Field(..., ge=0.0, le=100.0)
     weekly_hours: float = Field(..., ge=0.0, le=168.0)
-    prev_score: Optional[float] = Field(None, ge=1.0, le=5.0)
+    prev_score: float | None = Field(None, ge=1.0, le=5.0)
     department: str
     job_level: str
-    peer_feedback: Optional[float] = Field(3.5, ge=1.0, le=5.0)
-    tasks_on_time_pct: Optional[float] = Field(80.0, ge=0.0, le=100.0)
-    certifications: Optional[float] = Field(1.0, ge=0.0, le=20.0)
-    
-    model_config = ConfigDict(extra='forbid')
+    peer_feedback: float | None = Field(3.5, ge=1.0, le=5.0)
+    tasks_on_time_pct: float | None = Field(80.0, ge=0.0, le=100.0)
+    certifications: float | None = Field(1.0, ge=0.0, le=20.0)
+
+    model_config = ConfigDict(extra="forbid")
+
 
 class PredictResponse(BaseModel):
-    prediction: List[str]
+    prediction: list[str]
     confidence: float
-    probabilities: Dict[str, float]
+    probabilities: dict[str, float]
     stability_index: float
 
+
 class ExplainResponse(BaseModel):
-    prediction: List[str]
+    prediction: list[str]
     confidence: float
-    neighbors: List[Dict[str, Any]]
-    votes: Dict[str, float]
+    neighbors: list[dict[str, Any]]
+    votes: dict[str, float]
     summary: str
-    attribution: Dict[str, float]
-    counterfactual_path: List[str]
+    attribution: dict[str, float]
+    counterfactual_path: list[str]
+
 
 class BatchPredictResponse(BaseModel):
-    results: List[Optional[PredictResponse]]
-    errors: List[Optional[Dict[str, Any]]]
+    results: list[PredictResponse | None]
+    errors: list[dict[str, Any] | None]
     latency_ms: float
 
 
 # --- v2 Schemas ---
 
+
 class V2PredictRequest(BaseModel):
-    model_key: Optional[str] = "rf"
+    model_key: str | None = "rf"
     features: EmployeeFeatures
 
 
@@ -48,14 +54,14 @@ class V2PredictResponse(BaseModel):
     model_key: str
     predicted_band: str
     confidence: float
-    prediction_set: List[str]
-    probabilities: Dict[str, float]
+    prediction_set: list[str]
+    probabilities: dict[str, float]
     stability_score: float
     performance_index: float
 
 
 class V2PredictAllResponse(BaseModel):
-    predictions: Dict[str, V2PredictResponse]
+    predictions: dict[str, V2PredictResponse]
     consensus_band: str
     agreement_rate: float
     split_decision: bool
@@ -65,9 +71,9 @@ class V2PredictAllResponse(BaseModel):
 
 
 class V2ExplainRequest(BaseModel):
-    model_key: Optional[str] = "rf"
+    model_key: str | None = "rf"
     features: EmployeeFeatures
-    k: Optional[int] = 5
+    k: int | None = 5
 
 
 class V2ExplainResponse(BaseModel):
@@ -75,28 +81,33 @@ class V2ExplainResponse(BaseModel):
     label: str
     explanation_type: str
     predicted_band: str
-    native_explanation: Dict[str, Any]
-    local_attribution: Dict[str, float]
-    counterfactuals: List[Dict[str, Any]]
-    similar_cases: Dict[str, Any]
-    persona_summaries: Dict[str, str]
+    native_explanation: dict[str, Any]
+    local_attribution: dict[str, float]
+    counterfactuals: list[dict[str, Any]]
+    similar_cases: dict[str, Any]
+    persona_summaries: dict[str, str]
+    key_drivers: list[str] | None = None
+    actionable_guidance: str | None = None
+    llm_metadata: dict[str, Any] | None = None
 
 
 class V2MCDARequest(BaseModel):
-    weights: Dict[str, float]
+    weights: dict[str, float]
+    profile: str | None = "Custom"
 
 
 class V2LLMVerdictRequest(BaseModel):
-    mode: Optional[str] = "verdict"
-    audience: Optional[str] = "HR"
-    allow_fallback: Optional[bool] = True
-    evidence_packet: Optional[Dict[str, Any]] = None
+    mode: str | None = "verdict"
+    profile: str | None = "Balanced"
+    audience: str | None = "HR"
+    allow_fallback: bool | None = True
+    evidence_packet: dict[str, Any] | None = None
 
 
 class V2LLMConfigUpdateRequest(BaseModel):
-    provider: Optional[str] = "ollama"
-    model: Optional[str] = "qwen2.5:7b-instruct"
-    base_url: Optional[str] = "http://localhost:11434"
+    provider: str | None = None
+    model: str | None = None
+    base_url: str | None = None
 
 
 class ProblemDetails(BaseModel):
@@ -104,19 +115,19 @@ class ProblemDetails(BaseModel):
     title: str
     status: int
     detail: Any
-    instance: Optional[str] = None
+    instance: str | None = None
 
 
 class V2ReviewDecisionRequest(BaseModel):
     decision_band: int = Field(..., ge=0, le=2)
-    override_reason: Optional[str] = None
-    comments: Optional[str] = None
+    override_reason: str | None = None
+    comments: str | None = None
 
 
 class V2AppealRequest(BaseModel):
     employee_id: str
     reason: str
-    supporting_info: Optional[str] = None
+    supporting_info: str | None = None
 
 
 class V2ConsentRequest(BaseModel):
@@ -127,18 +138,17 @@ class V2ConsentRequest(BaseModel):
 
 class V2DeleteRequest(BaseModel):
     employee_id: str
-    reason: Optional[str] = None
+    reason: str | None = None
 
 
 class V2RetrainRequest(BaseModel):
-    profile: Optional[str] = "fast"
+    profile: str | None = "fast"
 
 
 class V2ApproveChampionRequest(BaseModel):
     champion_key: str
-    version: Optional[str] = "v2.0"
+    version: str | None = "v2.0"
 
 
 class V2FeatureFlagsUpdateRequest(BaseModel):
-    flags: Dict[str, bool]
-
+    flags: dict[str, bool]

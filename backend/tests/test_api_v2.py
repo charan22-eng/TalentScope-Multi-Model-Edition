@@ -57,6 +57,31 @@ def test_v2_models_list():
     assert boost_model["sha256"] != "unknown"
 
 
+def test_v2_dataset_summary_matches_artifacts():
+    resp = client.get("/api/v2/dataset/summary")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert data["dataset"]["name"] == "employees_v2"
+    assert data["dataset"]["semver"] == "2.0.0"
+    assert data["rows_loaded"] == data["dataset"]["total_rows"]
+
+    split = data["split"]
+    assert (
+        split["train"]
+        + split["calibration"]["cal_a"]
+        + split["calibration"]["cal_b"]
+        + split["test"]
+        == data["dataset"]["total_rows"]
+    )
+
+    assert sum(item["count"] for item in data["class_balance"]) == data["rows_loaded"]
+    assert [item["band"] for item in data["class_balance"]] == ["Low", "Medium", "High"]
+
+    assert {f["name"] for f in data["features"]} == set(data["dataset"]["features"])
+    assert data["protected_attributes"] == ["gender", "age_band"]
+
+
 # ==============================================================================
 # 2. Prediction Endpoints & G11 Whitelist Guard
 # ==============================================================================

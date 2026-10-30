@@ -12,27 +12,46 @@ Implements all endpoints defined in Multi-Model Pack Section 6.4:
 - LLM routes: /api/v2/llm/health, /llm/models, /llm/config, /llm/verdict, /llm/verdicts/{id}
 """
 
+import copy
+import csv
+import io
 import json
 import logging
+import os
+import re
 import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, UploadFile, File
-import io
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import JSONResponse, StreamingResponse
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from backend.core.audit import log_audit_event
-from backend.core.security import get_current_user, require_roles, revoke_token, oauth2_scheme, create_access_token
+from backend.core.security import (
+    create_access_token,
+    get_current_user,
+    oauth2_scheme,
+    require_roles,
+    revoke_token,
+)
 from backend.db.database import get_db
 from backend.db.models import (
+    AppealRecord,
     AuditLog,
     ConsentRecord,
     DeletionRequest,
@@ -40,15 +59,16 @@ from backend.db.models import (
     LLMVerdict,
     ModelVersion,
     Prediction,
+    ProtectedAttribute,
     ReviewDecision,
     ReviewItem,
     User,
 )
 from backend.services.drift_service import assess_drift
 from backend.services.pdf_reports import generate_comparison_pdf, generate_employee_pdf
+
 from .schemas import (
     EmployeeFeatures,
-    ProblemDetails,
     V2AppealRequest,
     V2ApproveChampionRequest,
     V2ConsentRequest,
@@ -73,28 +93,30 @@ FEATURE_FLAGS = {
     "conformal_filtering_enabled": True,
 }
 
-from epk.artifacts import default_loader, ModelKeyError
+import hashlib
+
+from epk.artifacts import default_loader
 from epk.explain import (
     compute_performance_index,
     compute_stability_score,
     explain_model_native,
     find_counterfactuals,
     find_similar_cases,
+    generate_ollama_persona_explanations,
     generate_persona_summaries,
     local_attribution,
 )
-import hashlib
-from epk.labels import BANDS, INT_TO_BAND
+from epk.labels import INT_TO_BAND
 from epk.llm.cache import VerdictCache
 from epk.llm.client import LocalLLM, assert_local
 from epk.llm.fallback import generate_template_verdict
 from epk.llm.prompts import (
+    SYSTEM_PROMPT,
     format_user_prompt,
     scan_prompt_for_forbidden_keys,
-    SYSTEM_PROMPT,
 )
 from epk.llm.validator import validate_verdict
-from epk.mcda import PROFILES, run_mcda_pipeline
+from epk.mcda import run_mcda_pipeline
 from epk.models.registry import MODEL_KEYS, get_model_spec
 from epk.uncertainty import get_prediction_set
 
@@ -103,7 +125,7 @@ limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/api/v2", tags=["v2"])
 
 # Allowed comparison topics mapping to JSON files in artifacts/v2/comparison/
-ALLOWED_COMPARISON_TOPICS: Dict[str, str] = {
+ALLOWED_COMPARISON_TOPICS: dict[str, str] = {
     "leaderboard": "leaderboard",
     "curves": "curves",
     "confusion": "confusion",
@@ -119,29 +141,77 @@ ALLOWED_COMPARISON_TOPICS: Dict[str, str] = {
     "conformal": "conformal",
 }
 
-# Runtime config for LLM
+
+# Runtime config for LLM. Keep the default aligned with the local demo setup:
+# llama3.1:latest is installed on the review machine and performed best on the
+# project's structured-evidence benchmark among the available text models.
+def _env_float(*names: str, default: float) -> float:
+    for name in names:
+        value = os.getenv(name)
+        if value is None:
+            continue
+        try:
+            return float(value)
+        except ValueError:
+            continue
+    return default
+
+
+def _env_bool(name: str, default: bool = True) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
 _LLM_CONFIG = {
-    "provider": "ollama",
-    "model": "qwen2.5:7b-instruct",
-    "base_url": "http://localhost:11434",
+    "provider": os.getenv("LLM_PROVIDER", "ollama"),
+    "model": os.getenv("LLM_MODEL", "qwen2.5:3b"),
+    "base_url": os.getenv(
+        "LLM_BASE_URL", os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    ),
+    "enabled": _env_bool("LLM_ENABLED", True),
+    "timeout_s": _env_float("LLM_TIMEOUT_S", "LLM_TIMEOUT_SECONDS", default=120.0),
+    "max_retries": max(0, _env_int("LLM_MAX_RETRIES", 2)),
 }
 
 # Cache for train background data and medians
-_TRAIN_DATA: Optional[pd.DataFrame] = None
-_TRAIN_LABELS: Optional[pd.Series] = None
-_TRAIN_MEDIANS: Optional[pd.Series] = None
+_TRAIN_DATA: pd.DataFrame | None = None
+_TRAIN_LABELS: pd.Series | None = None
+_TRAIN_MEDIANS: pd.Series | None = None
 
 
-def get_train_context():
+def get_train_context() -> tuple[pd.DataFrame, pd.Series, pd.Series]:
     """Load train split features and medians once for fast local explainability."""
     global _TRAIN_DATA, _TRAIN_LABELS, _TRAIN_MEDIANS
     if _TRAIN_DATA is None:
         try:
-            data_file = default_loader.root_dir.parent.parent / "data" / "processed" / "train.csv"
-            if data_file.exists():
-                df = pd.read_csv(data_file)
-                _TRAIN_DATA = df.drop(columns=["performance"], errors="ignore")
-                _TRAIN_LABELS = df["performance"] if "performance" in df.columns else pd.Series(["Medium"] * len(df))
+            root = default_loader.root_dir.parent.parent
+            train_csv = root / "data" / "processed" / "train.csv"
+            dataset_csv = root / "data" / "nonlinear" / "dataset.csv"
+            split_file = root / "data" / "processed" / "split.json"
+
+            if train_csv.exists():
+                df = pd.read_csv(train_csv)
+            elif dataset_csv.exists():
+                df_all = pd.read_csv(dataset_csv)
+                if split_file.exists():
+                    with open(split_file, "r", encoding="utf-8") as f:
+                        s_data = json.load(f)
+                    indices = s_data.get("train_indices", [])
+                    df = df_all.iloc[indices].copy() if indices else df_all.copy()
+                else:
+                    df = df_all.copy()
             else:
                 # Fallback to background sample in pca.json
                 pca_meta = default_loader.root_dir / "explainability" / "pca.json"
@@ -149,8 +219,27 @@ def get_train_context():
                     with open(pca_meta, "r", encoding="utf-8") as f:
                         meta = json.load(f)
                     pts = meta.get("background_points", [])
-                    _TRAIN_DATA = pd.DataFrame(pts)
-                    _TRAIN_LABELS = pd.Series([p.get("band", "Medium") for p in pts])
+                    df = pd.DataFrame(pts)
+                else:
+                    df = pd.DataFrame()
+
+            if not df.empty:
+                _TRAIN_LABELS = (
+                    cast(pd.Series, df["performance"].copy())
+                    if "performance" in df.columns
+                    else pd.Series(["Medium"] * len(df))
+                )
+                _TRAIN_DATA = df.drop(
+                    columns=["performance", "performance_score"], errors="ignore"
+                )
+                # Fill missing numeric values with medians so distances are non-NaN
+                num_cols = _TRAIN_DATA.select_dtypes(include=[np.number]).columns
+                _TRAIN_DATA[num_cols] = _TRAIN_DATA[num_cols].fillna(
+                    _TRAIN_DATA[num_cols].median()
+                )
+            else:
+                _TRAIN_DATA = pd.DataFrame()
+                _TRAIN_LABELS = pd.Series()
         except Exception as e:
             logger.warning(f"Could not load train dataset for explainability: {e}")
             _TRAIN_DATA = pd.DataFrame()
@@ -159,17 +248,23 @@ def get_train_context():
         if _TRAIN_DATA is not None and not _TRAIN_DATA.empty:
             _TRAIN_MEDIANS = _TRAIN_DATA.select_dtypes(include=[np.number]).median()
         else:
-            _TRAIN_MEDIANS = pd.Series({
-                "attendance": 88.0,
-                "experience_years": 4.0,
-                "training_hours": 35.0,
-                "projects_completed": 6.0,
-                "weekly_hours": 40.0,
-                "peer_feedback": 3.6,
-                "tasks_on_time_pct": 82.0,
-                "certifications": 1.0,
-            })
-    return _TRAIN_DATA, _TRAIN_LABELS, _TRAIN_MEDIANS
+            _TRAIN_MEDIANS = pd.Series(
+                {
+                    "attendance": 88.0,
+                    "experience_years": 4.0,
+                    "training_hours": 35.0,
+                    "projects_completed": 6.0,
+                    "weekly_hours": 40.0,
+                    "peer_feedback": 3.6,
+                    "tasks_on_time_pct": 82.0,
+                    "certifications": 1.0,
+                }
+            )
+    return (
+        cast(pd.DataFrame, _TRAIN_DATA),
+        cast(pd.Series, _TRAIN_LABELS),
+        cast(pd.Series, _TRAIN_MEDIANS),
+    )
 
 
 def to_band_str(c: Any) -> str:
@@ -177,7 +272,9 @@ def to_band_str(c: Any) -> str:
     return INT_TO_BAND.get(c, str(c)) if isinstance(c, (int, np.integer)) else str(c)
 
 
-def problem_details(status_code: int, title: str, detail: Any, instance: Optional[str] = None) -> JSONResponse:
+def problem_details(
+    status_code: int, title: str, detail: Any, instance: str | None = None
+) -> JSONResponse:
     """Construct RFC 7807 Problem Details response."""
     content = {
         "type": "about:blank",
@@ -200,15 +297,16 @@ def check_model_key_safe(model_key: str) -> None:
     if model_key not in MODEL_KEYS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unknown model key '{model_key}'. Allowed models: {sorted(list(MODEL_KEYS))}",
+            detail=f"Unknown model key '{model_key}'. Allowed models: {sorted(MODEL_KEYS)}",
         )
 
 
-def run_single_model_predict(model_key: str, features_dict: Dict[str, Any]) -> V2PredictResponse:
+def run_single_model_predict(
+    model_key: str, features_dict: dict[str, Any]
+) -> V2PredictResponse:
     """Internal helper to predict for a single model key."""
     check_model_key_safe(model_key)
     model = default_loader.load_model(model_key)
-    meta = default_loader.load_model_metadata(model_key)
 
     df = pd.DataFrame([features_dict])
     probs = model.predict_proba(df)[0]
@@ -216,11 +314,12 @@ def run_single_model_predict(model_key: str, features_dict: Dict[str, Any]) -> V
     classes_str = [to_band_str(c) for c in classes]
 
     # Conformal set
-    alpha_threshold = meta.get("conformal_threshold", 0.10)
     # Using conformal prediction set threshold from conformal.json or metadata
     try:
         conf_data = default_loader.load_comparison_json("conformal")
-        threshold = conf_data.get("models", {}).get(model_key, {}).get("threshold", 0.05)
+        threshold = (
+            conf_data.get("models", {}).get(model_key, {}).get("threshold", 0.05)
+        )
     except Exception:
         threshold = 0.05
 
@@ -233,7 +332,7 @@ def run_single_model_predict(model_key: str, features_dict: Dict[str, Any]) -> V
     prob_dict = {c: float(p) for c, p in zip(classes_str, probs)}
 
     stab = compute_stability_score(probs)
-    perf_idx = compute_performance_index(model, df, model_key)
+    perf_idx = compute_performance_index(model, df, model_key, precomputed_probs=probs)
 
     return V2PredictResponse(
         model_key=model_key,
@@ -241,7 +340,7 @@ def run_single_model_predict(model_key: str, features_dict: Dict[str, Any]) -> V
         confidence=best_conf,
         prediction_set=pset,
         probabilities=prob_dict,
-        stability_score=stab,
+        stability_score=round(stab * 100.0, 2),
         performance_index=perf_idx,
     )
 
@@ -250,13 +349,18 @@ def run_single_model_predict(model_key: str, features_dict: Dict[str, Any]) -> V
 # Model Registry & Predictions
 # ==============================================================================
 
+
 @router.get("/models")
-def list_models(current_user: User = Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))):
+def list_models(
+    current_user: User = Depends(
+        require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer")
+    )
+):
     """List all seven models with their specs, metadata, and test metrics (all authenticated roles)."""
     manifest = default_loader.manifest.get("files", {})
     champion_data = default_loader.load_champion()
     out = []
-    for key in sorted(list(MODEL_KEYS)):
+    for key in sorted(MODEL_KEYS):
         spec = get_model_spec(key)
         try:
             meta = default_loader.load_model_metadata(key)
@@ -266,18 +370,159 @@ def list_models(current_user: User = Depends(require_roles("admin", "hr_manager"
         model_rel = f"models/{key}/model.joblib"
         file_sha256 = manifest.get(model_rel, {}).get("sha256", "unknown")
 
-        out.append({
-            "key": key,
-            "label": spec.label,
-            "family": spec.family,
-            "explain_tier": spec.explain_tier,
-            "is_champion": (key == champion_data.get("champion_key", "rf")),
-            "test_macro_f1": meta.get("test_macro_f1"),
-            "test_accuracy": meta.get("test_accuracy"),
-            "latency_p95_ms": meta.get("latency_p95_ms"),
-            "sha256": file_sha256,
-        })
+        out.append(
+            {
+                "key": key,
+                "label": spec.label,
+                "family": spec.family,
+                "explain_tier": spec.explain_tier,
+                "is_champion": (key == champion_data.get("champion_key", "rf")),
+                "test_macro_f1": meta.get("test_macro_f1"),
+                "test_accuracy": meta.get("test_accuracy"),
+                "latency_p95_ms": meta.get("latency_p95_ms"),
+                "sha256": file_sha256,
+            }
+        )
     return out
+
+
+# ==============================================================================
+# Dataset census (Data Explorer)
+# ==============================================================================
+
+_DATASET_SUMMARY_CACHE: dict[str, tuple[float, dict]] = {}
+
+
+def _feature_statistics(df: pd.DataFrame, features: list[str]) -> list[dict]:
+    """Per-feature descriptive statistics; never emits employee-level values."""
+    stats = []
+    for name in features:
+        if name not in df.columns:
+            continue
+        column = df[name]
+        missing_pct = round(float(column.isna().mean() * 100), 2)
+        if pd.api.types.is_numeric_dtype(column):
+            stats.append(
+                {
+                    "name": name,
+                    "kind": "numeric",
+                    "missing_pct": missing_pct,
+                    "min": round(float(column.min()), 2),
+                    "median": round(float(column.median()), 2),
+                    "mean": round(float(column.mean()), 2),
+                    "max": round(float(column.max()), 2),
+                }
+            )
+        else:
+            counts = column.value_counts(normalize=True)
+            stats.append(
+                {
+                    "name": name,
+                    "kind": "categorical",
+                    "missing_pct": missing_pct,
+                    "categories": int(column.nunique()),
+                    "top_values": [
+                        {"value": str(value), "share": round(float(share), 4)}
+                        for value, share in counts.head(3).items()
+                    ],
+                }
+            )
+    return stats
+
+
+def _build_dataset_summary() -> dict:
+    """Aggregate the governed dataset into census statistics (no employee-level rows)."""
+    meta = default_loader.load_dataset_meta()
+    variant = meta.get("default_variant", "nonlinear")
+    dataset_file = Path("data") / variant / "dataset.csv"
+    protected_file = Path("data") / variant / "protected.csv"
+    split_file = default_loader.root_dir / "split.json"
+
+    cache_key = f"{dataset_file}:{split_file}"
+    if dataset_file.exists():
+        stamp = dataset_file.stat().st_mtime
+        cached = _DATASET_SUMMARY_CACHE.get(cache_key)
+        if cached and cached[0] == stamp:
+            return cached[1]
+
+    summary: dict = {
+        "dataset": meta,
+        "variant": variant,
+        "split": None,
+        "class_balance": [],
+        "features": [],
+        "protected_attributes": [],
+        "notes": (
+            "Synthetic benchmark generated by the frozen generator (ADR-006). "
+            "Protected attributes are stored separately and are never model features."
+        ),
+    }
+
+    if split_file.exists():
+        try:
+            with open(split_file, "r", encoding="utf-8") as f:
+                split = json.load(f)
+            summary["split"] = {
+                "seed": split.get("seed"),
+                "n_rows": split.get("n_rows"),
+                "train": split.get("train_count", len(split.get("train_indices", []))),
+                "calibration": {
+                    "cal_a": split.get("cal_a_count", len(split.get("cal_a_indices", []))),
+                    "cal_b": split.get("cal_b_count", len(split.get("cal_b_indices", []))),
+                },
+                "test": split.get("test_count", len(split.get("test_indices", []))),
+                "dataset_sha256": split.get("dataset_sha256"),
+                "split_hash": split.get("split_hash"),
+            }
+        except Exception:
+            logger.warning("Split file could not be read for the dataset summary")
+
+    if protected_file.exists():
+        try:
+            columns = pd.read_csv(protected_file, nrows=0).columns
+            summary["protected_attributes"] = [
+                name for name in columns if name != "employee_id"
+            ]
+        except Exception:
+            logger.warning("Protected attribute names could not be read")
+
+    if dataset_file.exists():
+        df = pd.read_csv(dataset_file)
+        summary["features"] = _feature_statistics(df, list(meta.get("features", [])))
+        if "performance" in df.columns:
+            counts = df["performance"].value_counts()
+            total = int(counts.sum())
+            order = ["Low", "Medium", "High"]
+            summary["class_balance"] = [
+                {
+                    "band": band,
+                    "count": int(counts.get(band, 0)),
+                    "share": round(float(counts.get(band, 0) / total), 4) if total else 0.0,
+                }
+                for band in order
+            ]
+        summary["rows_loaded"] = int(len(df))
+        _DATASET_SUMMARY_CACHE[cache_key] = (dataset_file.stat().st_mtime, summary)
+
+    return summary
+
+
+@router.get(
+    "/dataset/summary",
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
+)
+def dataset_summary():
+    """Dataset census for the Data Explorer page (all authenticated roles)."""
+    try:
+        return _build_dataset_summary()
+    except Exception as e:
+        return problem_details(
+            status_code=503,
+            title="Dataset Summary Unavailable",
+            detail=str(e),
+        )
 
 
 @router.post("/predict", response_model=V2PredictResponse)
@@ -286,7 +531,7 @@ async def predict_single(
     request: Request,
     body: V2PredictRequest,
     db: Session = Depends(get_db),
-    user: Optional[User] = Depends(get_current_user),
+    user: User | None = Depends(get_current_user),
 ):
     """Predict performance band using a specific whitelisted model (all roles)."""
     key = body.model_key or "rf"
@@ -310,12 +555,20 @@ async def predict_single(
                 id=p_id,
                 user_email=user_email,
                 model_key=key,
-                predicted_band=0 if res.predicted_band == "Low" else (1 if res.predicted_band == "Medium" else 2),
+                predicted_band=(
+                    0
+                    if res.predicted_band == "Low"
+                    else (1 if res.predicted_band == "Medium" else 2)
+                ),
                 probabilities_json=json.dumps(res.probabilities),
                 confidence=res.confidence,
                 stability_score=res.stability_score,
                 conformal_set_json=json.dumps(res.prediction_set),
-                is_split_decision=1 if (shadow_res and shadow_res.predicted_band != res.predicted_band) else 0,
+                is_split_decision=(
+                    1
+                    if (shadow_res and shadow_res.predicted_band != res.predicted_band)
+                    else 0
+                ),
                 is_shadow=0,
                 input_data=json.dumps(body.features.model_dump()),
             )
@@ -326,7 +579,11 @@ async def predict_single(
                     id=str(uuid.uuid4()),
                     user_email=user_email,
                     model_key="boost",
-                    predicted_band=0 if shadow_res.predicted_band == "Low" else (1 if shadow_res.predicted_band == "Medium" else 2),
+                    predicted_band=(
+                        0
+                        if shadow_res.predicted_band == "Low"
+                        else (1 if shadow_res.predicted_band == "Medium" else 2)
+                    ),
                     probabilities_json=json.dumps(shadow_res.probabilities),
                     confidence=shadow_res.confidence,
                     stability_score=shadow_res.stability_score,
@@ -340,7 +597,8 @@ async def predict_single(
             # Uncertainty-first queue item (L3)
             if FEATURE_FLAGS.get("uncertainty_queue_enabled"):
                 flags = []
-                if res.stability_score < 70:
+                stab_pct = res.stability_score
+                if stab_pct < 70.0:
                     flags.append("low_stability")
                 if len(res.prediction_set) > 1:
                     flags.append("conformal_multi_band")
@@ -348,7 +606,11 @@ async def predict_single(
                     flags.append("split_decision")
 
                 if flags:
-                    urgency = "high" if ("split_decision" in flags or res.stability_score < 50) else "medium"
+                    urgency = (
+                        "high"
+                        if ("split_decision" in flags or stab_pct < 50.0)
+                        else "medium"
+                    )
                     rev_item = ReviewItem(
                         id=str(uuid.uuid4()),
                         prediction_id=p_id,
@@ -370,18 +632,20 @@ async def predict_single(
 @router.post(
     "/predict/all",
     response_model=V2PredictAllResponse,
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 @limiter.limit("30/minute")
 async def predict_all(request: Request, features: EmployeeFeatures):
     """Run inference across all seven models, returning consensus and split-decision flags.
-    
+
     Performance requirement: p95 latency under 800ms.
     """
     t0 = time.time()
     feat_dict = features.model_dump()
-    predictions: Dict[str, V2PredictResponse] = {}
-    top_bands: List[str] = []
+    predictions: dict[str, V2PredictResponse] = {}
+    top_bands: list[str] = []
 
     for key in MODEL_KEYS:
         pred_resp = run_single_model_predict(key, feat_dict)
@@ -420,12 +684,12 @@ async def predict_all(request: Request, features: EmployeeFeatures):
 async def batch_predict_v2(
     request: Request,
     file: UploadFile = File(...),
-    model_key: Optional[str] = None,
+    model_key: str | None = None,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     """Run batch prediction on uploaded CSV file (roles: admin, hr_manager, analyst)."""
-    if not file.filename.endswith(".csv"):
+    if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files allowed")
 
     content = await file.read()
@@ -437,12 +701,22 @@ async def batch_predict_v2(
     except UnicodeDecodeError:
         raise HTTPException(status_code=400, detail="Invalid encoding")
 
-    # Formula injection guard
-    for line in text.splitlines():
-        if line.strip().startswith(("=", "+", "-", "@")):
-            raise HTTPException(status_code=400, detail="Formula injection detected")
+    # Formula injection guard. Negative numeric values are valid input; only
+    # formula-like cell contents are rejected.
+    numeric_cell = re.compile(r"^-?(?:\d+(?:\.\d*)?|\.\d+)$")
+    for row in csv.reader(io.StringIO(text)):
+        for cell in row:
+            value = cell.strip()
+            if value.startswith(("=", "+", "@")) or (
+                value.startswith("-") and not numeric_cell.fullmatch(value)
+            ):
+                raise HTTPException(
+                    status_code=400, detail="Formula injection detected"
+                )
 
     df = pd.read_csv(io.StringIO(text))
+    if len(df) > 5000:
+        raise HTTPException(status_code=413, detail="Maximum 5,000 CSV rows allowed")
 
     chosen_key = model_key or default_loader.load_champion().get("champion_key", "rf")
     if chosen_key not in MODEL_KEYS and chosen_key != "all":
@@ -456,17 +730,22 @@ async def batch_predict_v2(
         try:
             row_dict = row.to_dict()
             if chosen_key == "all":
-                row_preds = {k: run_single_model_predict(k, row_dict).predicted_band for k in MODEL_KEYS}
+                row_preds = {
+                    k: run_single_model_predict(k, row_dict).predicted_band
+                    for k in MODEL_KEYS
+                }
                 results.append({"row": idx, "predictions": row_preds})
             else:
                 pred = run_single_model_predict(chosen_key, row_dict)
-                results.append({
-                    "row": idx,
-                    "model_key": chosen_key,
-                    "predicted_band": pred.predicted_band,
-                    "confidence": pred.confidence,
-                    "stability_score": pred.stability_score,
-                })
+                results.append(
+                    {
+                        "row": idx,
+                        "model_key": chosen_key,
+                        "predicted_band": pred.predicted_band,
+                        "confidence": pred.confidence,
+                        "stability_score": pred.stability_score,
+                    }
+                )
             errors.append(None)
         except Exception as e:
             results.append(None)
@@ -480,7 +759,10 @@ async def batch_predict_v2(
         user.email,
         "batch_predict",
         f"/api/v2/batch/{chosen_key}",
-        details={"total_rows": len(df), "error_count": sum(1 for e in errors if e is not None)},
+        details={
+            "total_rows": len(df),
+            "error_count": sum(1 for e in errors if e is not None),
+        },
     )
 
     return {
@@ -494,7 +776,9 @@ async def batch_predict_v2(
 
 @router.post(
     "/auth/logout",
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 def logout_v2(
     token: str = Depends(oauth2_scheme),
@@ -511,11 +795,13 @@ def logout_v2(
         details={"token_prefix": token[:10]},
     )
     return {"status": "success", "message": "Token revoked successfully"}
- 
- 
+
+
 @router.post(
     "/auth/refresh",
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 def refresh_v2(
     token: str = Depends(oauth2_scheme),
@@ -539,13 +825,16 @@ def refresh_v2(
 # Explainability
 # ==============================================================================
 
+
 @router.post(
     "/explain",
     response_model=V2ExplainResponse,
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 @limiter.limit("30/minute")
-async def explain_model(request: Request, body: V2ExplainRequest):
+def explain_model(request: Request, body: V2ExplainRequest):
     """Provide model-specific native and agnostic explanations (all roles)."""
     key = body.model_key or "rf"
     check_model_key_safe(key)
@@ -583,17 +872,46 @@ async def explain_model(request: Request, body: V2ExplainRequest):
             "neighborhood_distribution": {},
         }
 
-    # 5. Persona summaries
+    # 5. Persona summaries & Ollama generation
     stab = compute_stability_score(probs)
-    summaries = generate_persona_summaries(
-        key=key,
-        label=spec.label,
-        pred_band=best_band,
-        proba=probs.tolist(),
-        attribution=attrib,
-        counterfactuals=cfs,
-        stability=stab,
-    )
+    features_dict = body.features.model_dump()
+
+    if _LLM_CONFIG["enabled"]:
+        llm_exp = generate_ollama_persona_explanations(
+            key=key,
+            label=spec.label,
+            pred_band=best_band,
+            proba=probs.tolist(),
+            attribution=attrib,
+            counterfactuals=cfs,
+            stability=stab,
+            candidate_features=features_dict,
+            similar_cases=sim_cases,
+            base_url=_LLM_CONFIG["base_url"],
+            preferred_model=_LLM_CONFIG["model"],
+            timeout_s=15.0,
+        )
+        summaries = llm_exp["persona_summaries"]
+        key_drivers = llm_exp.get("key_drivers")
+        actionable_guidance = llm_exp.get("actionable_guidance")
+        llm_meta = llm_exp.get("llm_metadata")
+    else:
+        summaries = generate_persona_summaries(
+            key=key,
+            label=spec.label,
+            pred_band=best_band,
+            proba=probs.tolist(),
+            attribution=attrib,
+            counterfactuals=cfs,
+            stability=stab,
+        )
+        key_drivers = [f"{k.replace('_', ' ').title()}: {v:+.2f}" for k, v in list(attrib.items())[:3]]
+        actionable_guidance = (
+            "Review counterfactual levers to achieve a higher performance band."
+            if cfs
+            else "Maintain strong baseline performance metrics."
+        )
+        llm_meta = {"source": "template_fallback", "model": "none", "reason": "LLM_ENABLED=false"}
 
     return V2ExplainResponse(
         model_key=key,
@@ -605,6 +923,9 @@ async def explain_model(request: Request, body: V2ExplainRequest):
         counterfactuals=cfs,
         similar_cases=sim_cases,
         persona_summaries=summaries,
+        key_drivers=key_drivers,
+        actionable_guidance=actionable_guidance,
+        llm_metadata=llm_meta,
     )
 
 
@@ -612,9 +933,12 @@ async def explain_model(request: Request, body: V2ExplainRequest):
 # Comparison Science & MCDA
 # ==============================================================================
 
+
 @router.get(
     "/compare/{topic}",
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 def get_comparison_data(topic: str):
     """Retrieve precomputed model comparison science JSON (all roles)."""
@@ -622,7 +946,7 @@ def get_comparison_data(topic: str):
         return problem_details(
             status_code=404,
             title="Comparison Topic Not Found",
-            detail=f"Topic '{topic}' is not valid. Allowed topics: {sorted(list(ALLOWED_COMPARISON_TOPICS.keys()))}",
+            detail=f"Topic '{topic}' is not valid. Allowed topics: {sorted(ALLOWED_COMPARISON_TOPICS)}",
         )
 
     json_name = ALLOWED_COMPARISON_TOPICS[topic]
@@ -633,13 +957,15 @@ def get_comparison_data(topic: str):
         return problem_details(
             status_code=500,
             title="Artifact Read Error",
-            detail=f"Could not load comparison data for '{topic}': {str(e)}",
+            detail=f"Could not load comparison data for '{topic}': {e!s}",
         )
 
 
 @router.post(
     "/compare/mcda",
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 def recalculate_mcda(body: V2MCDARequest):
     """Dynamically recompute MCDA rankings with validated user weights (all roles)."""
@@ -672,18 +998,42 @@ def recalculate_mcda(body: V2MCDARequest):
             rows[m_key] = {
                 "macro_f1": float(m.get("macro_f1", 0.7)),
                 "qwk": float(m.get("qwk", 0.6)),
-                "calibration": float(1.0 - m.get("ece", 0.05)),
-                "robustness": 0.85,
-                "fairness": 0.85,
-                "stability": float(m.get("stability_score", 0.6)),
-                "latency": float(m.get("latency_p95_ms", 10.0)),
-                "train_cost": 2.0,
-                "explainability": 0.9 if m_key in ("dt", "linreg", "logreg") else (0.8 if m_key == "knn" else 0.5),
+                "calibration": float(m.get("calibration", 1.0 - m.get("ece", 0.05))),
+                "robustness": float(m.get("robustness", 0.85)),
+                "fairness": float(m.get("fairness", 0.85)),
+                "stability": float(m.get("stability", 0.6)),
+                "latency": float(
+                    m.get("latency", m.get("latency_single_p95_ms", 10.0))
+                ),
+                "train_cost": float(m.get("train_cost", m.get("tuning_time_sec", 2.0))),
+                "explainability": float(
+                    m.get("explainability", m.get("explain_score", 0.5))
+                ),
             }
         table = pd.DataFrame.from_dict(rows, orient="index")
 
-        result = run_mcda_pipeline(table, profile_name="Custom", custom_weights=weights)
-        return result
+        result = run_mcda_pipeline(
+            table, profile_name=body.profile or "Custom", custom_weights=weights
+        )
+        return {
+            "weights_used": result["weights"],
+            "profile_name": result["profile"],
+            "ranked_models": [
+                {
+                    "key": row["key"],
+                    "composite_score": row["mcda_score"],
+                    "rank": row["rank"],
+                    "rank1_probability": row["p_rank1"],
+                    "decision_strength": result["decision_strength"],
+                }
+                for row in result["ranking"]
+            ],
+            "winner": result["deterministic_winner"],
+            "deterministic_winner": result["deterministic_winner"],
+            "decision_strength": result["decision_strength"],
+            "decision_rule": "ADR-009 Multi-Criteria Decision Analysis",
+            "ranking": result["ranking"],
+        }
     except Exception as e:
         return problem_details(
             status_code=500,
@@ -696,13 +1046,18 @@ def recalculate_mcda(body: V2MCDARequest):
 # 2D/3D Visualizations
 # ==============================================================================
 
+
 @router.get(
     "/viz/surface",
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 @router.post(
     "/viz/surface",
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 def get_surface_landscape(model_key: str = "rf", grid_size: int = 40):
     """Retrieve decision surface grid for 2D/3D visualization (all roles)."""
@@ -730,7 +1085,9 @@ def get_surface_landscape(model_key: str = "rf", grid_size: int = 40):
 
 @router.get(
     "/viz/pca",
-    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))],
+    dependencies=[
+        Depends(require_roles("admin", "hr_manager", "analyst", "viewer", "reviewer"))
+    ],
 )
 def get_pca_projection():
     """Retrieve PCA 2D/3D projection coordinates and background sample (all roles)."""
@@ -738,26 +1095,45 @@ def get_pca_projection():
     if pca_path.exists():
         with open(pca_path, "r", encoding="utf-8") as f:
             return json.load(f)
-    return problem_details(status_code=404, title="PCA Data Not Found", detail="PCA artifact not available")
+    return problem_details(
+        status_code=404, title="PCA Data Not Found", detail="PCA artifact not available"
+    )
 
 
 # ==============================================================================
 # Local LLM Verdict Engine
 # ==============================================================================
 
+
 @router.get("/llm/health", dependencies=[Depends(require_roles("admin", "analyst"))])
 def llm_health():
     """Check local LLM runtime health (Admin, Analyst)."""
+    if not _LLM_CONFIG["enabled"]:
+        return {
+            "status": "disabled",
+            "runtime": _LLM_CONFIG["provider"],
+            "base_url": _LLM_CONFIG["base_url"],
+            "model": _LLM_CONFIG["model"],
+            "fallback_available": True,
+        }
     try:
-        llm = LocalLLM(provider=_LLM_CONFIG["provider"], base_url=_LLM_CONFIG["base_url"], timeout=2.0)
+        llm = LocalLLM(
+            provider=_LLM_CONFIG["provider"],
+            base_url=_LLM_CONFIG["base_url"],
+            timeout=2.0,
+        )
         models = llm.list_models()
-        return {"status": "healthy" if models else "reachable", "runtime": _LLM_CONFIG["provider"], "models_available": models}
+        return {
+            "status": "healthy" if models else "reachable",
+            "runtime": _LLM_CONFIG["provider"],
+            "models_available": models,
+        }
     except Exception as e:
         return {
             "status": "offline",
             "runtime": _LLM_CONFIG["provider"],
             "base_url": _LLM_CONFIG["base_url"],
-            "detail": f"Local runtime not reachable: {str(e)}",
+            "detail": f"Local runtime not reachable: {e!s}",
             "fallback_available": True,
         }
 
@@ -765,15 +1141,21 @@ def llm_health():
 @router.get("/llm/models", dependencies=[Depends(require_roles("admin", "analyst"))])
 def list_llm_models():
     """List local models available in Ollama/vLLM (Admin, Analyst)."""
+    if not _LLM_CONFIG["enabled"]:
+        return {"models": [], "disabled": True}
     try:
-        llm = LocalLLM(provider=_LLM_CONFIG["provider"], base_url=_LLM_CONFIG["base_url"], timeout=5.0)
+        llm = LocalLLM(
+            provider=_LLM_CONFIG["provider"],
+            base_url=_LLM_CONFIG["base_url"],
+            timeout=5.0,
+        )
         models = llm.list_models()
         return {"models": models}
     except Exception as e:
         return problem_details(
             status_code=503,
             title="LLM Service Unavailable",
-            detail=f"Could not connect to local runtime at {_LLM_CONFIG['base_url']}: {str(e)}",
+            detail=f"Could not connect to local runtime at {_LLM_CONFIG['base_url']}: {e!s}",
         )
 
 
@@ -787,7 +1169,7 @@ def update_llm_config(body: V2LLMConfigUpdateRequest):
             return problem_details(
                 status_code=400,
                 title="SSRF Violation",
-                detail=f"Refused non-local URL: {str(e)}",
+                detail=f"Refused non-local URL: {e!s}",
             )
         _LLM_CONFIG["base_url"] = body.base_url
 
@@ -799,27 +1181,63 @@ def update_llm_config(body: V2LLMConfigUpdateRequest):
     return {"status": "updated", "config": _LLM_CONFIG}
 
 
-@router.post("/llm/verdict", dependencies=[Depends(require_roles("admin", "hr", "analyst"))])
+@router.post(
+    "/llm/verdict",
+    dependencies=[Depends(require_roles("admin", "hr", "hr_manager", "analyst"))],
+)
 @limiter.limit("15/minute")
-async def generate_verdict(
+def generate_verdict(
     request: Request,
     body: V2LLMVerdictRequest,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     """Generate or retrieve a cached/fallback LLM verdict.
-    
+
     Roles: Admin, HR, Analyst.
     Checks:
     - Zero employee data in input (G9 prompt hygiene)
     - Strict numeric validation against evidence packet (G9 validator)
     - Fallback on connection error or validator failure
     """
-    # 1. Load evidence packet
-    if body.evidence_packet:
-        packet = body.evidence_packet
-    else:
-        packet = default_loader.load_comparison_json("evidence_packet")
+    # 1. Load evidence packet and apply the requested governance profile.
+    packet = copy.deepcopy(
+        body.evidence_packet
+        if body.evidence_packet
+        else default_loader.load_comparison_json("evidence_packet")
+    )
+    requested_profile = body.profile or packet.get("profile", {}).get(
+        "name", "Balanced"
+    )
+    profile_name = {
+        "High Accuracy": "Accuracy-first",
+        "Interpretability First": "Explainability-first",
+        "Low Latency": "Speed-first",
+        "Fair & Robust": "Fairness-first",
+    }.get(requested_profile, requested_profile)
+    if profile_name != packet.get("profile", {}).get("name"):
+        profile_catalog = default_loader.load_comparison_json("mcda").get(
+            "all_profiles", {}
+        )
+        selected_profile = profile_catalog.get(profile_name)
+        if selected_profile:
+            packet["profile"] = {
+                "name": profile_name,
+                "weights": selected_profile.get("weights", {}),
+            }
+            packet["deterministic_winner"] = selected_profile.get(
+                "deterministic_winner", packet.get("deterministic_winner")
+            )
+            packet["runner_up"] = selected_profile.get(
+                "runner_up", packet.get("runner_up")
+            )
+            packet["decision_strength"] = selected_profile.get(
+                "decision_strength", packet.get("decision_strength", "none")
+            )
+
+    audience = {"hr": "HR", "ds": "Data Scientist"}.get(
+        body.audience or "HR", body.audience or "HR"
+    )
 
     # 2. Check for employee leakage
     violations = scan_prompt_for_forbidden_keys(json.dumps(packet))
@@ -830,7 +1248,7 @@ async def generate_verdict(
             detail=f"Forbidden employee identifiers found in evidence: {violations}",
         )
 
-    prompt = format_user_prompt(packet, audience=body.audience or "HR")
+    prompt = format_user_prompt(packet, audience=audience)
     prompt_violations = scan_prompt_for_forbidden_keys(prompt)
     if prompt_violations:
         return problem_details(
@@ -846,85 +1264,120 @@ async def generate_verdict(
         packet_hash=pkt_hash,
         prompt_version="1.0",
         model=_LLM_CONFIG["model"],
-        audience=body.audience or "HR",
+        audience=audience,
         mode=body.mode or "verdict",
-        profile_name="Balanced",
+        profile_name=profile_name,
     )
     cached = cache.get(cache_key)
-    if cached:
-        return {
-            "verdict": cached.get("output", cached),
-            "source": "cache",
-            "is_fallback": bool(cached.get("source") == "fallback"),
-            "validation": {"valid": True, "errors": []},
-        }
+    cached_source = cached.get("source") if isinstance(cached, dict) else None
+    cache_allowed = _LLM_CONFIG["enabled"] or cached_source in {
+        "fallback",
+        "template",
+        "template_fallback",
+    }
+    if cached and cache_allowed:
+        cached_output = cached.get("output", cached)
+        cached_errors = validate_verdict(cached_output, packet)
+        if not cached_errors:
+            return {
+                "verdict": cached_output,
+                "source": "cache",
+                "is_fallback": cached.get("source")
+                in {"fallback", "template", "template_fallback"},
+                "validation": {"valid": True, "errors": []},
+            }
+        logger.warning(
+            "Ignoring invalid cached verdict %s: %s", cache_key, cached_errors
+        )
 
     # 4. Attempt local LLM call
     llm_error = None
-    try:
-        llm = LocalLLM(
-            provider=_LLM_CONFIG["provider"],
-            base_url=_LLM_CONFIG["base_url"],
-            model=_LLM_CONFIG["model"],
-            timeout=10.0,
-        )
-        raw_text = llm.chat_json(system=SYSTEM_PROMPT, user=prompt)
-        verdict_obj = json.loads(raw_text)
-        val_res = validate_verdict(verdict_obj, packet)
-        if val_res.is_valid:
-            cache.put(
-                cache_key=cache_key,
-                packet_hash=pkt_hash,
-                prompt_version="1.0",
+    if not _LLM_CONFIG["enabled"]:
+        llm_error = "LLM_ENABLED=false"
+    else:
+        try:
+            llm = LocalLLM(
+                provider=_LLM_CONFIG["provider"],
+                base_url=_LLM_CONFIG["base_url"],
                 model=_LLM_CONFIG["model"],
-                audience=body.audience or "HR",
-                mode=body.mode or "verdict",
-                source="live_llm",
-                output=verdict_obj,
-                validation_history=val_res.errors,
+                timeout=_LLM_CONFIG["timeout_s"],
             )
-            # Persist in DB
-            v_id = str(uuid.uuid4())
-            db_record = LLMVerdict(
-                id=v_id,
-                user_email=user.email,
-                mode=body.mode or "verdict",
-                audience=body.audience or "HR",
-                prompt_hash=pkt_hash,
-                verdict_json=json.dumps(verdict_obj),
-                is_valid=1,
-                is_fallback=0,
-                validation_json=json.dumps({"valid": True, "errors": []}),
-            )
-            db.add(db_record)
-            db.commit()
+            validation_history = []
+            for attempt in range(_LLM_CONFIG["max_retries"] + 1):
+                try:
+                    raw_text = llm.chat_json(system=SYSTEM_PROMPT, user=prompt)
+                    verdict_obj = json.loads(raw_text)
+                    validation_errors = validate_verdict(verdict_obj, packet)
+                    validation_history.append(validation_errors)
+                    if validation_errors:
+                        llm_error = (
+                            f"Validator rejected LLM response on attempt {attempt + 1}: "
+                            f"{validation_errors}"
+                        )
+                        continue
 
-            return {
-                "id": v_id,
-                "verdict": verdict_obj,
-                "source": "live_llm",
-                "is_fallback": False,
-                "validation": {"valid": True, "errors": []},
-            }
-        else:
-            llm_error = f"Validator rejected LLM response: {val_res.errors}"
-    except Exception as e:
-        llm_error = str(e)
+                    cache.put(
+                        cache_key=cache_key,
+                        packet_hash=pkt_hash,
+                        prompt_version="1.0",
+                        model=_LLM_CONFIG["model"],
+                        audience=audience,
+                        mode=body.mode or "verdict",
+                        source="live_llm",
+                        output=verdict_obj,
+                        validation_history=validation_history,
+                    )
+                    # Persist in DB
+                    v_id = str(uuid.uuid4())
+                    db_record = LLMVerdict(
+                        id=v_id,
+                        user_email=user.email,
+                        mode=body.mode or "verdict",
+                        audience=audience,
+                        prompt_hash=pkt_hash,
+                        verdict_json=json.dumps(verdict_obj),
+                        is_valid=1,
+                        is_fallback=0,
+                        validation_json=json.dumps(
+                            {"valid": True, "attempts": attempt + 1}
+                        ),
+                    )
+                    db.add(db_record)
+                    db.commit()
+
+                    return {
+                        "id": v_id,
+                        "verdict": verdict_obj,
+                        "source": "live_llm",
+                        "is_fallback": False,
+                        "validation": {
+                            "valid": True,
+                            "errors": [],
+                            "attempts": attempt + 1,
+                        },
+                    }
+                except Exception as e:
+                    llm_error = f"{type(e).__name__}: {e}"
+                    validation_history.append([llm_error])
+        except Exception as e:
+            llm_error = str(e)
 
     # 5. Handle fallback or return 503
     if body.allow_fallback:
-        fallback_verdict = generate_template_verdict(packet, audience=body.audience or "HR")
+        fallback_verdict = generate_template_verdict(packet, audience=audience)
         v_id = str(uuid.uuid4())
         db_record = LLMVerdict(
             id=v_id,
             user_email=user.email,
             mode=body.mode or "verdict",
-            audience=body.audience or "HR",
+            audience=audience,
             prompt_hash=pkt_hash,
             verdict_json=json.dumps(fallback_verdict),
             is_valid=1,
             is_fallback=1,
-            validation_json=json.dumps({"valid": True, "note": f"Fallback due to: {llm_error}"}),
+            validation_json=json.dumps(
+                {"valid": True, "note": f"Fallback due to: {llm_error}"}
+            ),
         )
         db.add(db_record)
         db.commit()
@@ -946,14 +1399,25 @@ async def generate_verdict(
 
 
 @router.get("/llm/verdicts/{verdict_id}", dependencies=[Depends(get_current_user)])
-def get_stored_verdict(verdict_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_stored_verdict(
+    verdict_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     """Retrieve stored verdict by ID (owner or Admin)."""
     record = db.query(LLMVerdict).filter(LLMVerdict.id == verdict_id).first()
     if not record:
-        return problem_details(status_code=404, title="Verdict Not Found", detail=f"Verdict '{verdict_id}' not found")
+        return problem_details(
+            status_code=404,
+            title="Verdict Not Found",
+            detail=f"Verdict '{verdict_id}' not found",
+        )
 
     # Authorization: user must own the record or be admin
-    if record.user_email != user.email and (getattr(user, "role", "") or "").lower() != "admin":
+    if (
+        record.user_email != user.email
+        and (getattr(user, "role", "") or "").lower() != "admin"
+    ):
         return problem_details(
             status_code=403,
             title="Forbidden",
@@ -969,7 +1433,9 @@ def get_stored_verdict(verdict_id: str, db: Session = Depends(get_db), user: Use
         "is_fallback": bool(record.is_fallback),
         "is_valid": bool(record.is_valid),
         "verdict": json.loads(record.verdict_json) if record.verdict_json else {},
-        "validation": json.loads(record.validation_json) if record.validation_json else {},
+        "validation": (
+            json.loads(record.validation_json) if record.validation_json else {}
+        ),
     }
 
 
@@ -977,11 +1443,12 @@ def get_stored_verdict(verdict_id: str, db: Session = Depends(get_db), user: Use
 # Stage L: Governed Operations, MLOps, Reviews, Transparency & Reports
 # ==============================================================================
 
+
 # L2: Audit Logs
 @router.get("/audit/logs", dependencies=[Depends(require_roles("admin"))])
 def get_audit_logs(
-    user_email: Optional[str] = None,
-    action: Optional[str] = None,
+    user_email: str | None = None,
+    action: str | None = None,
     limit: int = 50,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -1017,10 +1484,18 @@ def update_user_role(
     """Update a user's RBAC role with immutable audit trail (Admin only)."""
     target_user = db.query(User).filter(User.id == user_id).first()
     if not target_user:
-        return problem_details(status_code=404, title="User Not Found", detail=f"User ID {user_id} not found")
+        return problem_details(
+            status_code=404,
+            title="User Not Found",
+            detail=f"User ID {user_id} not found",
+        )
     valid_roles = {"admin", "hr_manager", "analyst", "viewer", "reviewer"}
     if new_role.lower() not in valid_roles:
-        return problem_details(status_code=400, title="Invalid Role", detail=f"Role '{new_role}' is not a valid system role")
+        return problem_details(
+            status_code=400,
+            title="Invalid Role",
+            detail=f"Role '{new_role}' is not a valid system role",
+        )
     old_role = target_user.role
     target_user.role = new_role.lower()
     db.commit()
@@ -1029,22 +1504,38 @@ def update_user_role(
         user.email,
         "role_change",
         f"/api/v2/users/{user_id}/role",
-        details={"user_id": user_id, "target_email": target_user.email, "old_role": old_role, "new_role": target_user.role},
+        details={
+            "user_id": user_id,
+            "target_email": target_user.email,
+            "old_role": old_role,
+            "new_role": target_user.role,
+        },
     )
-    return {"status": "success", "user_id": user_id, "old_role": old_role, "new_role": target_user.role}
+    return {
+        "status": "success",
+        "user_id": user_id,
+        "old_role": old_role,
+        "new_role": target_user.role,
+    }
 
 
 # L3: Review Workflow
-@router.get("/review/queue", dependencies=[Depends(require_roles("admin", "hr_manager", "reviewer"))])
+@router.get(
+    "/review/queue",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "reviewer"))],
+)
 def get_review_queue(
-    status_filter: Optional[str] = "pending",
+    status_filter: str | None = "pending",
     limit: int = 50,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     """Retrieve items in the uncertainty-first review queue."""
     q = db.query(ReviewItem)
+    if status_filter:
+        q = q.filter(ReviewItem.status == status_filter)
     from sqlalchemy import case
+
     urgency_order = case(
         (ReviewItem.urgency == "high", 1),
         (ReviewItem.urgency == "medium", 2),
@@ -1056,26 +1547,41 @@ def get_review_queue(
     results = []
     for item in items:
         pred = db.query(Prediction).filter(Prediction.id == item.prediction_id).first()
-        results.append({
-            "id": item.id,
-            "prediction_id": item.prediction_id,
-            "employee_id": item.employee_id,
-            "status": item.status,
-            "urgency": item.urgency,
-            "flags": json.loads(item.flags_json) if item.flags_json else [],
-            "created_at": item.created_at.isoformat() if item.created_at else None,
-            "prediction": {
-                "predicted_band": to_band_str(pred.predicted_band) if pred else "Unknown",
-                "confidence": pred.confidence if pred else 0.0,
-                "stability_score": pred.stability_score if pred else 0.0,
-                "model_key": pred.model_key if pred else "",
-                "conformal_set": json.loads(pred.conformal_set_json) if pred and pred.conformal_set_json else [],
-            } if pred else None,
-        })
+        results.append(
+            {
+                "id": item.id,
+                "prediction_id": item.prediction_id,
+                "employee_id": item.employee_id,
+                "status": item.status,
+                "urgency": item.urgency,
+                "flags": json.loads(item.flags_json) if item.flags_json else [],
+                "created_at": item.created_at.isoformat() if item.created_at else None,
+                "prediction": (
+                    {
+                        "predicted_band": (
+                            to_band_str(pred.predicted_band) if pred else "Unknown"
+                        ),
+                        "confidence": pred.confidence if pred else 0.0,
+                        "stability_score": pred.stability_score if pred else 0.0,
+                        "model_key": pred.model_key if pred else "",
+                        "conformal_set": (
+                            json.loads(pred.conformal_set_json)
+                            if pred and pred.conformal_set_json
+                            else []
+                        ),
+                    }
+                    if pred
+                    else None
+                ),
+            }
+        )
     return results
 
 
-@router.post("/review/{review_id}/decision", dependencies=[Depends(require_roles("admin", "hr_manager", "reviewer"))])
+@router.post(
+    "/review/{review_id}/decision",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "reviewer"))],
+)
 def submit_review_decision(
     review_id: str,
     body: V2ReviewDecisionRequest,
@@ -1092,13 +1598,16 @@ def submit_review_decision(
         )
 
     pred = db.query(Prediction).filter(Prediction.id == item.prediction_id).first()
-    if pred and pred.predicted_band != body.decision_band:
-        if not body.override_reason or not body.override_reason.strip():
-            return problem_details(
-                status_code=422,
-                title="Override Reason Mandatory",
-                detail="An override_reason is required when overturning the model's recommendation.",
-            )
+    if (
+        pred
+        and pred.predicted_band != body.decision_band
+        and (not body.override_reason or not body.override_reason.strip())
+    ):
+        return problem_details(
+            status_code=422,
+            title="Override Reason Mandatory",
+            detail="An override_reason is required when overturning the model's recommendation.",
+        )
 
     decision_id = str(uuid.uuid4())
     decision = ReviewDecision(
@@ -1118,7 +1627,10 @@ def submit_review_decision(
         user.email,
         "review_decision",
         f"review_item/{review_id}",
-        details={"decision_band": body.decision_band, "override": bool(body.override_reason)},
+        details={
+            "decision_band": body.decision_band,
+            "override": bool(body.override_reason),
+        },
     )
     return {
         "status": "success",
@@ -1128,13 +1640,18 @@ def submit_review_decision(
     }
 
 
-@router.get("/review/analytics", dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "reviewer"))])
+@router.get(
+    "/review/analytics",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "reviewer"))],
+)
 def get_review_analytics(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     """Decision-log analytics and overturn rates."""
-    total_reviewed = db.query(ReviewItem).filter(ReviewItem.status == "reviewed").count()
+    total_reviewed = (
+        db.query(ReviewItem).filter(ReviewItem.status == "reviewed").count()
+    )
     total_pending = db.query(ReviewItem).filter(ReviewItem.status == "pending").count()
     decisions = db.query(ReviewDecision).all()
     overrides = [d for d in decisions if d.override_reason]
@@ -1151,7 +1668,10 @@ def get_review_analytics(
 
 
 # L3: Employee Transparency, Appeals, Privacy
-@router.get("/transparency/employee/{employee_id}", dependencies=[Depends(require_roles("admin", "hr_manager"))])
+@router.get(
+    "/transparency/employee/{employee_id}",
+    dependencies=[Depends(require_roles("admin", "hr_manager"))],
+)
 def get_employee_transparency(
     employee_id: str,
     db: Session = Depends(get_db),
@@ -1193,7 +1713,9 @@ def get_employee_transparency(
     }
 
 
-@router.post("/transparency/appeal", dependencies=[Depends(require_roles("admin", "hr_manager"))])
+@router.post(
+    "/transparency/appeal", dependencies=[Depends(require_roles("admin", "hr_manager"))]
+)
 def submit_employee_appeal(
     body: V2AppealRequest,
     db: Session = Depends(get_db),
@@ -1201,15 +1723,15 @@ def submit_employee_appeal(
 ):
     """Lodge an appeal on an automated decision."""
     appeal_id = str(uuid.uuid4())
-    item = ReviewItem(
+    appeal = AppealRecord(
         id=appeal_id,
-        prediction_id="appeal_" + appeal_id[:8],
         employee_id=body.employee_id,
+        user_email=user.email,
+        reason=body.reason,
+        supporting_info=body.supporting_info,
         status="appealed",
-        urgency="high",
-        flags_json=json.dumps(["employee_appeal"]),
     )
-    db.add(item)
+    db.add(appeal)
     db.commit()
 
     log_audit_event(
@@ -1226,7 +1748,9 @@ def submit_employee_appeal(
     }
 
 
-@router.post("/privacy/consent", dependencies=[Depends(require_roles("admin", "hr_manager"))])
+@router.post(
+    "/privacy/consent", dependencies=[Depends(require_roles("admin", "hr_manager"))]
+)
 def record_consent(
     body: V2ConsentRequest,
     db: Session = Depends(get_db),
@@ -1265,8 +1789,44 @@ def process_deletion_request(
     )
     db.add(del_req)
 
-    # Delete records for employee
-    db.query(Prediction).filter(Prediction.employee_id == body.employee_id).delete()
+    # Delete operational records for the employee. Audit/deletion records are
+    # retained as governance evidence, but the employee's operational data is
+    # removed from the decision-support stores.
+    prediction_ids = [
+        row[0]
+        for row in db.query(Prediction.id)
+        .filter(Prediction.employee_id == body.employee_id)
+        .all()
+    ]
+    if prediction_ids:
+        review_ids = [
+            row[0]
+            for row in db.query(ReviewItem.id)
+            .filter(ReviewItem.prediction_id.in_(prediction_ids))
+            .all()
+        ]
+        if review_ids:
+            db.query(ReviewDecision).filter(
+                ReviewDecision.review_item_id.in_(review_ids)
+            ).delete(synchronize_session=False)
+            db.query(ReviewItem).filter(ReviewItem.id.in_(review_ids)).delete(
+                synchronize_session=False
+            )
+        db.query(Prediction).filter(Prediction.id.in_(prediction_ids)).delete(
+            synchronize_session=False
+        )
+    db.query(ConsentRecord).filter(
+        ConsentRecord.employee_id == body.employee_id
+    ).delete(synchronize_session=False)
+    db.query(AppealRecord).filter(AppealRecord.employee_id == body.employee_id).delete(
+        synchronize_session=False
+    )
+    db.query(ProtectedAttribute).filter(
+        ProtectedAttribute.employee_id == body.employee_id
+    ).delete(synchronize_session=False)
+    db.query(Employee).filter(Employee.id == body.employee_id).delete(
+        synchronize_session=False
+    )
     db.commit()
 
     log_audit_event(
@@ -1293,15 +1853,27 @@ def trigger_retrain(
     """Trigger governed retrain across all seven models (Admin only). Verifies frozen test lock."""
     split_file = Path("data/processed/split.json")
     if not split_file.exists():
-        return problem_details(status_code=500, title="Split Missing", detail="Frozen split file not found")
+        return problem_details(
+            status_code=500, title="Split Missing", detail="Frozen split file not found"
+        )
 
     proposed_champion = "rf"
+    try:
+        mcda = default_loader.load_comparison_json("mcda")
+        proposed_champion = str(mcda.get("deterministic_winner") or proposed_champion)
+    except Exception:
+        logger.warning("MCDA artifacts unavailable; proposing default candidate")
+
     log_audit_event(
         db,
         user.email,
         "retrain_pipeline_executed",
         "models/v2.1",
-        details={"profile": body.profile, "proposed_champion": proposed_champion, "rule": "ADR-009"},
+        details={
+            "profile": body.profile,
+            "proposed_champion": proposed_champion,
+            "rule": "ADR-009",
+        },
     )
 
     return {
@@ -1314,13 +1886,79 @@ def trigger_retrain(
     }
 
 
+def _read_current_champion() -> dict:
+    """Return the current champion payload without failing on a tampered artifact."""
+    try:
+        current = default_loader.load_champion()
+        if isinstance(current, dict):
+            return current
+    except Exception:
+        pass
+
+    champ_file = default_loader.root_dir / "champion.json"
+    if champ_file.exists():
+        try:
+            with open(champ_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                return data
+        except Exception:
+            logger.warning("champion.json could not be parsed; rebuilding from approval")
+    return {}
+
+
+def _champion_payload(champion_key: str, **overrides) -> dict:
+    """Build a champion.json payload that keeps provenance and both key spellings.
+
+    The artifact is read back through ``champion_key`` (API responses, batch defaults,
+    PDF reports, loader) and through ``champion`` (legacy database seeding), so a
+    promotion must never drop either spelling or the recorded provenance fields.
+    """
+    payload = _read_current_champion()
+    payload["champion_key"] = champion_key
+    payload["champion"] = champion_key
+    try:
+        payload["champion_label"] = get_model_spec(champion_key).label
+    except Exception:
+        logger.warning("No registry spec found for champion '%s'", champion_key)
+
+    try:
+        mcda = default_loader.load_comparison_json("mcda")
+    except Exception:
+        mcda = {}
+    ranking = [
+        row
+        for row in mcda.get("ranking", [])
+        if isinstance(row, dict)
+        and row.get("key") in MODEL_KEYS
+        and row.get("key") != champion_key
+    ]
+    if ranking:
+        runner_up = min(ranking, key=lambda row: row.get("rank", len(ranking)))
+        payload["runner_up_key"] = runner_up["key"]
+        try:
+            payload["runner_up_label"] = get_model_spec(runner_up["key"]).label
+        except Exception:
+            logger.warning("No registry spec found for runner-up '%s'", runner_up["key"])
+
+    payload["rollback"] = False
+    payload.update(overrides)
+    return payload
+
+
 def update_champion_file(champion_data: dict) -> None:
     """Write champion.json and synchronize SHA-256 in MANIFEST.json for ArtifactLoader integrity."""
     champ_file = default_loader.root_dir / "champion.json"
     manifest_file = default_loader.root_dir / "MANIFEST.json"
 
+    payload = dict(champion_data)
+    if payload.get("champion_key"):
+        payload["champion"] = payload["champion_key"]
+    elif payload.get("champion"):
+        payload["champion_key"] = payload["champion"]
+
     with open(champ_file, "w", encoding="utf-8") as f:
-        json.dump(champion_data, f, indent=2)
+        json.dump(payload, f, indent=2)
 
     h = hashlib.sha256(champ_file.read_bytes()).hexdigest()
     size = champ_file.stat().st_size
@@ -1335,6 +1973,7 @@ def update_champion_file(champion_data: dict) -> None:
                 with open(manifest_file, "w", encoding="utf-8") as f:
                     json.dump(manifest, f, indent=2)
             default_loader._manifest = manifest
+            default_loader._loaded_champion = None
         except Exception as e:
             logger.warning(f"Could not update MANIFEST.json: {e}")
 
@@ -1347,17 +1986,21 @@ def approve_champion(
 ):
     """Approve proposed candidate champion (Admin only)."""
     check_model_key_safe(body.champion_key)
-    update_champion_file({
-        "champion": body.champion_key,
-        "selection_rule": "ADR-009 Balanced Profile MCDA",
-        "decision_strength": "marginal",
-        "margin": 0.031,
-        "runner_up": "boost",
-        "approved_by": user.email,
-    })
+    update_champion_file(
+        _champion_payload(
+            body.champion_key,
+            approved_by=user.email,
+            approved_at=datetime.now(timezone.utc).isoformat(),
+            approval_version=body.version,
+        )
+    )
 
     db.query(ModelVersion).update({ModelVersion.is_champion: 0})
-    target = db.query(ModelVersion).filter(ModelVersion.model_key == body.champion_key).first()
+    target = (
+        db.query(ModelVersion)
+        .filter(ModelVersion.model_key == body.champion_key)
+        .first()
+    )
     if target:
         target.is_champion = 1
         target.approved_by = user.email
@@ -1371,7 +2014,11 @@ def approve_champion(
         f"models/{body.champion_key}",
         details={"version": body.version},
     )
-    return {"status": "approved", "champion": body.champion_key, "version": body.version}
+    return {
+        "status": "approved",
+        "champion": body.champion_key,
+        "version": body.version,
+    }
 
 
 @router.post("/models/rollback", dependencies=[Depends(require_roles("admin"))])
@@ -1380,15 +2027,26 @@ def rollback_champion(
     user: User = Depends(get_current_user),
 ):
     """One-click rollback of active champion to stable baseline (Admin only)."""
-    update_champion_file({
-        "champion_key": "boost",
-        "champion": "boost",
-        "selection_rule": "ADR-009 Balanced Profile MCDA",
-        "decision_strength": "none",
-        "margin": 0.009,
-        "runner_up": "svm",
-        "rollback": True,
-    })
+    update_champion_file(
+        _champion_payload(
+            "boost",
+            rollback=True,
+            approved_by=user.email,
+            approved_at=datetime.now(timezone.utc).isoformat(),
+        )
+    )
+
+    db.query(ModelVersion).update({ModelVersion.is_champion: 0})
+    target = (
+        db.query(ModelVersion)
+        .filter(ModelVersion.model_key == "boost", ModelVersion.status == "active")
+        .order_by(ModelVersion.trained_at.desc())
+        .first()
+    )
+    if target:
+        target.is_champion = 1
+        target.approved_by = user.email
+        target.approved_at = datetime.now(timezone.utc)
 
     log_audit_event(
         db,
@@ -1423,7 +2081,10 @@ def list_model_versions(
 
 
 # L5: Drift Monitoring & Feature Flags
-@router.get("/drift/status", dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "reviewer"))])
+@router.get(
+    "/drift/status",
+    dependencies=[Depends(require_roles("admin", "hr_manager", "analyst", "reviewer"))],
+)
 def get_drift_status(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -1435,20 +2096,22 @@ def get_drift_status(
         "training_hours": [20.0, 35.0, 40.0, 30.0, 50.0, 25.0, 38.0, 42.0],
         "projects_completed": [3.0, 5.0, 7.0, 6.0, 8.0, 4.0, 6.0, 7.0],
     }
-    recent_preds = db.query(Prediction).order_by(Prediction.timestamp.desc()).limit(100).all()
-    cur_data = {k: [] for k in ref_data.keys()}
+    recent_preds = (
+        db.query(Prediction).order_by(Prediction.timestamp.desc()).limit(100).all()
+    )
+    cur_data = {k: [] for k in ref_data}
     for p in recent_preds:
         try:
             d = json.loads(p.input_data)
-            for k in ref_data.keys():
+            for k in ref_data:
                 if k in d:
                     cur_data[k].append(float(d[k]))
         except Exception:
             pass
 
-    for k in ref_data.keys():
+    for k, reference_values in ref_data.items():
         if len(cur_data[k]) < 5:
-            cur_data[k] = [v * 1.02 for v in ref_data[k]]
+            cur_data[k] = [v * 1.02 for v in reference_values]
 
     report = assess_drift(ref_data, cur_data)
     return report
@@ -1479,7 +2142,10 @@ def update_feature_flags(
 
 
 # L6: PDF Reports
-@router.get("/reports/employee/{employee_id}/pdf", dependencies=[Depends(require_roles("admin", "hr_manager"))])
+@router.get(
+    "/reports/employee/{employee_id}/pdf",
+    dependencies=[Depends(require_roles("admin", "hr_manager"))],
+)
 def download_employee_report_pdf(
     employee_id: str,
     db: Session = Depends(get_db),
@@ -1492,29 +2158,41 @@ def download_employee_report_pdf(
         .order_by(Prediction.timestamp.desc())
         .first()
     )
+    employee_predictions = (
+        db.query(Prediction)
+        .filter(Prediction.employee_id == employee_id)
+        .order_by(Prediction.timestamp.desc())
+        .limit(len(MODEL_KEYS))
+        .all()
+    )
     champ_dict = {
         "model_key": pred.model_key if pred else "rf",
         "predicted_band": pred.predicted_band if pred else 1,
         "confidence": pred.confidence if pred else 0.85,
         "stability_score": pred.stability_score if pred else 78.4,
-        "conformal_set": json.loads(pred.conformal_set_json) if pred and pred.conformal_set_json else [1],
+        "conformal_set": (
+            json.loads(pred.conformal_set_json)
+            if pred and pred.conformal_set_json
+            else [1]
+        ),
     }
 
     pdf_bytes = generate_employee_pdf(
         employee_id=employee_id,
         champion_prediction=champ_dict,
         all_predictions=[
-            {"model_key": "rf", "predicted_band": 1, "probabilities": [0.1, 0.75, 0.15]},
-            {"model_key": "boost", "predicted_band": 1, "probabilities": [0.12, 0.72, 0.16]},
-            {"model_key": "knn", "predicted_band": 1, "probabilities": [0.2, 0.6, 0.2]},
+            {
+                "model_key": item.model_key,
+                "predicted_band": item.predicted_band,
+                "probabilities": [
+                    json.loads(item.probabilities_json).get("Low", 0.0),
+                    json.loads(item.probabilities_json).get("Medium", 0.0),
+                    json.loads(item.probabilities_json).get("High", 0.0),
+                ],
+            }
+            for item in employee_predictions
         ],
-        explanation={
-            "top_factors": [
-                {"name": "projects_completed", "importance": 0.32},
-                {"name": "attendance", "importance": 0.24},
-                {"name": "peer_feedback", "importance": -0.15},
-            ]
-        },
+        explanation=None,
     )
 
     log_audit_event(
@@ -1527,7 +2205,9 @@ def download_employee_report_pdf(
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=employee_{employee_id}_transparency.pdf"},
+        headers={
+            "Content-Disposition": f"attachment; filename=employee_{employee_id}_transparency.pdf"
+        },
     )
 
 
@@ -1541,7 +2221,15 @@ def download_comparison_report_pdf(
     lb_data = []
     if lb_file.exists():
         with open(lb_file, "r", encoding="utf-8") as f:
-            lb_data = json.load(f).get("leaderboard", [])
+            lb_json = json.load(f)
+            intervals = lb_json.get("confidence_intervals", {})
+            lb_data = []
+            for row in lb_json.get("metrics", []):
+                enriched = dict(row)
+                model_key = row.get("key")
+                if model_key in intervals:
+                    enriched.update(intervals[model_key])
+                lb_data.append(enriched)
 
     champ_file = Path("artifacts/v2/champion.json")
     champ_info = {"champion": "rf", "strength": "marginal", "margin": 0.031}
@@ -1549,7 +2237,9 @@ def download_comparison_report_pdf(
         with open(champ_file, "r", encoding="utf-8") as f:
             champ_info = json.load(f)
 
-    pdf_bytes = generate_comparison_pdf(leaderboard_data=lb_data, champion_info=champ_info)
+    pdf_bytes = generate_comparison_pdf(
+        leaderboard_data=lb_data, champion_info=champ_info
+    )
 
     log_audit_event(
         db,
@@ -1561,5 +2251,7 @@ def download_comparison_report_pdf(
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
-        headers={"Content-Disposition": "attachment; filename=talentscope_arena_comparison.pdf"},
+        headers={
+            "Content-Disposition": "attachment; filename=talentscope_arena_comparison.pdf"
+        },
     )

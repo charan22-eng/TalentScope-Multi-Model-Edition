@@ -3,12 +3,12 @@
     "check_id": "V6.8",
     "title": "single-predict p95 under 300 ms (independent script)",
     "status": "PASS",
-    "evidence": "100 single-predict calls: p50=79.49ms, p95=94.07ms, p99=111.28ms, max=121.21ms (threshold < 300ms)",
+    "evidence": "100 single-predict calls: p50=41.24ms, p95=67.05ms, p99=84.28ms, max=121.45ms (threshold < 300ms)",
     "metrics": {
-      "p50_ms": 79.49,
-      "p95_ms": 94.07,
-      "p99_ms": 111.28,
-      "max_ms": 121.21
+      "p50_ms": 41.24,
+      "p95_ms": 67.05,
+      "p99_ms": 84.28,
+      "max_ms": 121.45
     }
   },
   {
@@ -49,10 +49,10 @@
     "check_id": "V10.3",
     "title": "token and cookie settings",
     "status": "PASS",
-    "evidence": "JWT algorithm HS256, expiration 30m; decoded header/payload verified; Set-Cookie header present with HttpOnly and SameSite=lax",
+    "evidence": "JWT algorithm HS256, expiration 60m; decoded header/payload verified; Set-Cookie header present with HttpOnly and SameSite=lax",
     "metrics": {
       "algorithm": "HS256",
-      "expiry_minutes": 30,
+      "expiry_minutes": 60,
       "cookie_set": true
     }
   },
@@ -153,10 +153,23 @@
     "check_id": "V10.14",
     "title": "frontend guards",
     "status": "PASS",
-    "evidence": "React Router guards verified in App.tsx: ProtectedRoute checks localStorage token; all operational routes wrapped; unauthorized fallback presented",
+    "evidence": "React Router guards verified in App.tsx: ProtectedRoute checks localStorage token; 10 operational route(s) wrapped (/, /arena/*, /predict, /batch, /dashboard, /model-lab, /data-explorer, /methodology, /3d, /components); 0 unguarded; unauthorized fallback presented",
     "metrics": {
       "has_protected_route": true,
-      "all_routes_wrapped": true
+      "all_routes_wrapped": true,
+      "guarded_routes": [
+        "/",
+        "/arena/*",
+        "/predict",
+        "/batch",
+        "/dashboard",
+        "/model-lab",
+        "/data-explorer",
+        "/methodology",
+        "/3d",
+        "/components"
+      ],
+      "unguarded_routes": []
     }
   },
   {
@@ -173,13 +186,13 @@
     "check_id": "V13.3",
     "title": "load test",
     "status": "PASS",
-    "evidence": "50 concurrent requests (5 workers): 11.2 req/s, 0 errors, p95=522.16ms",
+    "evidence": "50 concurrent requests (5 workers): 15.6 req/s, 0 errors, p95=515.64ms",
     "metrics": {
       "total_requests": 50,
       "concurrency": 5,
-      "rps": 11.2,
+      "rps": 15.6,
       "errors": 0,
-      "p95_ms": 522.16
+      "p95_ms": 515.64
     }
   },
   {
@@ -190,7 +203,7 @@
     "metrics": {
       "global_pip_check_returncode": 1,
       "venv_pip_check_returncode": 0,
-      "npm_audit_returncode": 0,
+      "npm_audit_returncode": 1,
       "proposed_waiver": "PW-2"
     }
   },
@@ -198,7 +211,7 @@
     "check_id": "V13.5",
     "title": "static security (bandit) AND a secret scan over the full git history",
     "status": "PASS",
-    "evidence": "Full git history secret scan: 0 leaked AWS/SSH/GitHub keys found; Bandit AST check passed (safe standard library patterns)",
+    "evidence": "Full git history secret scan: 0 leaked AWS/SSH/GitHub keys found; Bandit static analysis completed: 0 high-severity issues",
     "metrics": {
       "git_secret_leaks": 0,
       "bandit_clean": true

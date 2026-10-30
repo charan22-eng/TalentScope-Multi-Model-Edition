@@ -5,44 +5,20 @@ import { ShieldCheck } from 'lucide-react';
 
 interface FairnessRecord {
   modelKey: string;
-  genderDisparity: number;
-  ageDisparity: number;
-  ethnicityDisparity: number;
+  disparityRatio: number;
   passedFourFifths: boolean;
 }
 
 interface RobustnessRecord {
   modelKey: string;
-  cleanF1: number;
-  noise5PctF1: number;
-  missing10PctF1: number;
-  degradationPct: number;
-  splitSeedStd: number;
+  noiseDropPct: number;
+  missingDropPct: number;
 }
 
-const SAMPLE_FAIRNESS: FairnessRecord[] = [
-  { modelKey: 'rf', genderDisparity: 0.94, ageDisparity: 0.91, ethnicityDisparity: 0.88, passedFourFifths: true },
-  { modelKey: 'boost', genderDisparity: 0.92, ageDisparity: 0.89, ethnicityDisparity: 0.86, passedFourFifths: true },
-  { modelKey: 'svm', genderDisparity: 0.93, ageDisparity: 0.90, ethnicityDisparity: 0.87, passedFourFifths: true },
-  { modelKey: 'knn', genderDisparity: 0.88, ageDisparity: 0.85, ethnicityDisparity: 0.83, passedFourFifths: true },
-  { modelKey: 'logreg', genderDisparity: 0.96, ageDisparity: 0.93, ethnicityDisparity: 0.90, passedFourFifths: true },
-  { modelKey: 'dt', genderDisparity: 0.86, ageDisparity: 0.82, ethnicityDisparity: 0.81, passedFourFifths: true },
-  { modelKey: 'linreg', genderDisparity: 0.95, ageDisparity: 0.92, ethnicityDisparity: 0.89, passedFourFifths: true },
-];
-
-const SAMPLE_ROBUSTNESS: RobustnessRecord[] = [
-  { modelKey: 'rf', cleanF1: 0.780, noise5PctF1: 0.768, missing10PctF1: 0.752, degradationPct: 3.6, splitSeedStd: 0.008 },
-  { modelKey: 'boost', cleanF1: 0.804, noise5PctF1: 0.775, missing10PctF1: 0.760, degradationPct: 5.5, splitSeedStd: 0.012 },
-  { modelKey: 'svm', cleanF1: 0.816, noise5PctF1: 0.792, missing10PctF1: 0.774, degradationPct: 5.1, splitSeedStd: 0.010 },
-  { modelKey: 'knn', cleanF1: 0.754, noise5PctF1: 0.710, missing10PctF1: 0.690, degradationPct: 8.5, splitSeedStd: 0.014 },
-  { modelKey: 'logreg', cleanF1: 0.719, noise5PctF1: 0.708, missing10PctF1: 0.695, degradationPct: 3.3, splitSeedStd: 0.007 },
-  { modelKey: 'dt', cleanF1: 0.709, noise5PctF1: 0.665, missing10PctF1: 0.640, degradationPct: 9.7, splitSeedStd: 0.019 },
-  { modelKey: 'linreg', cleanF1: 0.703, noise5PctF1: 0.694, missing10PctF1: 0.680, degradationPct: 3.2, splitSeedStd: 0.006 },
-];
-
 export function ArenaFairnessRobustness() {
-  const [fairness, setFairness] = useState<FairnessRecord[]>(SAMPLE_FAIRNESS);
-  const [robustness, setRobustness] = useState<RobustnessRecord[]>(SAMPLE_ROBUSTNESS);
+  const [fairness, setFairness] = useState<FairnessRecord[]>([]);
+  const [robustness, setRobustness] = useState<RobustnessRecord[]>([]);
+  const [auditAttribute, setAuditAttribute] = useState('audit attribute');
 
   useEffect(() => {
     async function loadData() {
@@ -51,8 +27,17 @@ export function ArenaFairnessRobustness() {
           apiV2.getCompare('fairness'),
           apiV2.getCompare('robustness'),
         ]);
-        if (fData?.records) setFairness(fData.records);
-        if (rData?.records) setRobustness(rData.records);
+        const fairnessData = fData as unknown as { audit_attribute?: string; disparity_ratios?: Record<string, number>; parity_tolerance?: number };
+        const robustnessData = rData as unknown as { noise_stress_5pct_f1_drop?: Record<string, number>; missing_stress_10pct_f1_drop?: Record<string, number> };
+        if (fairnessData?.disparity_ratios) {
+          setAuditAttribute(String(fairnessData.audit_attribute || 'audit attribute'));
+          setFairness(Object.entries(fairnessData.disparity_ratios).map(([modelKey, ratio]) => ({ modelKey, disparityRatio: ratio, passedFourFifths: ratio >= Number(fairnessData.parity_tolerance || 0.8) })));
+        }
+        if (robustnessData?.noise_stress_5pct_f1_drop && robustnessData?.missing_stress_10pct_f1_drop) {
+          const noise = robustnessData.noise_stress_5pct_f1_drop;
+          const missing = robustnessData.missing_stress_10pct_f1_drop;
+          setRobustness(Object.keys(noise).map((modelKey) => ({ modelKey, noiseDropPct: noise[modelKey] * 100, missingDropPct: (missing[modelKey] || 0) * 100 })));
+        }
       } catch (e) {
         console.warn('Using baseline fairness and robustness data', e);
       }
@@ -78,11 +63,11 @@ export function ArenaFairnessRobustness() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
           <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Demographic Disparity Ratios (Audit-Only)</h3>
           <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 700 }}>
-            All 7 Models Meet 4/5ths (0.80) Minimum Rule
+            {fairness.filter((item) => item.passedFourFifths).length} / {fairness.length || 0} Models Meet 4/5ths (0.80) Minimum Rule
           </span>
         </div>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 1rem 0' }}>
-          Ratio of selection rate (High band) in protected group relative to reference baseline. Protected attributes are permanently isolated from model training (Guard G2).
+          Ratio of selection rate (High band) for the audit slice ({auditAttribute}) relative to the reference baseline. Protected attributes are isolated from model training (Guard G2).
         </p>
 
         <div style={{ overflowX: 'auto' }}>
@@ -90,9 +75,7 @@ export function ArenaFairnessRobustness() {
             <thead>
               <tr>
                 <th style={{ padding: '0.6rem', textAlign: 'left', borderBottom: '2px solid var(--border-color)' }}>Model</th>
-                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>Gender Disparity Ratio</th>
-                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>Age Disparity Ratio</th>
-                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>Ethnicity Disparity Ratio</th>
+                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>Disparity Ratio</th>
                 <th style={{ padding: '0.6rem', textAlign: 'center', borderBottom: '2px solid var(--border-color)' }}>Compliance Status</th>
               </tr>
             </thead>
@@ -100,16 +83,10 @@ export function ArenaFairnessRobustness() {
               {fairness.map(f => (
                 <tr key={f.modelKey} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '0.6rem' }}>
-                    <ModelChip modelKey={f.modelKey} size="sm" showChampionBadge={f.modelKey === 'rf'} />
+                    <ModelChip modelKey={f.modelKey} size="sm" showChampionBadge={f.modelKey === 'boost'} />
                   </td>
                   <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
-                    {f.genderDisparity.toFixed(2)}
-                  </td>
-                  <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
-                    {f.ageDisparity.toFixed(2)}
-                  </td>
-                  <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
-                    {f.ethnicityDisparity.toFixed(2)}
+                    {f.disparityRatio.toFixed(2)}
                   </td>
                   <td style={{ padding: '0.6rem', textAlign: 'center' }}>
                     <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>
@@ -135,33 +112,21 @@ export function ArenaFairnessRobustness() {
             <thead>
               <tr>
                 <th style={{ padding: '0.6rem', textAlign: 'left', borderBottom: '2px solid var(--border-color)' }}>Model</th>
-                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>Clean Macro-F1</th>
-                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>5% Gaussian Noise</th>
-                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>10% Missing Drop</th>
-                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>Total Drop</th>
-                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>Split Seed $\sigma$</th>
+                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>5% Noise F1 Drop</th>
+                <th style={{ padding: '0.6rem', textAlign: 'right', borderBottom: '2px solid var(--border-color)' }}>10% Missing F1 Drop</th>
               </tr>
             </thead>
             <tbody>
               {robustness.map(r => (
                 <tr key={r.modelKey} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '0.6rem' }}>
-                    <ModelChip modelKey={r.modelKey} size="sm" showChampionBadge={r.modelKey === 'rf'} />
+                    <ModelChip modelKey={r.modelKey} size="sm" showChampionBadge={r.modelKey === 'boost'} />
                   </td>
                   <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                    {r.cleanF1.toFixed(3)}
+                    {r.noiseDropPct.toFixed(1)}%
                   </td>
                   <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                    {r.noise5PctF1.toFixed(3)}
-                  </td>
-                  <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                    {r.missing10PctF1.toFixed(3)}
-                  </td>
-                  <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace', color: r.degradationPct <= 4.0 ? '#10b981' : '#f59e0b', fontWeight: 600 }}>
-                    -{r.degradationPct.toFixed(1)}%
-                  </td>
-                  <td style={{ padding: '0.6rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                    ±{r.splitSeedStd.toFixed(3)}
+                    {r.missingDropPct.toFixed(1)}%
                   </td>
                 </tr>
               ))}

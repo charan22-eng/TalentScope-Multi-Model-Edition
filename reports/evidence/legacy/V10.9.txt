@@ -1,12 +1,12 @@
 === V10.9 REVIEW REASONS MANDATORY VERIFICATION ===
 1. Negative Test: Override Without Reason
-POST /api/v2/review/test-v109-item-78f7c445-049e-4d8d-b250-7b3c9145420c/decision
+POST /api/v2/review/test-v109-item-712dd003-79d0-4e5e-ac64-9a688b3b57e8/decision
 Payload: {"decision_band": 2, "override_reason": ""}
 Status Code: 422 Unprocessable Entity (Rejected)
 Response Body: {"type":"about:blank","title":"Override Reason Mandatory","status":422,"detail":"An override_reason is required when overturning the model's recommendation."}
 
 2. Positive Test: Override With Valid Justification
-POST /api/v2/review/test-v109-item-78f7c445-049e-4d8d-b250-7b3c9145420c/decision
+POST /api/v2/review/test-v109-item-712dd003-79d0-4e5e-ac64-9a688b3b57e8/decision
 Payload: {"decision_band": 2, "override_reason": "High strategic delivery..."}
 Status Code: 200 OK (Accepted)
-Response Body: {"status":"success","review_id":"test-v109-item-78f7c445-049e-4d8d-b250-7b3c9145420c","decision_id":"0793b7e9-f1a9-4b26-b5b0-e3f8479f2314","decision_band":"High"}
+Response Body: {"status":"success","review_id":"test-v109-item-712dd003-79d0-4e5e-ac64-9a688b3b57e8","decision_id":"5b43c41a-d723-430a-b0dd-9c38fb79a2d3","decision_band":"High"}

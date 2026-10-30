@@ -10,7 +10,7 @@ class LLMConfig:
     enabled: bool = True
     provider: Literal["ollama", "openai_compat"] = "ollama"
     base_url: str = "http://localhost:11434"
-    model: str = ""
+    model: str = "llama3.1:latest"
     temperature: float = 0.0
     seed: int = 42
     num_ctx: int = 8192
@@ -29,7 +29,7 @@ def get_llm_config() -> LLMConfig:
         provider = "ollama"
 
     base_url = os.getenv("LLM_BASE_URL", "http://localhost:11434")
-    model = os.getenv("LLM_MODEL", "")
+    model = os.getenv("LLM_MODEL", "llama3.1:latest")
 
     try:
         temperature = float(os.getenv("LLM_TEMPERATURE", "0.0"))
@@ -59,7 +59,9 @@ def get_llm_config() -> LLMConfig:
     allow_remote_str = os.getenv("LLM_ALLOW_REMOTE", "false").lower()
     allow_remote = allow_remote_str in ("true", "1", "yes")
 
-    prov: Literal["ollama", "openai_compat"] = "openai_compat" if provider == "openai_compat" else "ollama"
+    prov: Literal["ollama", "openai_compat"] = (
+        "openai_compat" if provider == "openai_compat" else "ollama"
+    )
 
     return LLMConfig(
         enabled=enabled,

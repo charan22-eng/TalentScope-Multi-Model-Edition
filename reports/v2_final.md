@@ -1,7 +1,7 @@
 # TalentScope Multi-Model Final Evaluation Report (v2)
 
 **Variant Evaluated**: `nonlinear` | **Holdout Test Set Size**: 2,381 rows
-**Generated**: 2026-10-13 20:40:25 UTC
+**Generated**: 2026-10-30 05:57:21 UTC
 
 ## 1. Classification Leaderboard (Sorted by Primary Metric: Macro-F1)
 

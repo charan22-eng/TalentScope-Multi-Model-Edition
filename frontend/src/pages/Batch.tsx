@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { ModelChip } from '../components/ui/ModelChip';
 import { ClassChip } from '../components/ui/ClassChip';
 import { Download, Filter, Upload, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { apiV2 } from '../lib/api-client-v2';
 
 interface BatchRow {
   rowId: number;
@@ -22,24 +23,6 @@ interface BatchRow {
 
 const MODEL_KEYS = ['rf', 'boost', 'dt', 'knn', 'svm', 'logreg', 'linreg'];
 
-// Client-side heuristic simulation for fast 5,000-row batch demonstration
-function simulatePredictions(attendance: number, projects: number, prev_score: number): Record<string, 'Low' | 'Medium' | 'High'> {
-  const score = (attendance * 0.4) + (projects * 2.5) + (prev_score * 8);
-  const baseBand: 'Low' | 'Medium' | 'High' = score > 85 ? 'High' : score > 65 ? 'Medium' : 'Low';
-
-  // Introduce model-specific variance around boundaries
-  const res: Record<string, 'Low' | 'Medium' | 'High'> = {
-    rf: baseBand,
-    boost: baseBand,
-    dt: score > 84 ? 'High' : score > 66 ? 'Medium' : 'Low',
-    knn: score > 86 ? 'High' : score > 64 ? 'Medium' : 'Low',
-    svm: baseBand,
-    logreg: score > 87 ? 'High' : score > 63 ? 'Medium' : 'Low',
-    linreg: score > 85.5 ? 'High' : score > 64.5 ? 'Medium' : 'Low',
-  };
-  return res;
-}
-
 export default function BatchPage() {
   const [selectedModel, setSelectedModel] = useState<string>('all');
   const [disagreementOnly, setDisagreementOnly] = useState<boolean>(false);
@@ -51,112 +34,58 @@ export default function BatchPage() {
   const [fileName, setFileName] = useState<string>('');
   const [processing, setProcessing] = useState<boolean>(false);
 
-  // Generate sample 500-row test dataset on demand
-  const handleGenerateSample = () => {
+  const processFile = async (file: File) => {
     setProcessing(true);
-    setFileName('sample_talent_batch_500.csv');
-    setTimeout(() => {
-      const generated: BatchRow[] = [];
-      const departments = ['Engineering', 'Sales', 'HR', 'Marketing', 'Finance'];
-      const levels = ['Junior', 'Mid', 'Senior', 'Lead'];
-
-      for (let i = 1; i <= 500; i++) {
-        const attendance = Math.floor(60 + Math.random() * 40);
-        const projects = Math.floor(1 + Math.random() * 12);
-        const prev_score = Math.floor(1 + Math.random() * 5);
-        const weekly = Math.floor(35 + Math.random() * 20);
-        const exp = Number((1 + Math.random() * 15).toFixed(1));
-        const dept = departments[i % departments.length];
-        const lvl = levels[i % levels.length];
-
-        const preds = simulatePredictions(attendance, projects, prev_score);
-        const uniquePreds = new Set(Object.values(preds));
-        const hasDisagreement = uniquePreds.size > 1;
-
-        // Consensus is modal prediction
-        const counts: Record<string, number> = { Low: 0, Medium: 0, High: 0 };
-        Object.values(preds).forEach(p => counts[p]++);
-        const consensus = (Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b)) as 'Low' | 'Medium' | 'High';
-
-        generated.push({
-          rowId: i,
-          attendance,
-          experience_years: exp,
-          training_hours: Math.floor(10 + Math.random() * 50),
-          projects_completed: projects,
-          weekly_hours: weekly,
-          prev_score,
-          department: dept,
-          job_level: lvl,
-          predictions: preds,
+    setFileName(file.name);
+    try {
+      const result = await apiV2.batchPredict(file, selectedModel === 'all' ? 'all' : selectedModel);
+      const parsed = (result.results || []).map((item): BatchRow | null => {
+        if (!item) return null;
+        const predictions = item.predictions || { [result.model_key]: item.predicted_band || 'Unknown' };
+        const values = Object.values(predictions);
+        const counts = values.reduce<Record<string, number>>((acc, value) => {
+          acc[value] = (acc[value] || 0) + 1;
+          return acc;
+        }, {});
+        const consensus = (Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Medium') as BatchRow['consensus'];
+        return {
+          rowId: Number(item.row) + 1,
+          attendance: 0,
+          experience_years: 0,
+          training_hours: 0,
+          projects_completed: 0,
+          weekly_hours: 0,
+          prev_score: 0,
+          department: '',
+          job_level: '',
+          predictions: predictions as BatchRow['predictions'],
           consensus,
-          hasDisagreement,
+          hasDisagreement: new Set(values).size > 1,
           isValid: true,
-        });
-      }
-      setRows(generated);
-      setProcessing(false);
+        };
+      }).filter((row): row is BatchRow => row !== null);
+      setRows(parsed);
       setPage(1);
-    }, 200);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleGenerateSample = async () => {
+    const headers = ['attendance', 'experience_years', 'training_hours', 'projects_completed', 'weekly_hours', 'prev_score', 'department', 'job_level'];
+    const departments = ['Engineering', 'Sales', 'HR', 'Marketing', 'Finance'];
+    const levels = ['Junior', 'Mid', 'Senior', 'Lead'];
+    const lines = [headers.join(',')];
+    for (let i = 0; i < 500; i += 1) {
+      lines.push([85 + (i % 15), 1 + (i % 12), 10 + (i % 50), 1 + (i % 12), 35 + (i % 20), 1 + (i % 5), departments[i % departments.length], levels[i % levels.length]].join(','));
+    }
+    await processFile(new File([lines.join('\n')], 'sample_talent_batch_500.csv', { type: 'text/csv' }));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setFileName(file.name);
-    setProcessing(true);
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-      if (lines.length <= 1) {
-        setProcessing(false);
-        return;
-      }
-
-      const parsed: BatchRow[] = [];
-      // Skip header line
-      for (let i = 1; i < lines.length && i <= 5000; i++) {
-        const parts = lines[i].split(',').map(p => p.trim());
-        const attendance = Number(parts[0]) || 80;
-        const exp = Number(parts[1]) || 3;
-        const training = Number(parts[2]) || 20;
-        const projects = Number(parts[3]) || 5;
-        const weekly = Number(parts[4]) || 40;
-        const prev = Number(parts[5]) || 3;
-        const dept = parts[6] || 'Engineering';
-        const lvl = parts[7] || 'Mid';
-
-        const preds = simulatePredictions(attendance, projects, prev);
-        const uniquePreds = new Set(Object.values(preds));
-        const hasDisagreement = uniquePreds.size > 1;
-
-        const counts: Record<string, number> = { Low: 0, Medium: 0, High: 0 };
-        Object.values(preds).forEach(p => counts[p]++);
-        const consensus = (Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b)) as 'Low' | 'Medium' | 'High';
-
-        parsed.push({
-          rowId: i,
-          attendance,
-          experience_years: exp,
-          training_hours: training,
-          projects_completed: projects,
-          weekly_hours: weekly,
-          prev_score: prev,
-          department: dept,
-          job_level: lvl,
-          predictions: preds,
-          consensus,
-          hasDisagreement,
-          isValid: true,
-        });
-      }
-      setRows(parsed);
-      setProcessing(false);
-      setPage(1);
-    };
-    reader.readAsText(file);
+    void processFile(file);
   };
 
   const filteredRows = useMemo(() => {
@@ -181,6 +110,11 @@ export default function BatchPage() {
 
   const handleExportCSV = () => {
     if (rows.length === 0) return;
+    const csvCell = (value: unknown) => {
+      const text = String(value ?? '');
+      const safe = /^[=+@]/.test(text) || (/^-/.test(text) && !/^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(text)) ? `'${text}` : text;
+      return /[",\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+    };
     const headers = [
       'row_id', 'attendance', 'experience_years', 'training_hours', 'projects_completed',
       'weekly_hours', 'prev_score', 'department', 'job_level',
@@ -188,7 +122,7 @@ export default function BatchPage() {
       'consensus', 'has_disagreement'
     ];
 
-    const csvLines = [headers.join(',')];
+    const csvLines = [headers.map(csvCell).join(',')];
     rows.forEach(r => {
       const line = [
         r.rowId, r.attendance, r.experience_years, r.training_hours, r.projects_completed,
@@ -196,7 +130,7 @@ export default function BatchPage() {
         ...MODEL_KEYS.map(k => r.predictions[k]),
         r.consensus, r.hasDisagreement
       ];
-      csvLines.push(line.join(','));
+      csvLines.push(line.map(csvCell).join(','));
     });
 
     const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
@@ -209,17 +143,17 @@ export default function BatchPage() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem 0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem 0' }}>
       {/* Header */}
-      <div style={{ background: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Batch Inference & Consensus Auditing</h1>
-        <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+      <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800 }}>Batch Inference & Consensus Auditing</h1>
+        <p style={{ margin: '0.35rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
           Evaluate up to 5,000 employee profiles simultaneously across all 7 machine learning models with automated disagreement detection.
         </p>
       </div>
 
       {/* Upload & Controls */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
+      <div className="glass-panel" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem' }}>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <label
             style={{

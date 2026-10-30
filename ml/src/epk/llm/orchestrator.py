@@ -16,7 +16,9 @@ def generate_verdict(
     packet: Dict[str, Any],
     audience: str = "HR",
     profile: Optional[Dict[str, Any]] = None,
-    mode: Literal["verdict", "why_not", "second_opinion", "audience_rewrite"] = "verdict",
+    mode: Literal[
+        "verdict", "why_not", "second_opinion", "audience_rewrite"
+    ] = "verdict",
     focus_model: Optional[str] = None,
     prior_verdict: Optional[Dict[str, Any]] = None,
     use_cache: bool = True,
@@ -27,7 +29,10 @@ def generate_verdict(
     start_time = time.perf_counter()
 
     if profile is None:
-        profile = packet.get("profile", {"name": "Balanced"})
+        packet_profile = packet.get("profile")
+        profile = (
+            packet_profile if isinstance(packet_profile, dict) else {"name": "Balanced"}
+        )
     profile_name = profile.get("name", "Custom")
 
     packet_hash = packet.get("checksum", "unknown_hash")
@@ -48,7 +53,11 @@ def generate_verdict(
     if use_cache:
         cached = cache.get(cache_key)
         if cached is not None:
-            return cached
+            cached_output = cached.get("output")
+            if isinstance(cached_output, dict) and not validate_verdict(
+                cached_output, packet
+            ):
+                return cached
 
     # If LLM is not provided or disabled, return template fallback immediately
     if llm is None:
@@ -62,7 +71,9 @@ def generate_verdict(
             mode=mode,
             source="template",
             output=tpl_output,
-            validation_history=[["LLM runtime not configured or disabled; template fallback used"]],
+            validation_history=[
+                ["LLM runtime not configured or disabled; template fallback used"]
+            ],
             latency_s=time.perf_counter() - start_time,
         )
         return record
@@ -93,6 +104,10 @@ def generate_verdict(
             history.append(violations)
             continue
 
+        if not isinstance(parsed_output, dict):
+            violations = ["LLM output was not a JSON object"]
+            history.append(violations)
+            continue
         violations = validate_verdict(parsed_output, packet)
         history.append(violations)
 

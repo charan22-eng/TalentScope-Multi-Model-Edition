@@ -4,37 +4,27 @@ import { BumpChart, type VariantRanking } from '../../components/charts/BumpChar
 import { ModelChip } from '../../components/ui/ModelChip';
 import { GitBranch, AlertTriangle } from 'lucide-react';
 
-const SAMPLE_RANKINGS: VariantRanking[] = [
-  { modelKey: 'rf', linearRank: 4, nonlinearRank: 3, noisyRank: 1 },
-  { modelKey: 'svm', linearRank: 3, nonlinearRank: 1, noisyRank: 3 },
-  { modelKey: 'boost', linearRank: 2, nonlinearRank: 2, noisyRank: 2 },
-  { modelKey: 'knn', linearRank: 5, nonlinearRank: 4, noisyRank: 5 },
-  { modelKey: 'linreg', linearRank: 1, nonlinearRank: 7, noisyRank: 6 },
-  { modelKey: 'logreg', linearRank: 6, nonlinearRank: 5, noisyRank: 4 },
-  { modelKey: 'dt', linearRank: 7, nonlinearRank: 6, noisyRank: 7 },
-];
-
 export function ArenaSensitivity() {
-  const [rankings, setRankings] = useState<VariantRanking[]>(SAMPLE_RANKINGS);
+  const [rankings, setRankings] = useState<VariantRanking[]>([]);
   const [kendallTau, setKendallTau] = useState<{
     linearVsNonlinear: number;
     nonlinearVsNoisy: number;
-  }>({
-    linearVsNonlinear: 0.428,
-    nonlinearVsNoisy: 0.714,
-  });
+  }>({ linearVsNonlinear: 0, nonlinearVsNoisy: 0 });
   const [calSensitivity, setCalSensitivity] = useState<any>(null);
   const [activeCalScenario, setActiveCalScenario] = useState<'calibration_removed' | 'raw_calibration'>('calibration_removed');
 
   useEffect(() => {
     async function loadSensitivity() {
       try {
-        const data = await apiV2.getCompare('sensitivity');
+        const data = await apiV2.getCompare('sensitivity') as unknown as { rankings?: VariantRanking[]; kendall_tau?: { linearVsNonlinear?: number; nonlinearVsNoisy?: number }; calibration_sensitivity?: unknown };
         if (data?.rankings) {
           setRankings(data.rankings);
         }
         if (data?.kendall_tau) {
-          setKendallTau(data.kendall_tau);
+          setKendallTau({
+            linearVsNonlinear: data.kendall_tau.linearVsNonlinear ?? 0,
+            nonlinearVsNoisy: data.kendall_tau.nonlinearVsNoisy ?? 0,
+          });
         }
         if (data?.calibration_sensitivity) {
           setCalSensitivity(data.calibration_sensitivity);
@@ -127,7 +117,7 @@ export function ArenaSensitivity() {
                 {rankings.map(r => (
                   <tr key={r.modelKey} style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.6rem' }}>
-                      <ModelChip modelKey={r.modelKey} size="sm" showChampionBadge={r.modelKey === 'rf'} />
+                      <ModelChip modelKey={r.modelKey} size="sm" showChampionBadge={r.modelKey === 'boost'} />
                     </td>
                     <td style={{ padding: '0.6rem', textAlign: 'center', fontWeight: r.linearRank === 1 ? 700 : 400 }}>
                       #{r.linearRank}

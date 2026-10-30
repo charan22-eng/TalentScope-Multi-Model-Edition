@@ -659,7 +659,7 @@ export interface components {
             provider: string | null;
             /**
              * Model
-             * @default qwen2.5:7b-instruct
+             * @default llama3.1:latest
              */
             model: string | null;
             /**

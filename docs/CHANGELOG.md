@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Employee transparency and appeal endpoints (`/api/v2/transparency/*`).
   - Governed retrain-all pipeline (`/api/v2/retrain`) with automated champion proposal and cryptographic rollback (`/api/v2/models/rollback`).
   - Population Stability Index (PSI) and Kolmogorov-Smirnov (KS) feature drift detection (`/api/v2/drift/status`).
-  - Real-time shadow mode inference comparing runner-up model (`boost`) with champion (`rf`).
+  - Real-time shadow mode inference comparing runner-up model (`svm`) with champion (`boost`).
   - Server-side PDF report generation (ReportLab) with mandatory ethics notices.
 - **Frontend Modern Web Application**:
   - React 19 + TypeScript + Vite + Tailwind CSS with Okabe-Ito accessible color palette.

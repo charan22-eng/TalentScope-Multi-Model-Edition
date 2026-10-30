@@ -7,4 +7,25 @@ GitHub Personal Access Token Regex: Clean (0 matches)
 Total Leaks Detected: 0
 
 2. Bandit AST Security Scan on backend/:
-C:\Program Files\Python311\python.exe: No module named bandit
+Run started:2026-10-27 14:51:16.550655+00:00
+
+Test results:
+	No issues identified.
+
+Code scanned:
+	Total lines of code: 4538
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 199
+		Medium: 0
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 8
+		High: 191
+Files skipped (0):

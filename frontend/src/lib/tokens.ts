@@ -57,22 +57,22 @@ export const MODEL_TOKENS: Record<string, ModelToken> = {
   },
   rf: {
     key: 'rf',
-    name: 'Random Forest (Champion)',
+    name: 'Random Forest',
     family: 'ensemble',
     color: '#D55E00',
     marker: '★',
     markerShape: 'star',
     explainTier: 'partial',
-    isChampion: true,
   },
   boost: {
     key: 'boost',
-    name: 'Histogram Gradient Boosting',
+    name: 'Histogram Gradient Boosting (Champion)',
     family: 'boosting',
     color: '#CC79A7',
     marker: '✚',
     markerShape: 'cross',
     explainTier: 'partial',
+    isChampion: true,
   },
 };
 

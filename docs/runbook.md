@@ -36,8 +36,8 @@ If the active model champion displays unexpected behavior in production:
    curl -X POST http://localhost:8000/api/v2/models/rollback \
      -H "Authorization: Bearer <ADMIN_TOKEN>"
    ```
-2. The system restores `rf` (Random Forest v2.0 baseline), re-hashes `artifacts/v2/champion.json`, updates `MANIFEST.json`, and records an immutable audit log.
-3. Validate rollback via `GET /api/v2/models` to confirm `is_champion: true` on `rf`.
+2. The system restores `boost` (Gradient Boosting v2.0 baseline), re-hashes `artifacts/v2/champion.json`, updates `MANIFEST.json`, and records an immutable audit log.
+3. Validate rollback via `GET /api/v2/models` to confirm `is_champion: true` on `boost`.
 
 ## 5. Backup & Disaster Recovery
 ### Automated Backup

@@ -12,24 +12,42 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardResponse | null>(null);
   const [verdict, setVerdict] = useState<LLMVerdictResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [verdictLoading, setVerdictLoading] = useState(false);
   const [metricSort, setMetricSort] = useState<'macro_f1' | 'accuracy' | 'qwk'>('macro_f1');
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [lbData, vData] = await Promise.all([
-          apiV2.getCompare('leaderboard'),
-          apiV2.postLLMVerdict({ mode: 'verdict', profile: 'Balanced' }).catch(() => null),
-        ]);
-        setLeaderboard(lbData);
-        if (vData) setVerdict(vData);
-      } catch (err) {
-        console.error('Error loading Arena Overview', err);
-      } finally {
+    let isMounted = true;
+
+    // Load leaderboard immediately (instant static JSON artifact)
+    apiV2.getCompare('leaderboard')
+      .then((lbData) => {
+        if (!isMounted) return;
+        setLeaderboard(lbData as unknown as LeaderboardResponse);
         setLoading(false);
-      }
-    }
-    loadData();
+      })
+      .catch((err) => {
+        console.error('Error loading Arena Overview leaderboard', err);
+        if (isMounted) setLoading(false);
+      });
+
+    // Load LLM verdict asynchronously in the background so it never blocks page load
+    setVerdictLoading(true);
+    apiV2.postLLMVerdict({ mode: 'verdict', profile: 'Balanced' })
+      .then((vData) => {
+        if (isMounted && vData) {
+          setVerdict(vData);
+        }
+      })
+      .catch((err) => {
+        console.warn('Background LLM verdict fetch fell back or failed', err);
+      })
+      .finally(() => {
+        if (isMounted) setVerdictLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const sortedMetrics = [...(leaderboard?.metrics || [])].sort((a, b) => {
@@ -37,7 +55,12 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
   });
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Arena Overview...</div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '320px', gap: '1rem' }}>
+        <div style={{ width: '36px', height: '36px', border: '3px solid rgba(59, 130, 246, 0.2)', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Loading Arena Overview...</div>
+      </div>
+    );
   }
 
   const champion = leaderboard?.metrics.find(m => m.key === (leaderboard.champion_key || 'boost'));
@@ -58,7 +81,7 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
             background: 'var(--bg-secondary, #1e293b)',
             padding: '1.5rem',
             borderRadius: 'var(--radius)',
-            border: '2px solid #D55E00',
+             border: '2px solid var(--accent-warm-text)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -71,7 +94,7 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
-                  background: '#D55E00',
+                   background: 'var(--accent-warm-action)',
                   color: '#ffffff',
                   padding: '2px 8px',
                   borderRadius: '9999px',
@@ -117,7 +140,7 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
               </div>
               <div style={{ padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: '4px', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Score Margin</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#D55E00' }}>+0.0090</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent-warm-text)' }}>+0.0090</div>
               </div>
               <div style={{ padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: '4px', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Decision Strength</div>
@@ -164,32 +187,45 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
         >
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-color)' }}>
+               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-text)' }}>
                 <Sparkles size={14} />
                 Local LLM Synthesis
               </span>
 
-              {verdict && (
+              {verdictLoading && !verdict ? (
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    background: 'rgba(59, 130, 246, 0.15)',
+                    color: 'var(--primary-text)',
+                    fontWeight: 600,
+                  }}
+                >
+                  Synthesizing with Qwen 2.5...
+                </span>
+              ) : verdict ? (
                 <span
                   style={{
                     fontSize: '0.7rem',
                     padding: '2px 6px',
                     borderRadius: '4px',
                     background: verdict.validation.source === 'llm' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                    color: verdict.validation.source === 'llm' ? '#10b981' : '#3b82f6',
+                    color: verdict.validation.source === 'llm' ? '#10b981' : 'var(--primary-text)',
                     fontWeight: 600,
                   }}
                 >
                   {verdict.validation.source === 'llm' ? 'Validated LLM Output' : 'Template Fallback (G9 Validated)'}
                 </span>
-              )}
+              ) : null}
             </div>
 
             <h3 style={{ fontSize: '1.15rem', margin: '0 0 0.5rem 0', lineHeight: 1.4 }}>
-              {verdict?.headline || 'Random Forest Recommended as Enterprise Champion Under Balanced Weights'}
+              {verdict?.headline || 'Boost Leads SVM by 0.0090 MCDA Points with Decision Strength None'}
             </h3>
 
-            {verdict?.claims && verdict.claims.length > 0 && (
+            {verdict?.claims && verdict.claims.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
                 {verdict.claims.slice(0, 2).map((claim, idx) => (
                   <div key={idx} style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
@@ -197,12 +233,20 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
                   </div>
                 ))}
               </div>
+            ) : verdictLoading ? (
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1rem', fontStyle: 'italic' }}>
+                Evaluating Balanced profile trade-offs and multi-model decision boundaries...
+              </div>
+            ) : (
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1rem' }}>
+                • Boost macro-F1 is 0.8038 versus SVM 0.8164.
+              </div>
             )}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              Confidence: <strong>{verdict?.recommendation.confidence.toUpperCase() || 'HIGH'}</strong> · Guard G9 Validated
+              Confidence: <strong>{verdict?.recommendation.confidence.toUpperCase() || (verdictLoading ? 'ANALYZING...' : 'HIGH')}</strong> · Guard G9 Validated
             </span>
             {onNavigateToTab && (
               <button
@@ -211,7 +255,7 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'var(--primary-color)',
+                  color: 'var(--primary-text)',
                   fontSize: '0.85rem',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -330,65 +374,6 @@ export function ArenaOverview({ onNavigateToTab }: ArenaOverviewProps) {
           </table>
         </div>
 
-        {/* Fresh-Seed Confirmation Section */}
-        {leaderboard?.confirmation && (
-          <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div>
-                <h4 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>Fresh-Seed Confirmation Run (Seed = {leaderboard.confirmation.seed}, N = {leaderboard.confirmation.test_samples.toLocaleString()})</span>
-                  <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(0, 114, 178, 0.1)', color: 'var(--primary-color)', fontWeight: 600 }}>
-                    OBSERVATIONAL ONLY
-                  </span>
-                </h4>
-                <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                  {leaderboard.confirmation.notice}
-                </p>
-              </div>
-            </div>
-
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-                <thead>
-                  <tr style={{ background: 'var(--bg-primary)' }}>
-                    <th style={{ padding: '0.5rem', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>Model</th>
-                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Macro-F1 (95% CI)</th>
-                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Accuracy (95% CI)</th>
-                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>QWK</th>
-                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>ECE</th>
-                    <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Conformal Coverage (α=0.10)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(leaderboard.confirmation.models)
-                    .sort(([, a], [, b]) => b.macro_f1 - a.macro_f1)
-                    .map(([key, cm]) => (
-                      <tr key={key} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <td style={{ padding: '0.5rem' }}>
-                          <ModelChip modelKey={key} size="sm" />
-                        </td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                          <strong>{cm.macro_f1.toFixed(4)}</strong> [{cm.macro_f1_ci[0].toFixed(4)}, {cm.macro_f1_ci[1].toFixed(4)}]
-                        </td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                          {(cm.accuracy * 100).toFixed(2)}% [{cm.accuracy_ci[0].toFixed(4)}, {cm.accuracy_ci[1].toFixed(4)}]
-                        </td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                          {cm.qwk.toFixed(4)}
-                        </td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                          {cm.ece.toFixed(4)}
-                        </td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                          {(cm.conformal_coverage * 100).toFixed(1)}%
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

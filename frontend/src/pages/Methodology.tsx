@@ -7,26 +7,26 @@ const MODEL_DATA = {
   rf: {
     title: 'Random Forest (Ensemble) — Model Card',
     family: 'Ensemble of Bagged Decision Trees',
-    champion: true,
-    f1: '0.7804',
-    acc: '77.7%',
-    ece: '0.0133 (Best Calibration)',
-    latency: '99.4 ms',
+    champion: false,
+    f1: '0.7787',
+    acc: '77.6%',
+    ece: '0.0157',
+    latency: '60.2 ms',
     tier: 'Partial Native (Tree Path + Feature Importance)',
-    details: 'Constructs an ensemble of de-correlated decision trees with randomized feature subsampling. Selected as the Arena Champion under ADR-009 Balanced MCDA profile due to high calibration fidelity, robustness to noise, and low extreme-error rate (0.21%).',
-    limitations: 'High memory footprint during inference compared to single decision tree.',
+    details: 'Constructs an ensemble of de-correlated decision trees with randomized feature subsampling. Demonstrates high calibration fidelity, robustness to noise, and low extreme-error rate (0.21%).',
+    limitations: 'Higher latency and memory footprint during inference compared to single decision tree.',
   },
   boost: {
     title: 'Histogram Gradient Boosting — Model Card',
     family: 'Ensemble Boosting',
-    champion: false,
-    f1: '0.8038',
-    acc: '80.1%',
-    ece: '0.0904',
-    latency: '105.8 ms',
+    champion: true,
+    f1: '0.8056',
+    acc: '80.3%',
+    ece: '0.0126 (Calibrated)',
+    latency: '100.8 ms',
     tier: 'Partial Native (Gradient Tree Rules)',
-    details: 'Bins continuous features into integer histograms for rapid gradient-boosted tree construction. Demonstrates runner-up predictive accuracy with sharp decision boundary transitions.',
-    limitations: 'Higher ECE requiring calibration tuning; sensitive to noisy label overlap.',
+    details: 'Bins continuous features into integer histograms for rapid gradient-boosted tree construction. Governed Arena Champion under ADR-014 temperature calibration Balanced MCDA profile (score 0.6665, p_rank1 0.555).',
+    limitations: 'Sensitivity to extreme noise; requires multinomial temperature scaling for optimal probability calibration.',
   },
   svm: {
     title: 'Support Vector Machine (RBF) — Model Card',
@@ -94,14 +94,14 @@ export default function MethodologyPage() {
   const [selectedTab, setSelectedTab] = useState<'comparison' | string>('comparison');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem 0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem 0' }}>
       {/* Header */}
-      <div style={{ background: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <BookOpen size={22} />
+      <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <BookOpen size={24} color="var(--primary-color)" />
           Model Methodology & Architecture Cards
         </h1>
-        <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+        <p style={{ margin: '0.35rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
           Comprehensive documentation, calibration protocols, fairness governance, and machine-generated model cards for the 7 arena models.
         </p>
       </div>
@@ -157,7 +157,7 @@ export default function MethodologyPage() {
             modelKey={k}
             active={selectedTab === k}
             onClick={() => setSelectedTab(k)}
-            showChampionBadge={k === 'rf'}
+            showChampionBadge={k === 'boost'}
             size="sm"
           />
         ))}

@@ -8,21 +8,28 @@ Includes mandatory ethics disclaimers and model version tags.
 
 import io
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.platypus import HRFlowable, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import (
+    HRFlowable,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
 BAND_LABELS = {0: "Low", 1: "Medium", 2: "High"}
 
 
 def generate_employee_pdf(
     employee_id: str,
-    champion_prediction: Dict[str, Any],
-    all_predictions: Optional[List[Dict[str, Any]]] = None,
-    explanation: Optional[Dict[str, Any]] = None,
+    champion_prediction: dict[str, Any],
+    all_predictions: list[dict[str, Any]] | None = None,
+    explanation: dict[str, Any] | None = None,
 ) -> bytes:
     """Generate an Employee Decision Transparency PDF report."""
     buffer = io.BytesIO()
@@ -72,9 +79,16 @@ def generate_employee_pdf(
     elements = []
 
     # Title & Metadata
-    elements.append(Paragraph("TalentScope Employee Decision Transparency Report", title_style))
+    elements.append(
+        Paragraph("TalentScope Employee Decision Transparency Report", title_style)
+    )
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    elements.append(Paragraph(f"Generated: {now_str} &nbsp;|&nbsp; Employee ID: <b>{employee_id}</b>", sub_style))
+    elements.append(
+        Paragraph(
+            f"Generated: {now_str} &nbsp;|&nbsp; Employee ID: <b>{employee_id}</b>",
+            sub_style,
+        )
+    )
     elements.append(Spacer(1, 10))
 
     # Mandatory Ethics Disclaimer
@@ -97,30 +111,44 @@ def generate_employee_pdf(
     conformal_names = ", ".join(BAND_LABELS.get(b, str(b)) for b in conformal_set)
 
     summary_data = [
-        ["Model Champion", f"{champion_prediction.get('model_key', 'rf').upper()} (Governed v2.0)"],
+        [
+            "Model Champion",
+            f"{champion_prediction.get('model_key', 'rf').upper()} (Governed v2.0)",
+        ],
         ["Recommended Band", f"<b>{band_name}</b> (Band {band_val})"],
         ["Confidence Score", f"{conf * 100:.1f}%"],
         ["Stability Score", f"{stability:.1f} / 100"],
         ["Conformal Prediction Set", f"{conformal_names} (90% coverage guarantee)"],
     ]
     summary_table = Table(summary_data, colWidths=[200, 340])
-    summary_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#F0F4F8")),
-        ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#1A202C")),
-        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E0")),
-    ]))
+    summary_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#F0F4F8")),
+                ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#1A202C")),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+                ("FONTSIZE", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E0")),
+            ]
+        )
+    )
     elements.append(summary_table)
     elements.append(Spacer(1, 14))
 
     # All Models Consensus Table (if provided)
     if all_predictions:
         elements.append(Paragraph("Cross-Model Consensus Comparison", section_style))
-        headers = ["Model", "Recommended Band", "P(Low)", "P(Medium)", "P(High)", "Agreement"]
+        headers = [
+            "Model",
+            "Recommended Band",
+            "P(Low)",
+            "P(Medium)",
+            "P(High)",
+            "Agreement",
+        ]
         rows = [headers]
         for p in all_predictions:
             m_key = p.get("model", p.get("model_key", "")).upper()
@@ -129,22 +157,33 @@ def generate_employee_pdf(
             p0 = f"{probs[0]*100:.0f}%" if len(probs) > 0 else "-"
             p1 = f"{probs[1]*100:.0f}%" if len(probs) > 1 else "-"
             p2 = f"{probs[2]*100:.0f}%" if len(probs) > 2 else "-"
-            agree = "Consensus" if p.get("predicted_band") == band_val else "Disagreement"
+            agree = (
+                "Consensus" if p.get("predicted_band") == band_val else "Disagreement"
+            )
             rows.append([m_key, m_band, p0, p1, p2, agree])
 
         consensus_table = Table(rows, colWidths=[90, 110, 65, 65, 65, 145])
-        consensus_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0072B2")),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 9),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("ALIGN", (0, 0), (0, -1), "LEFT"),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-            ("TOPPADDING", (0, 0), (-1, -1), 5),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F7FAFC")]),
-        ]))
+        consensus_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0072B2")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 9),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("ALIGN", (0, 0), (0, -1), "LEFT"),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
+                    (
+                        "ROWBACKGROUNDS",
+                        (0, 1),
+                        (-1, -1),
+                        [colors.white, colors.HexColor("#F7FAFC")],
+                    ),
+                ]
+            )
+        )
         elements.append(consensus_table)
         elements.append(Spacer(1, 14))
 
@@ -161,25 +200,39 @@ def generate_employee_pdf(
                 f_rows.append([name, f"{abs(impact):.4f}", direction])
 
             exp_table = Table(f_rows, colWidths=[200, 180, 160])
-            exp_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#56B4E9")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 9),
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E0")),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-                ("TOPPADDING", (0, 0), (-1, -1), 5),
-            ]))
+            exp_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#56B4E9")),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, -1), 9),
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E0")),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                        ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ]
+                )
+            )
             elements.append(exp_table)
 
     # Footer note
     elements.append(Spacer(1, 20))
-    elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#E2E8F0")))
+    elements.append(
+        HRFlowable(width="100%", thickness=1, color=colors.HexColor("#E2E8F0"))
+    )
     elements.append(Spacer(1, 6))
-    elements.append(Paragraph(
-        "TalentScope v2.0 Multi-Model Governance Engine &bull; Confidential HR Document &bull; Model Hash Verified",
-        ParagraphStyle("Footer", parent=styles["Normal"], fontSize=8, textColor=colors.gray, alignment=1)
-    ))
+    elements.append(
+        Paragraph(
+            "TalentScope v2.0 Multi-Model Governance Engine &bull; Confidential HR Document &bull; Model Hash Verified",
+            ParagraphStyle(
+                "Footer",
+                parent=styles["Normal"],
+                fontSize=8,
+                textColor=colors.gray,
+                alignment=1,
+            ),
+        )
+    )
 
     doc.build(elements)
     buffer.seek(0)
@@ -187,9 +240,9 @@ def generate_employee_pdf(
 
 
 def generate_comparison_pdf(
-    leaderboard_data: List[Dict[str, Any]],
-    champion_info: Dict[str, Any],
-    mcda_summary: Optional[Dict[str, Any]] = None,
+    leaderboard_data: list[dict[str, Any]],
+    champion_info: dict[str, Any],
+    mcda_summary: dict[str, Any] | None = None,
 ) -> bytes:
     """Generate an Executive Multi-Model Comparison PDF report."""
     buffer = io.BytesIO()
@@ -228,65 +281,103 @@ def generate_comparison_pdf(
     )
 
     elements = []
-    elements.append(Paragraph("TalentScope Multi-Model Arena Evaluation Report", title_style))
+    elements.append(
+        Paragraph("TalentScope Multi-Model Arena Evaluation Report", title_style)
+    )
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    elements.append(Paragraph(f"Generated: {now_str} &nbsp;|&nbsp; Seven Models Benchmark", sub_style))
+    elements.append(
+        Paragraph(
+            f"Generated: {now_str} &nbsp;|&nbsp; Seven Models Benchmark", sub_style
+        )
+    )
     elements.append(Spacer(1, 10))
 
     # Champion Governance Card
-    champ_model = champion_info.get("champion", "rf").upper()
+    champ_model = champion_info.get(
+        "champion", champion_info.get("champion_key", "rf")
+    ).upper()
+    champ_label = champion_info.get("champion_label", champ_model)
     strength = champion_info.get("strength", "marginal")
     margin = champion_info.get("margin", 0.03)
 
     c_box = [
-        ["Selected Champion", f"<b>{champ_model}</b> (Random Forest)"],
-        ["Decision Rule", "ADR-009 Multi-Criteria Decision Analysis (Balanced Profile)"],
+        ["Selected Champion", f"<b>{champ_model}</b> ({champ_label})"],
+        [
+            "Decision Rule",
+            "ADR-009 Multi-Criteria Decision Analysis (Balanced Profile)",
+        ],
         ["Decision Strength", f"{strength.capitalize()} (Score Delta: +{margin:.3f})"],
         ["Statistically Significant", "No (p = 0.22 vs Boost; McNemar-Holm test)"],
     ]
     c_table = Table(c_box, colWidths=[180, 360])
-    c_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#E69F00")),
-        ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
-        ("BACKGROUND", (1, 0), (1, -1), colors.HexColor("#FFF8E7")),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#D55E00")),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 9),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
-    ]))
+    c_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#E69F00")),
+                ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
+                ("BACKGROUND", (1, 0), (1, -1), colors.HexColor("#FFF8E7")),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#D55E00")),
+                ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+            ]
+        )
+    )
     elements.append(c_table)
     elements.append(Spacer(1, 14))
 
     # Leaderboard Table
-    elements.append(Paragraph("Seven-Model Locked Holdout Benchmark (N=2,400)", section_style))
-    headers = ["Rank", "Model", "Macro-F1 (95% CI)", "Accuracy", "QWK", "Latency (p95)", "Pareto"]
+    elements.append(
+        Paragraph("Seven-Model Locked Holdout Benchmark (N=2,400)", section_style)
+    )
+    headers = [
+        "Rank",
+        "Model",
+        "Macro-F1 (95% CI)",
+        "Accuracy",
+        "QWK",
+        "Latency (p95)",
+        "Pareto",
+    ]
     rows = [headers]
 
     for idx, row in enumerate(leaderboard_data):
-        m_name = row.get("model", "").upper()
+        m_name = row.get("model", row.get("key", "")).upper()
         f1_str = f"{row.get('macro_f1', 0):.3f}"
-        if "f1_ci_low" in row and "f1_ci_high" in row:
+        ci = row.get("macro_f1_ci")
+        if isinstance(ci, (list, tuple)) and len(ci) == 2:
+            f1_str += f" [{ci[0]:.2f}, {ci[1]:.2f}]"
+        elif "f1_ci_low" in row and "f1_ci_high" in row:
             f1_str += f" [{row['f1_ci_low']:.2f}, {row['f1_ci_high']:.2f}]"
         acc_str = f"{row.get('accuracy', 0):.3f}"
         qwk_str = f"{row.get('qwk', 0):.3f}"
-        lat_str = f"{row.get('latency_ms', 0):.1f} ms"
+        lat_str = f"{row.get('latency_ms', row.get('latency_single_p95_ms', 0)):.1f} ms"
         pareto = "Yes" if idx < 3 else "No"
         rows.append([str(idx + 1), m_name, f1_str, acc_str, qwk_str, lat_str, pareto])
 
     lb_table = Table(rows, colWidths=[40, 80, 150, 70, 60, 80, 60])
-    lb_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0072B2")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 8.5),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("ALIGN", (1, 0), (1, -1), "LEFT"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E0")),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F7FAFC")]),
-    ]))
+    lb_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0072B2")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 8.5),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("ALIGN", (1, 0), (1, -1), "LEFT"),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E0")),
+                (
+                    "ROWBACKGROUNDS",
+                    (0, 1),
+                    (-1, -1),
+                    [colors.white, colors.HexColor("#F7FAFC")],
+                ),
+            ]
+        )
+    )
     elements.append(lb_table)
     elements.append(Spacer(1, 14))
 
@@ -301,12 +392,22 @@ def generate_comparison_pdf(
     elements.append(Paragraph(gov_text, styles["Normal"]))
     elements.append(Spacer(1, 20))
 
-    elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#E2E8F0")))
+    elements.append(
+        HRFlowable(width="100%", thickness=1, color=colors.HexColor("#E2E8F0"))
+    )
     elements.append(Spacer(1, 6))
-    elements.append(Paragraph(
-        "TalentScope v2.0 Multi-Model Governance Suite &bull; Cryptographic Guard Verification Verified",
-        ParagraphStyle("Footer2", parent=styles["Normal"], fontSize=8, textColor=colors.gray, alignment=1)
-    ))
+    elements.append(
+        Paragraph(
+            "TalentScope v2.0 Multi-Model Governance Suite &bull; Cryptographic Guard Verification Verified",
+            ParagraphStyle(
+                "Footer2",
+                parent=styles["Normal"],
+                fontSize=8,
+                textColor=colors.gray,
+                alignment=1,
+            ),
+        )
+    )
 
     doc.build(elements)
     buffer.seek(0)

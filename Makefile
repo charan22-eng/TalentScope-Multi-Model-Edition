@@ -1,10 +1,10 @@
-.PHONY: setup lint test data train api web guard
+.PHONY: setup lint test data train api web guard demo-setup demo-smoke
 
 guard:
 	uv run python scripts/guard.py
 
 setup:
-	uv venv .venv
+	uv venv .venv --python 3.11
 	uv pip install -r backend/requirements.txt -e ml
 	cd frontend && npm install
 
@@ -30,10 +30,16 @@ final-variants:
 	python ml/src/epk/sensitivity.py
 
 api:
-	uv run uvicorn app.main:app --reload --app-dir backend
+	uv run uvicorn backend.app.main:app --reload --reload-dir backend --reload-dir ml/src --port 8000
 
 web:
 	cd frontend && npm run dev
+
+demo-setup:
+	uv run python scripts/demo_setup.py
+
+demo-smoke:
+	uv run python scripts/demo_smoke.py
 
 seed:
 	uv run python -m epk.seed_data

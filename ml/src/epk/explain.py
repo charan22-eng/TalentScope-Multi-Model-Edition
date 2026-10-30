@@ -231,10 +231,18 @@ def find_counterfactuals(
             break
 
     if int(model.predict(curr_df)[0]) == target_idx:
+        primary_lever = next(iter(changes_accum.keys())) if changes_accum else "training_hours"
+        orig_v = float(x_row[primary_lever].iloc[0]) if primary_lever in x_row.columns else 0.0
+        prop_v = float(changes_accum.get(primary_lever, orig_v))
         options.append({
             "option_id": 1,
             "description": "Multi-lever balanced intervention",
             "changes": changes_accum,
+            "feature": primary_lever,
+            "original_value": round(orig_v, 1),
+            "proposed_value": round(prop_v, 1),
+            "delta": round(prop_v - orig_v, 1),
+            "target_class": target_band,
             "cost_score": round(total_cost, 2),
             "achieved_proba": round(float(model.predict_proba(curr_df)[0][target_idx]), 4),
             "validated": True,
@@ -255,6 +263,11 @@ def find_counterfactuals(
                     "option_id": len(options) + 1,
                     "description": f"Focused intervention on {single_lever.replace('_', ' ')}",
                     "changes": {single_lever: new_val},
+                    "feature": single_lever,
+                    "original_value": round(val, 1),
+                    "proposed_value": round(new_val, 1),
+                    "delta": round(new_val - val, 1),
+                    "target_class": target_band,
                     "cost_score": round(cfg["cost"] * mult, 2),
                     "achieved_proba": round(float(model.predict_proba(single_df)[0][target_idx]), 4),
                     "validated": True,
@@ -281,8 +294,19 @@ def find_similar_cases(
     banner = "Native Decision Reasoning" if is_knn else "Similar Historical Cases (Not how this model decided)"
 
     numeric_cols = [c for c in NUMERIC_FEATURES if c in train_df.columns and c in x_row.columns]
-    X_train_num = train_df[numeric_cols].to_numpy(dtype=float)
-    x_num = x_row[numeric_cols].to_numpy(dtype=float)
+    if not numeric_cols or train_df.empty:
+        return {
+            "banner": banner,
+            "is_native_reasoning": is_knn,
+            "model_key": model_key,
+            "k": k,
+            "neighbors": [],
+            "neighborhood_distribution": {},
+        }
+
+    meds = train_df[numeric_cols].median(numeric_only=True)
+    X_train_num = train_df[numeric_cols].fillna(meds).to_numpy(dtype=float)
+    x_num = x_row[numeric_cols].fillna(meds).to_numpy(dtype=float)
 
     # Normalized Euclidean distance
     stds = np.nanstd(X_train_num, axis=0) + 1e-6
@@ -294,7 +318,11 @@ def find_similar_cases(
 
     neighbors = []
     for idx in nearest_indices:
-        item = train_df.iloc[idx].to_dict()
+        raw_item = train_df.iloc[idx].to_dict()
+        item = {
+            k_col: (None if pd.isna(v_val) else v_val)
+            for k_col, v_val in raw_item.items()
+        }
         item["distance"] = round(float(dists[idx]), 3)
         item["performance"] = str(train_labels.iloc[idx])
         neighbors.append(item)
@@ -318,7 +346,7 @@ def compute_stability_score(probas: np.ndarray) -> float:
     return round(float(margin), 4)
 
 
-def compute_performance_index(model: Any, x_row: pd.DataFrame, key: str) -> float:
+def compute_performance_index(model: Any, x_row: pd.DataFrame, key: str, precomputed_probs: Optional[np.ndarray] = None) -> float:
     """Compute performance index on a 0-100 scale."""
     if key == "linreg":
         prep, core = get_underlying_model(model)
@@ -326,7 +354,7 @@ def compute_performance_index(model: Any, x_row: pd.DataFrame, key: str) -> floa
         score = core.predict_score(prep_X)[0]
         return round(float(np.clip(score, 0.0, 100.0)), 2)
 
-    probas = model.predict_proba(x_row)[0]
+    probas = precomputed_probs if precomputed_probs is not None else model.predict_proba(x_row)[0]
     # Expectation: Low=15, Med=50, High=85
     exp_score = probas[0] * 15.0 + probas[1] * 50.0 + probas[2] * 85.0
     return round(float(exp_score), 2)
@@ -442,6 +470,194 @@ def generate_persona_summaries(
         "hr_summary": hr_text,
         "datascience_summary": ds_text,
     }
+
+
+def generate_ollama_persona_explanations(
+    key: str,
+    label: str,
+    pred_band: str,
+    proba: List[float],
+    attribution: Dict[str, float],
+    counterfactuals: List[Dict[str, Any]],
+    stability: float,
+    candidate_features: Optional[Dict[str, Any]] = None,
+    similar_cases: Optional[Dict[str, Any]] = None,
+    base_url: str = "http://localhost:11434",
+    preferred_model: str = "qwen2.5:3b",
+    timeout_s: float = 15.0,
+) -> Dict[str, Any]:
+    """Synthesize deep, faithful model explanations using local Ollama model.
+
+    Strictly adheres to Guard G9 (zero employee identifiers) and Guard G10 (loopback only).
+    Gracefully falls back to deterministic template summaries if Ollama is unavailable.
+    """
+    import logging
+    import time
+    import httpx
+    from epk.llm.client import assert_local
+    from epk.llm.prompts import FORBIDDEN_EMPLOYEE_PROMPT_KEYS, scan_prompt_for_forbidden_keys
+
+    logger = logging.getLogger("talentscope.explain.ollama")
+
+    fallback_summaries = generate_persona_summaries(
+        key=key,
+        label=label,
+        pred_band=pred_band,
+        proba=proba,
+        attribution=attribution,
+        counterfactuals=counterfactuals,
+        stability=stability,
+    )
+
+    top_pos_list = [f"{k.replace('_', ' ').title()}: +{v:.2f} positive impact" for k, v in attribution.items() if v > 0.02][:3]
+    top_neg_list = [f"{k.replace('_', ' ').title()}: {v:.2f} limiting impact" for k, v in attribution.items() if v < -0.02][:2]
+    default_key_drivers = top_pos_list + top_neg_list
+    if not default_key_drivers:
+        default_key_drivers = ["Consistent baseline metrics across performance dimensions"]
+
+    default_guidance = (
+        f"Maintain high standards in primary driver metrics ({', '.join([k.replace('_', ' ') for k, v in list(attribution.items())[:2]])}). "
+        f"Examine targeted counterfactual recommendations to elevate to a higher tier."
+    )
+
+    t0 = time.time()
+    try:
+        assert_local(base_url)
+
+        # Discover installed models
+        tags_resp = httpx.get(f"{base_url.rstrip('/')}/api/tags", timeout=3.0)
+        tags_resp.raise_for_status()
+        installed_models = [m.get("name", "") for m in tags_resp.json().get("models", [])]
+
+        if not installed_models:
+            raise RuntimeError("No models installed in local Ollama runtime")
+
+        # Pick best responsive model from installed
+        chosen_model = None
+        if preferred_model in installed_models:
+            chosen_model = preferred_model
+        else:
+            candidates = ["qwen2.5:3b", "qwen2.5:7b", "qwen-judge:latest", "llama-judge:latest", "llama3.1:latest", installed_models[0]]
+            for c in candidates:
+                if c in installed_models:
+                    chosen_model = c
+                    break
+
+        if not chosen_model:
+            chosen_model = installed_models[0]
+
+        # Sanitize candidate features for G9 compliance
+        clean_features = {}
+        if candidate_features:
+            for k_feat, v_feat in candidate_features.items():
+                if k_feat.lower() not in FORBIDDEN_EMPLOYEE_PROMPT_KEYS:
+                    clean_features[k_feat] = v_feat
+
+        p_low = round(proba[0] * 100, 1) if len(proba) > 0 else 0
+        p_med = round(proba[1] * 100, 1) if len(proba) > 1 else 0
+        p_high = round(proba[2] * 100, 1) if len(proba) > 2 else 0
+
+        sim_dist = {}
+        if similar_cases and isinstance(similar_cases, dict):
+            sim_dist = similar_cases.get("neighborhood_distribution", {})
+
+        top_attribs_str = ", ".join([f"{k} ({'+' if v > 0 else ''}{v:.3f})" for k, v in list(attribution.items())[:4]])
+        cf_str = "None required (already High band)"
+        if counterfactuals:
+            cf0 = counterfactuals[0]
+            cf_str = f"Increase {cf0.get('feature', 'key metrics')} from {cf0.get('original_value', '')} to {cf0.get('proposed_value', '')} to reach {cf0.get('target_class', 'High')}"
+
+        prompt = (
+            f"You are an expert HR and Machine Learning explainability advisor for TalentScope.\n"
+            f"Synthesize an accurate, contextual, and insightful explanation for the following candidate prediction:\n"
+            f"- Model Architecture: {label} (Key: {key})\n"
+            f"- Predicted Performance Band: {pred_band} (Class probabilities: Low={p_low}%, Medium={p_med}%, High={p_high}%)\n"
+            f"- Prediction Stability Margin: {stability:.3f} (confidence gap between top two classes)\n"
+            f"- Evaluated Features: {json.dumps(clean_features)}\n"
+            f"- Top Local Attribution Drivers: {top_attribs_str}\n"
+            f"- Counterfactual Pathway: {cf_str}\n"
+            f"- Similar Historical Cases: {json.dumps(sim_dist)}\n\n"
+            f"Provide a structured response adhering strictly to the JSON schema:\n"
+            f"1. 'hr_summary': 2-3 clear, professional, empathetic paragraphs for HR leaders and managers explaining why the model predicted '{pred_band}', recognizing specific high achievements, addressing bottlenecks, and recommending next management actions.\n"
+            f"2. 'datascience_summary': A rigorous technical review for Data Scientists and ML Auditors covering model mechanism ({label}), probability margin ({stability:.3f}), top feature attributions, and local sensitivity.\n"
+            f"3. 'key_drivers': An array of 3-4 concise bullet points summarizing primary drivers with exact metrics.\n"
+            f"4. 'actionable_guidance': Specific, realistic steps the employee or manager can take to elevate performance."
+        )
+
+        violations = scan_prompt_for_forbidden_keys(prompt)
+        if violations:
+            logger.warning("Guard G9 violation in prompt; falling back to template: %s", violations)
+            raise ValueError(f"Privacy guard violation: {violations}")
+
+        schema = {
+            "type": "object",
+            "properties": {
+                "hr_summary": {"type": "string"},
+                "datascience_summary": {"type": "string"},
+                "key_drivers": {"type": "array", "items": {"type": "string"}},
+                "actionable_guidance": {"type": "string"},
+            },
+            "required": ["hr_summary", "datascience_summary", "key_drivers", "actionable_guidance"],
+        }
+
+        call_resp = httpx.post(
+            f"{base_url.rstrip('/')}/api/chat",
+            json={
+                "model": chosen_model,
+                "messages": [
+                    {"role": "system", "content": "You are a talent analytics and ML explainability expert. Output valid JSON only."},
+                    {"role": "user", "content": prompt},
+                ],
+                "format": schema,
+                "stream": False,
+                "options": {
+                    "temperature": 0.1,
+                    "seed": 42,
+                    "num_predict": 750,
+                },
+            },
+            timeout=timeout_s,
+        )
+        call_resp.raise_for_status()
+
+        raw_content = call_resp.json().get("message", {}).get("content", "{}")
+        parsed = json.loads(raw_content)
+
+        elapsed_ms = round((time.time() - t0) * 1000.0, 1)
+
+        hr_sum = parsed.get("hr_summary", "").strip() or fallback_summaries["hr_summary"]
+        ds_sum = parsed.get("datascience_summary", "").strip() or fallback_summaries["datascience_summary"]
+        drivers = parsed.get("key_drivers") if isinstance(parsed.get("key_drivers"), list) and parsed.get("key_drivers") else default_key_drivers
+        guidance = parsed.get("actionable_guidance", "").strip() or default_guidance
+
+        return {
+            "persona_summaries": {
+                "hr_summary": hr_sum,
+                "datascience_summary": ds_sum,
+            },
+            "key_drivers": drivers,
+            "actionable_guidance": guidance,
+            "llm_metadata": {
+                "source": "ollama",
+                "model": chosen_model,
+                "latency_ms": elapsed_ms,
+            },
+        }
+
+    except Exception as exc:
+        elapsed_ms = round((time.time() - t0) * 1000.0, 1)
+        logger.warning("Ollama explainability fallback triggered: %s", exc)
+        return {
+            "persona_summaries": fallback_summaries,
+            "key_drivers": default_key_drivers,
+            "actionable_guidance": default_guidance,
+            "llm_metadata": {
+                "source": "template_fallback",
+                "model": "none",
+                "latency_ms": elapsed_ms,
+                "error": str(exc),
+            },
+        }
 
 
 def explain(pipe: Any, X_train: pd.DataFrame, y_train: pd.Series, x_row: pd.DataFrame, k: int = 2) -> Tuple[pd.DataFrame, Dict[str, float]]:

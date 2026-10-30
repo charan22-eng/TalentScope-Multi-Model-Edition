@@ -1,10 +1,12 @@
 import { test } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { loginAsAdmin } from './auth';
 
 const __dirname = import.meta.dirname || __dirname;
 
 test('Capture Screenshots', async ({ page }) => {
+  await loginAsAdmin(page);
   const routes = [
     { name: 'home', url: '/' },
     { name: 'predict', url: '/predict' },

@@ -44,7 +44,7 @@ export const BumpChart: React.FC<BumpChartProps> = ({ rankings }) => {
 
         {/* Lines for each model */}
         {rankings.map((r) => {
-          const token = MODEL_TOKENS[r.modelKey] || { name: r.modelKey, color: '#94a3b8', marker: '●' };
+          const token = MODEL_TOKENS[r.modelKey] || { key: r.modelKey, name: r.modelKey, color: '#94a3b8', marker: '●' };
           const y1 = getRankY(r.linearRank);
           const y2 = getRankY(r.nonlinearRank);
           const y3 = getRankY(r.noisyRank);

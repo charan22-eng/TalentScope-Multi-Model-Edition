@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, NavLink, Navigate } from 'react-router-dom';
 import PredictPage from './pages/Predict';
 import BatchPage from './pages/Batch';
 import DashboardPage from './pages/Dashboard';
@@ -8,78 +8,182 @@ import MethodologyPage from './pages/Methodology';
 import DataExplorerPage from './pages/DataExplorer';
 import ArenaPage from './pages/arena/ArenaPage';
 import ThreePage from './pages/ThreePage';
-import { Login } from './pages/Login';
-import { Moon, Sun, LogOut } from 'lucide-react';
+import { Moon, Sun, Shield, Trophy, UserCheck } from 'lucide-react';
 import { ClassChip } from './components/ui/ClassChip';
+import { ensureAuthToken } from './lib/auth-bootstrap';
 import './index.css';
+
+const NAV_ITEMS = [
+  { path: '/arena', label: 'Model Arena' },
+  { path: '/predict', label: 'Predict' },
+  { path: '/batch', label: 'Batch' },
+  { path: '/dashboard', label: 'Dashboard' },
+  { path: '/model-lab', label: 'Model Lab' },
+  { path: '/data-explorer', label: 'Data Explorer' },
+  { path: '/methodology', label: 'Methodology' },
+  { path: '/3d', label: '3D Viewer' },
+];
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
   });
-  const [showTour, setShowTour] = useState(true);
+  const [userRole] = useState<string>(() => localStorage.getItem('user_role') || 'admin');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
-
-  // Command palette listener stub
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        alert('Command Palette opened!');
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    void ensureAuthToken();
   }, []);
 
+  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
+
   return (
-    <div className="min-h-screen">
-      {showTour && (
-        <aside aria-label="Onboarding Tour" style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', padding: '1rem', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>
-          Welcome to the Onboarding Tour! <button onClick={() => setShowTour(false)} style={{ marginLeft: '1rem', padding: '0.25rem 0.5rem', background: 'var(--primary-color)', color: '#0f172a', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>Skip Tour</button>
-        </aside>
-      )}
-      <header style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <nav style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <Link to="/" style={{ fontWeight: 'bold', color: 'var(--text-primary)', textDecoration: 'none' }}>TalentScope</Link>
-          <Link to="/arena" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Model Arena</Link>
-          <Link to="/predict" style={{ color: 'var(--text-primary)' }}>Predict</Link>
-          <Link to="/batch" style={{ color: 'var(--text-primary)' }}>Batch</Link>
-          <Link to="/dashboard" style={{ color: 'var(--text-primary)' }}>Dashboard</Link>
-          <Link to="/model-lab" style={{ color: 'var(--text-primary)' }}>Model Lab</Link>
-          <Link to="/data-explorer" style={{ color: 'var(--text-primary)' }}>Data Explorer</Link>
-          <Link to="/methodology" style={{ color: 'var(--text-primary)' }}>Methodology</Link>
-          <Link to="/3d" style={{ color: 'var(--text-primary)' }}>3D Viewer</Link>
-        </nav>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <button onClick={toggleTheme} aria-label="Toggle theme" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}>
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
+      {/* Sticky Glassmorphic Header */}
+      <header
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          padding: '0.75rem 1.75rem',
+          borderBottom: '1px solid var(--border-color)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: 'var(--glass-bg)',
+          backdropFilter: 'var(--glass-blur)',
+          WebkitBackdropFilter: 'var(--glass-blur)',
+          boxShadow: 'var(--shadow-sm)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          {/* Brand Logo */}
+          <Link
+            to="/"
+            style={{
+              fontWeight: 800,
+              fontSize: '1.25rem',
+              color: 'var(--text-primary)',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, var(--primary-action), #1d4ed8)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                boxShadow: 'var(--shadow-glow)',
+              }}
+            >
+              <Shield size={18} />
+            </div>
+            <span style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>TalentScope</span>
+            <span
+              className="badge-pill badge-champion"
+              style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem', marginLeft: '0.2rem' }}
+              title="Hist Gradient Boosting Champion Governed"
+            >
+              <Trophy size={11} />
+              Boost
+            </span>
+          </Link>
+
+          {/* Navigation Links */}
+          <nav style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                style={({ isActive }) => ({
+                  padding: '0.45rem 0.85rem',
+                  borderRadius: 'var(--radius-pill)',
+                  textDecoration: 'none',
+                  fontSize: '0.85rem',
+                  fontWeight: isActive ? 700 : 500,
+                  color: isActive ? '#ffffff' : 'var(--text-secondary)',
+                  background: isActive ? 'var(--primary-action)' : 'transparent',
+                  boxShadow: isActive ? 'var(--shadow-glow)' : 'none',
+                  transition: 'all 0.15s ease',
+                })}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+
+        {/* User Role, Theme, & Controls */}
+        <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.25rem 0.65rem',
+              background: 'var(--bg-tertiary)',
+              borderRadius: 'var(--radius-pill)',
+              border: '1px solid var(--border-color)',
+              fontSize: '0.75rem',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            <UserCheck size={13} color="var(--primary-color)" />
+            <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{userRole}</span>
+          </div>
+
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius)',
+              cursor: 'pointer',
+              color: 'var(--text-primary)',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {theme === 'dark' ? <Sun size={17} color="#fbbf24" /> : <Moon size={17} color="#6366f1" />}
           </button>
-          {localStorage.getItem('token') && (
-            <button onClick={() => { localStorage.removeItem('token'); window.location.href='/login'; }} title="Logout" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}>
-              <LogOut size={20} />
-            </button>
-          )}
+
         </div>
       </header>
-      <main className="container">
+
+      {/* Main Content Area */}
+      <main className="container" style={{ flex: 1, padding: '1.75rem 1.25rem' }}>
         {children}
       </main>
-    </div>
-  );
-}
 
-function HomePage() {
-  return (
-    <div>
-      <h1>Welcome to TalentScope</h1>
-      <p>Data-driven employee performance intelligence.</p>
+      {/* Subtle Footer */}
+      <footer
+        style={{
+          borderTop: '1px solid var(--border-color)',
+          padding: '1rem 1.5rem',
+          textAlign: 'center',
+          fontSize: '0.78rem',
+          color: 'var(--text-muted)',
+          backgroundColor: 'var(--bg-secondary)',
+        }}
+      >
+        TalentScope Multi-Model Performance Intelligence • Governed Champion: Hist Gradient Boosting (0.6665 Balanced MCDA)
+      </footer>
     </div>
   );
 }
@@ -107,30 +211,23 @@ function ComponentsPage() {
   );
 }
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    return <div className="p-8 text-center"><h2 className="text-xl mb-4">Unauthorized Access</h2><Link to="/login" className="text-primary-color underline">Go to Login</Link></div>;
-  }
-  return <>{children}</>;
-}
-
 export default function App() {
   return (
     <BrowserRouter>
       <AppShell>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/arena/*" element={<ProtectedRoute><ArenaPage /></ProtectedRoute>} />
-          <Route path="/predict" element={<ProtectedRoute><PredictPage /></ProtectedRoute>} />
-          <Route path="/batch" element={<ProtectedRoute><BatchPage /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="/model-lab" element={<ProtectedRoute><ModelLabPage /></ProtectedRoute>} />
-          <Route path="/data-explorer" element={<ProtectedRoute><DataExplorerPage /></ProtectedRoute>} />
-          <Route path="/methodology" element={<ProtectedRoute><MethodologyPage /></ProtectedRoute>} />
-          <Route path="/3d" element={<ProtectedRoute><ThreePage /></ProtectedRoute>} />
-          <Route path="/components" element={<ProtectedRoute><ComponentsPage /></ProtectedRoute>} />
+          <Route path="/" element={<ArenaPage />} />
+          <Route path="/arena/*" element={<ArenaPage />} />
+          <Route path="/predict" element={<PredictPage />} />
+          <Route path="/batch" element={<BatchPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/model-lab" element={<ModelLabPage />} />
+          <Route path="/data-explorer" element={<DataExplorerPage />} />
+          <Route path="/methodology" element={<MethodologyPage />} />
+          <Route path="/3d" element={<ThreePage />} />
+          <Route path="/components" element={<ComponentsPage />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>
     </BrowserRouter>

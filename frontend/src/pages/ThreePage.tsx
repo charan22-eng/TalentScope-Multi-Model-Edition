@@ -9,28 +9,39 @@ export default function ThreePage() {
   const [tier, setTier] = useState<'high' | 'off'>('high');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem 0' }}>
-      {/* Tab Switcher */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem 0' }}>
+      {/* Modern Glassmorphic Tab Navigation */}
+      <div
+        className="glass-panel"
+        style={{
+          display: 'flex',
+          gap: '0.6rem',
+          padding: '0.65rem 0.85rem',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+        }}
+      >
         <button
           type="button"
           onClick={() => setActiveTab('landscape')}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.5rem 1rem',
+            gap: '0.5rem',
+            padding: '0.6rem 1.1rem',
             borderRadius: 'var(--radius)',
-            border: `1px solid ${activeTab === 'landscape' ? 'var(--primary-color)' : 'var(--border-color)'}`,
-            background: activeTab === 'landscape' ? 'var(--primary-color)' : 'var(--bg-secondary)',
-            color: activeTab === 'landscape' ? '#ffffff' : 'var(--text-primary)',
+            border: activeTab === 'landscape' ? '1px solid var(--primary-color)' : '1px solid transparent',
+            background: activeTab === 'landscape' ? 'var(--primary-action)' : 'transparent',
+            color: activeTab === 'landscape' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: activeTab === 'landscape' ? 700 : 500,
             cursor: 'pointer',
-            fontSize: '0.85rem',
+            fontSize: '0.875rem',
+            boxShadow: activeTab === 'landscape' ? 'var(--shadow-glow)' : 'none',
+            transition: 'all 0.2s ease',
           }}
         >
-          <Layers size={15} />
-          Decision Landscape (3D / 2D)
+          <Layers size={17} />
+          <span>Decision Landscape (3D / 2D)</span>
         </button>
 
         <button
@@ -39,19 +50,21 @@ export default function ThreePage() {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.5rem 1rem',
+            gap: '0.5rem',
+            padding: '0.6rem 1.1rem',
             borderRadius: 'var(--radius)',
-            border: `1px solid ${activeTab === 'neighbour' ? 'var(--primary-color)' : 'var(--border-color)'}`,
-            background: activeTab === 'neighbour' ? 'var(--primary-color)' : 'var(--bg-secondary)',
-            color: activeTab === 'neighbour' ? '#ffffff' : 'var(--text-primary)',
+            border: activeTab === 'neighbour' ? '1px solid var(--primary-color)' : '1px solid transparent',
+            background: activeTab === 'neighbour' ? 'var(--primary-action)' : 'transparent',
+            color: activeTab === 'neighbour' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: activeTab === 'neighbour' ? 700 : 500,
             cursor: 'pointer',
-            fontSize: '0.85rem',
+            fontSize: '0.875rem',
+            boxShadow: activeTab === 'neighbour' ? 'var(--shadow-glow)' : 'none',
+            transition: 'all 0.2s ease',
           }}
         >
-          <Compass size={15} />
-          3D Neighbour Explorer (PCA)
+          <Compass size={17} />
+          <span>3D Neighbour Explorer (PCA)</span>
         </button>
 
         <button
@@ -60,19 +73,21 @@ export default function ThreePage() {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.5rem 1rem',
+            gap: '0.5rem',
+            padding: '0.6rem 1.1rem',
             borderRadius: 'var(--radius)',
-            border: `1px solid ${activeTab === 'galaxy' ? 'var(--primary-color)' : 'var(--border-color)'}`,
-            background: activeTab === 'galaxy' ? 'var(--primary-color)' : 'var(--bg-secondary)',
-            color: activeTab === 'galaxy' ? '#ffffff' : 'var(--text-primary)',
+            border: activeTab === 'galaxy' ? '1px solid var(--primary-color)' : '1px solid transparent',
+            background: activeTab === 'galaxy' ? 'var(--primary-action)' : 'transparent',
+            color: activeTab === 'galaxy' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: activeTab === 'galaxy' ? 700 : 500,
             cursor: 'pointer',
-            fontSize: '0.85rem',
+            fontSize: '0.875rem',
+            boxShadow: activeTab === 'galaxy' ? 'var(--shadow-glow)' : 'none',
+            transition: 'all 0.2s ease',
           }}
         >
-          <Sparkles size={15} />
-          Talent Galaxy Hero Scene
+          <Sparkles size={17} />
+          <span>Talent Galaxy Hero Scene</span>
         </button>
       </div>
 

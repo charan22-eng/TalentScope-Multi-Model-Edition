@@ -5,9 +5,11 @@ This script provides an exact, step-by-step 5-minute walkthrough of **TalentScop
 ---
 
 ## Pre-Flight Check (30 seconds before demo)
-1. Backend running: `uvicorn backend.app.main:app --port 8000` (or `docker-compose up -d`)
-2. Frontend running: `cd frontend && npm run dev` (navigate to `http://localhost:5173`)
-3. Log in as **HR Manager** (`hr_manager@talentscope.internal` / `hr123456`) or **Admin** (`admin@talentscope.internal` / `admin123456`).
+1. Run `uv run python scripts/demo_setup.py` once from the repository root.
+2. Backend running: `uv run uvicorn backend.app.main:app --reload --reload-dir backend --reload-dir ml/src --port 8000`
+3. Frontend running: `cd frontend && npm run dev` (navigate to `http://localhost:5173`)
+4. Log in as **HR Manager** (`hrmanager@test.com` / `HRManagerPassword123!`) or **Admin** (`admin@test.com` / `AdminPassword123!`).
+5. Optional: run `uv run python scripts/demo_smoke.py` before the presentation.
 
 ---
 
@@ -15,15 +17,15 @@ This script provides an exact, step-by-step 5-minute walkthrough of **TalentScop
 1. **Navigate to Single Prediction**: Click **Predict** in the navigation bar.
 2. **Select an Employee**: Pick an existing employee or enter values (e.g., Senior Engineer with High Project Delivery, High Learning Rate, Moderate Overtime).
 3. **Show the Champion Highlight**:
-   - Point out that **Random Forest (`rf`)** is flagged as the approved production Champion with a gold badge.
-   - Show the predicted band: **Band 2 (Top Performer)** with calibrated probability of 84.2%.
-   - Note the **Split-Conformal Prediction Set**: `{Band 1, Band 2}`, demonstrating mathematical coverage guarantee ($\ge 90\%$).
+   - Point out that **Gradient Boosting (`boost`)** is flagged as the approved production Champion with a gold badge.
+    - Show the predicted band: **Low**, **Medium**, or **High**, with calibrated probabilities and stability.
+    - Note the **Split-Conformal Prediction Set** when it contains more than one band; this is an uncertainty signal for human review.
 4. **Compare Across 7 Models**:
    - Scroll to the **All 7 Models Comparison Panel**.
    - Show the agreement meter: "5 of 7 models agree on Band 2 (71.4% consensus)".
    - Explain why this matters: If a single model gave Band 2 but others disagreed, it would be routed to human review. Here, high consensus provides operational confidence.
 5. **Interactive What-If Advisor**:
-   - Adjust "Overtime Hours" downwards and "Certifications" upwards.
+    - Adjust attendance, training hours, projects completed, or certifications.
    - Watch the real-time slider re-evaluate without reloading, showing counterfactual sensitivity.
 
 ---
@@ -32,14 +34,13 @@ This script provides an exact, step-by-step 5-minute walkthrough of **TalentScop
 1. **Navigate to Arena**: Click **Model Arena** in the top navigation.
 2. **Overview & Leaderboard**:
    - Show the 7 models ranked side-by-side with color-coded Okabe-Ito badges.
-   - Point to the **Macro-F1** and **QWK** columns: Champion `rf` achieves 0.8123 Macro-F1, closely followed by `boost` at 0.8062, while linear baselines trail at ~0.65-0.71.
+   - Point to the **Macro-F1**, calibration, fairness, latency, and MCDA columns. The governed champion is `boost` under the Balanced profile; `svm` is the runner-up.
 3. **Head-to-Head**:
-   - Select `rf` (Random Forest) vs `boost` (Hist Gradient Boosting).
-   - Point out the **paired bootstrap 95% confidence interval whiskers** on the delta: the interval overlaps zero, indicating statistical parity.
-   - Point out the **McNemar test with Holm correction**: $p = 0.34$, confirming no statistically significant difference on discordant pairs.
+   - Select `boost` (Hist Gradient Boosting) vs `svm` (Support Vector Machine).
+   - Point out that the comparison artifacts include paired uncertainty and significance information rather than relying on one raw metric.
 4. **MCDA Priority Tuning**:
-   - Switch from "Balanced" profile to "Accuracy-Focused" and then "Cost/Speed Sensitive".
-   - Show how the deterministic MCDA rank updates: `rf` dominates Balanced and Accuracy, while `dt` or `logreg` surges when speed weight is set to 80%.
+   - Switch from "Balanced" profile to "Accuracy-first" and then "Speed-first" or "Explainability-first".
+   - Show how the deterministic MCDA rank updates: `boost` wins Balanced, `svm` wins Accuracy-first, while `dt`, `linreg`, or `logreg` surges when speed or explainability is prioritized.
 
 ---
 
@@ -51,7 +52,7 @@ This script provides an exact, step-by-step 5-minute walkthrough of **TalentScop
    - Switch to the **Difference Surface ($P_A - P_B$)**: Highlight the regions where non-linear trees capture interaction effects that the linear plane completely misses.
    - Show the 2D accessible heatmap fallback button for accessibility compliance.
 3. **Feature Importance & Case Neighbors**:
-   - Show the Permutation Importance chart: `project_delivery_score` and `technical_assessment_score` are dominant across all non-linear models.
+    - Show the feature-attribution chart for the current employee feature contract.
 
 ---
 

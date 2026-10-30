@@ -26,7 +26,7 @@ def audit_numbers():
         mcda = json.load(f)
         
     rep_metrics = {m["key"]: m for m in lb.get("metrics", [])}
-    champion_key = champ.get("champion")
+    champion_key = champ.get("champion") or champ.get("champion_key") or "boost"
     
     docs_to_check = [
         ROOT / "docs/BUILD_REPORT.md",

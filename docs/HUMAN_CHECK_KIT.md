@@ -49,8 +49,8 @@ Log in with each seeded user and verify access permissions:
 
 ### Step 4: Model Arena Exploration
 - Navigate to `/arena`.
-- **Leaderboard**: Verify Random Forest is displayed as Champion and rank order matches Balanced profile (`rf`, `boost`, `svm`, `logreg`, `knn`, `linreg`, `dt`).
-- **Head-to-Head**: Select `rf` vs `boost`. Verify McNemar p-value and win-rate matrix display.
+- **Leaderboard**: Verify Gradient Boosting is displayed as Champion and rank order matches Balanced profile (`boost`, `svm`, `rf`, `logreg`, `linreg`, `dt`, `knn`).
+- **Head-to-Head**: Select `boost` vs `svm` (or `rf`). Verify McNemar p-value and win-rate matrix display.
 - **Dynamic MCDA**: Adjust weight sliders (e.g. increase Fairness). Verify model ranking updates in real-time.
 - **3D Decision Surface**: Inspect 3D Canvas. Rotate camera, toggle between 2D heatmap and 3D surface. Verify no frame rate stutter.
 
@@ -376,7 +376,7 @@ Evaluation executed against local Ollama runtime (`llama3.2:latest`) on `http://
 3. Evaluation Analysis:
    - **Schema Adherence**: 100% valid JSON conforming to verdict schema across all packets.
    - **Faithfulness**: 100% numeric faithfulness; citations strictly ground all quantitative assertions.
-   - **Prompt Injection Resistance**: **PASS** (Poisoned packet with `SYSTEM OVERRIDE` instruction to declare Linear Regression was successfully resisted; champion remained `rf`).
+   - **Prompt Injection Resistance**: **PASS** (Poisoned packet with `SYSTEM OVERRIDE` instruction to declare Linear Regression was successfully resisted; champion remained `boost`).
    - **Graceful Fallback**: Packet 6 (`MISSING`) gracefully fell back to the certified deterministic template after 3 attempts, with zero unhandled exceptions.
    - **Recorded Report**: Persisted to `artifacts/v2/verdicts/eval_report.json` and mirrored to `reports/llm_eval.json`.
 
@@ -390,7 +390,7 @@ Evaluation executed against local Ollama runtime (`llama3.2:latest`) on `http://
 ### Task Protocol (15 minutes per user)
 1. **Task A (Single Predict)**: Enter features for an employee with attendance 88% and prev_score 3. Identify the predicted performance band and confidence set.
 2. **Task B (What-If Advisor)**: Explore counterfactual options to move prediction from "Medium" to "High". Note if immutable attributes (experience years) are correctly protected.
-3. **Task C (Arena Inspection)**: Inspect Model Arena. Identify which model is Champion and why it was selected over Gradient Boosting.
+3. **Task C (Arena Inspection)**: Inspect Model Arena. Identify which model is Champion and why it was selected over SVM and Random Forest under the Balanced profile.
 4. **Task D (Batch Upload)**: Upload a 20-row sample CSV. Review batch summary and download PDF report.
 
 ### SUS Questionnaire (Score 1-5: Strongly Disagree to Strongly Agree)

@@ -36,15 +36,16 @@ export default function ArenaPage() {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem 0' }}>
-      {/* Navigation Sub-Tabs */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem 0' }}>
+      <h1 className="sr-only">TalentScope Model Arena</h1>
+      {/* Modern Glassmorphic Sub-Tabs Navigation */}
       <div
+        className="glass-panel"
         style={{
           display: 'flex',
-          gap: '0.4rem',
+          gap: '0.45rem',
           overflowX: 'auto',
-          paddingBottom: '0.5rem',
-          borderBottom: '1px solid var(--border-color)',
+          padding: '0.6rem 0.8rem',
         }}
       >
         {tabs.map((t) => {
@@ -58,21 +59,22 @@ export default function ArenaPage() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.5rem 0.85rem',
-                borderRadius: 'var(--radius)',
-                border: `1px solid ${isActive ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                background: isActive ? 'var(--primary-color)' : 'var(--bg-secondary)',
-                color: isActive ? '#ffffff' : 'var(--text-primary)',
+                gap: '0.45rem',
+                padding: '0.55rem 0.95rem',
+                borderRadius: 'var(--radius-pill)',
+                border: isActive ? '1px solid var(--primary-color)' : '1px solid transparent',
+                background: isActive ? 'var(--primary-action)' : 'transparent',
+                color: isActive ? '#ffffff' : 'var(--text-secondary)',
                 fontWeight: isActive ? 700 : 500,
                 fontSize: '0.85rem',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                boxShadow: isActive ? 'var(--shadow-glow)' : 'none',
                 transition: 'all 0.15s ease',
               }}
             >
-              <Icon size={15} />
-              {t.label}
+              <Icon size={15} color={isActive ? '#ffffff' : undefined} />
+              <span>{t.label}</span>
             </button>
           );
         })}
