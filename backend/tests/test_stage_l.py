@@ -23,11 +23,6 @@ from backend.db.models import AuditLog, Employee, ModelVersion, Prediction, Revi
 
 client = TestClient(app)
 
-@pytest.fixture(autouse=True, scope="session")
-def setup_database_session():
-    """Ensure database schema and standard roles are seeded."""
-    run_migrations()
-
 ADMIN_USER = User(id=1, email="admin@test.com", role="admin")
 HR_USER = User(id=2, email="hrmanager@test.com", role="hr_manager")
 ANALYST_USER = User(id=3, email="analyst@test.com", role="analyst")
